@@ -3,16 +3,16 @@ import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import Text from "@kaloraat/react-native-text"
 import Logo from "../components/auth/Logo";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import SearchBar from "../components/SearchBar";
 
 const Stack = createNativeStackNavigator();
 
 const Index = ({ navigation }) => {
     return (
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start' }}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical:15 }}>
             <View>
-                {/* <View> */}
-                    <Logo/> 
-                {/* </View> */}
+                <SearchBar setCLicked={true}/>
+                <Logo/> 
                 <TouchableOpacity style={styles.buttonContainer}>
                     <Text title center style={styles.buttonText}>Index</Text>
                 </TouchableOpacity>
