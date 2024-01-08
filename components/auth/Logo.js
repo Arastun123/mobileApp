@@ -4,7 +4,7 @@ import { View, Image } from "react-native";
 const Logo = () => {
     return(
         <View style= {{ justifyContent:'center', alignItems:'center'}}>
-            <Image source={require("../../assets/logo.png")} style={{ width:300, height:200, marginVertical:50}}/>
+            <Image source={require("../../assets/logo.png")} style={{ width:150, height:150, margin:50}}/>
         </View>
     );
 }
