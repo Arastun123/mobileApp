@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TextInput } from 'react-native';
-import Text from "@kaloraat/react-native-text"
+import Text from "@kaloraat/react-native-text";
 
 const UserInput = ({
     name,

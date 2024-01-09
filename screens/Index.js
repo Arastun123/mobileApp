@@ -14,28 +14,25 @@ const Index = ({ navigation }) => {
                 <SearchBar setCLicked={true}/>
                 <Logo/> 
                 <TouchableOpacity style={styles.buttonContainer}>
-                    <Text title center style={styles.buttonText}>Index</Text>
+                    <Text medium center onPress={() => navigation.navigate('Routes')} style={styles.buttonText}> Marşurutlar </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
-                    <Text title center onPress={() => navigation.navigate('Routes')} style={styles.buttonText}> Marşurutlar </Text>
+                    <Text medium center onPress={() => navigation.navigate('Orders')} style={styles.buttonText}> Müştəri sifarişlər </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
-                    <Text title center onPress={() => navigation.navigate('Orders')} style={styles.buttonText}> Müştəri sifarişlər </Text>
+                    <Text medium center onPress={() => navigation.navigate('Invoce')} style={styles.buttonText}> Qaimələr </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
-                    <Text title center onPress={() => navigation.navigate('Orders')} style={styles.buttonText}> Qaimələr </Text>
+                    <Text medium center onPress={() => navigation.navigate('Orders')} style={styles.buttonText}> Kassa Orderləri </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
-                    <Text title center onPress={() => navigation.navigate('Orders')} style={styles.buttonText}> Kassa Orderləri </Text>
+                    <Text medium center onPress={() => navigation.navigate('Orders')} style={styles.buttonText}> Borclar </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
-                    <Text title center onPress={() => navigation.navigate('Orders')} style={styles.buttonText}> Borclar </Text>
+                    <Text medium center onPress={() => navigation.navigate('Orders')} style={styles.buttonText}> Qalıqlar </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
-                    <Text title center onPress={() => navigation.navigate('Orders')} style={styles.buttonText}> Qalıqlar </Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.buttonContainer}>
-                    <Text title center onPress={() => navigation.navigate('Orders')} style={styles.buttonText}> Sazlamalar </Text>
+                    <Text medium center onPress={() => navigation.navigate('Orders')} style={styles.buttonText}> Sazlamalar </Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>
