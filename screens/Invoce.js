@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, ScrollView } from 'react-native';
+import { View, TextInput, StyleSheet, ScrollView, Pressable } from 'react-native';
 import Text from "@kaloraat/react-native-text";
 
 const Invoce = () => {
@@ -44,12 +44,18 @@ const Invoce = () => {
     const totalSum = totalPriceArray.reduce((acc, totalPrice) => acc + (totalPrice), 0);
     const calculatedValue = parseInt(tableData.price) * parseInt(tableData.count);
 
-    const edv = (totalSum * 18 ) / 100
+    const edv = (totalSum * 18) / 100
     const amout = totalSum + edv
     const numColumns = 50;
+    const [rows, setRows] = useState([]);
 
+    const addRow = () => {
+        const newRow = Array(headers.length).fill('');
+        setRows((prevRows) => [...prevRows, newRow]);
+    };
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
+
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <TextInput
                     style={{ ...styles.input, width: 100 }}
@@ -79,6 +85,13 @@ const Invoce = () => {
             </View>
 
             <View>
+                <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
+                    <View >
+                        <Pressable style={styles.button} onPress={addRow}>
+                            <Text style={styles.text}>+</Text>
+                        </Pressable>
+                    </View>
+                </View> 
                 <View style={styles.table}>
                     <View style={styles.row}>
                         {headers.map((header) => (
@@ -123,6 +136,15 @@ const Invoce = () => {
                             </View>
                         ))}
                     </View>
+                    {rows.map((row, rowIndex) => (
+                        <View key={rowIndex} style={styles.row}>
+                            {row.map((cell, cellIndex) => (
+                                <Text key={cellIndex} style={styles.cell}>
+                                    {cell}
+                                </Text>
+                            ))}
+                        </View>
+                    ))}
                 </View>
             </View>
 
@@ -158,6 +180,22 @@ const styles = StyleSheet.create({
         padding: 5,
         borderRightWidth: 1,
         borderColor: '#ddd',
+    },
+    button: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 4,
+        backgroundColor: 'green',
+        width: 50,
+    },
+    text: {
+        fontSize: 16,
+        lineHeight: 21,
+        fontWeight: 'bold',
+        letterSpacing: 0.25,
+        color: 'white',
     },
 });
 export default Invoce;
