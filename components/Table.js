@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef  } from "react";
 import { View, StyleSheet, Pressable, TextInput } from "react-native";
 import Text from "@kaloraat/react-native-text"
 
@@ -53,6 +53,7 @@ const Table = ({ headers, data }) => {
                                     placeholder={String(headers[cellIndex])}
                                     onChangeText={(text) => handleInputChange(rowIndex, headers[cellIndex], text)}
                                     value={inputData[`${rowIndex}_${headers[cellIndex]}`]}
+                                    style={{textAlign:'center'}}
                                 />
                             </View>
                         ))}
