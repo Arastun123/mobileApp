@@ -1,22 +1,30 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Pressable, } from "react-native";
+import { View, StyleSheet, Pressable, TextInput } from "react-native";
 import Text from "@kaloraat/react-native-text"
 
 const Table = ({ headers, data }) => {
     const numColumns = 5;
     const [rows, setRows] = useState([]);
 
-
     const addRow = () => {
         const newRow = Array(headers.length).fill('');
         setRows((prevRows) => [...prevRows, newRow]);
     };
 
+    const [inputData, setData] = useState([]);
+    const handleInputChange = (rowIndex, header, value) => {
+        const key = `${header}`;
+        setData((prevData) => ({
+            ...prevData,
+            [key]: value,
+        }));
+    }
+
     return (
         <View>
             <View style={{ flex: 1, justifyContent: 'end', marginVertical: 20, marginHorizontal: 10 }}>
                 <View >
-                    <Pressable style={styles.button} onPress={addRow}>
+                    <Pressable style={{...styles.button, width:50}} onPress={addRow}>
                         <Text style={styles.text}>+</Text>
                     </Pressable>
                 </View>
@@ -40,13 +48,23 @@ const Table = ({ headers, data }) => {
                 {rows.map((row, rowIndex) => (
                     <View key={rowIndex} style={styles.row}>
                         {row.map((cell, cellIndex) => (
-                            <Text key={cellIndex} style={styles.cell}>
-                                {cell}
-                            </Text>
+                            <View style={styles.cell} key={cellIndex}>
+                                <TextInput
+                                    placeholder={String(headers[cellIndex])}
+                                    onChangeText={(text) => handleInputChange(rowIndex, headers[cellIndex], text)}
+                                    value={inputData[`${rowIndex}_${headers[cellIndex]}`]}
+                                />
+                            </View>
                         ))}
                     </View>
                 ))}
             </View>
+            <View style={{margin:10}}>
+                <Pressable style={{...styles.button, width:150}} onPress={handleInputChange}>
+                    <Text style={styles.text}>Submit</Text>
+                </Pressable>
+            </View>
+            <Text> {JSON.stringify({ inputData }, null, 4)} </Text>
         </View>
     );
 }
@@ -81,7 +99,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         borderRadius: 4,
         backgroundColor: 'green',
-        width: 50,
     },
     text: {
         fontSize: 16,
