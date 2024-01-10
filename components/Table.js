@@ -62,7 +62,7 @@ const Table = ({ headers, data }) => {
             </View>
             <View style={{margin:10}}>
                 <Pressable style={{...styles.button, width:150}} onPress={handleInputChange}>
-                    <Text style={styles.text}>Submit</Text>
+                    <Text style={styles.text}>Təsdiq et</Text>
                 </Pressable>
             </View>
             <Text> {JSON.stringify({ inputData }, null, 4)} </Text>

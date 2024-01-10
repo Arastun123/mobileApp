@@ -8,6 +8,7 @@ import Routes from './screens/Routes';
 import Invoce from './screens/Invoce';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
+import Contracts from './screens/Contract';
 
 const Stack = createNativeStackNavigator();
 
@@ -19,6 +20,7 @@ export default function App() {
         <Stack.Screen name="Orders" component={Orders} />
         <Stack.Screen name="Routes" component={Routes} />
         <Stack.Screen name="Invoce" component={Invoce} />
+        <Stack.Screen name="Contracts" component={Contracts} />
 
         {/* <Stack.Screen name="Singup" component={Singup} />
         <Stack.Screen name="Singin" component={Singin} /> */}

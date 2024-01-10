@@ -147,7 +147,7 @@ const Invoce = () => {
                     ))}
                 </View>
             </View>
-
+                                
             <View style={{ flex: 1, alignItems: 'flex-end', margin: 10 }}>
                 <Text>Məbləğ: <Text>{totalSum}</Text></Text>
                 <Text>Ədv:    <Text>{edv}</Text></Text>

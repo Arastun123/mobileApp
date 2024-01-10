@@ -9,10 +9,10 @@ const Stack = createNativeStackNavigator();
 
 const Index = ({ navigation }) => {
     return (
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical:15 }}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15 }}>
             <View>
-                <SearchBar setCLicked={true}/>
-                <Logo/> 
+                <SearchBar setCLicked={true} />
+                <Logo />
                 <TouchableOpacity style={styles.buttonContainer}>
                     <Text medium center onPress={() => navigation.navigate('Routes')} style={styles.buttonText}> Marşurutlar </Text>
                 </TouchableOpacity>
@@ -21,6 +21,15 @@ const Index = ({ navigation }) => {
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
                     <Text medium center onPress={() => navigation.navigate('Invoce')} style={styles.buttonText}> Qaimələr </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.buttonContainer}>
+                    <Text medium center onPress={() => navigation.navigate('Contracts')} style={styles.buttonText}> Müqavilələr </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.buttonContainer}>
+                    <Text medium center onPress={() => navigation.navigate('Kontragentlər')} style={styles.buttonText}> Kontragentlər </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.buttonContainer}>
+                    <Text medium center onPress={() => navigation.navigate('Nomenklatura')} style={styles.buttonText}> Nomenklatura </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
                     <Text medium center onPress={() => navigation.navigate('Orders')} style={styles.buttonText}> Kassa Orderləri </Text>
@@ -40,16 +49,16 @@ const Index = ({ navigation }) => {
 }
 const styles = StyleSheet.create({
     buttonContainer: {
-        backgroundColor: '#3498db', 
-        paddingVertical: 10, 
-        paddingHorizontal: 15, 
-        borderRadius: 5, 
-        margin:10
+        backgroundColor: '#3498db',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 5,
+        margin: 10
     },
     buttonText: {
-        color: '#ffffff', 
-        textAlign: 'center', 
-        fontWeight: 'bold', 
+        color: '#ffffff',
+        textAlign: 'center',
+        fontWeight: 'bold',
     },
 });
 
