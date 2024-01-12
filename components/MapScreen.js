@@ -1,4 +1,4 @@
-import { StyleSheet, View, Dimensions, } from "react-native";
+import { StyleSheet, View, Dimensions, Text } from "react-native";
 import * as Location from "expo-location";
 import MapView, { Marker } from "react-native-maps";
 import { useEffect, useState } from "react";
@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
-const Map = () => {
+const MapScreen = () => {
     const [currentLocation, setCurrentLocation] = useState(null);
     const [initialRegion, setInitialRegion] = useState(null);
 
@@ -47,7 +47,7 @@ const Map = () => {
                     )}
                 </MapView>
             )}
-            {/* <Text> {JSON.stringify({ initialRegion }, null, 4)} </Text> */}
+            <Text> {JSON.stringify({ initialRegion }, null, 4)} </Text>
         </View>
     );
 };
@@ -57,12 +57,12 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        marginHorizontal: 20
+        marginVertical: 100
     },
     map: {
         width: "100%",
-        height: 300,
+        height: "100%",
     },
 });
 
-export default Map;
+export default MapScreen;

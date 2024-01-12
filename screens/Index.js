@@ -5,6 +5,7 @@ import Logo from "../components/auth/Logo";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SearchBar from "../components/SearchBar";
 
+
 const Stack = createNativeStackNavigator();
 
 const Index = ({ navigation }) => {
@@ -26,7 +27,7 @@ const Index = ({ navigation }) => {
                     <Text medium center onPress={() => navigation.navigate('Contracts')} style={styles.buttonText}> Müqavilələr </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
-                    <Text medium center onPress={() => navigation.navigate('Kontragentlər')} style={styles.buttonText}> Kontragentlər </Text>
+                    <Text medium center onPress={() => navigation.navigate('Kontragent')} style={styles.buttonText}> Kontragentlər </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
                     <Text medium center onPress={() => navigation.navigate('Nomenklatura')} style={styles.buttonText}> Nomenklatura </Text>
@@ -42,6 +43,9 @@ const Index = ({ navigation }) => {
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
                     <Text medium center onPress={() => navigation.navigate('Orders')} style={styles.buttonText}> Sazlamalar </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.buttonContainer}>
+                    <Text medium center onPress={() => navigation.navigate('MapScreen')} style={styles.buttonText}> Map </Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>

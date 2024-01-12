@@ -15,7 +15,7 @@ const Contracts = () => {
                 <View>
                     <TextInput
                         placeholder="№"
-                        keyboardType="numric"
+                        keyboardType="numeric"
                         // value=""
                         style={styles.input}
                     />
