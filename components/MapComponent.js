@@ -3,9 +3,7 @@ import { View, Text, Button, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 
-
-
-const MapScreen = () => {
+const MapComponent = () => {
     const [currentLocation, setCurrentLocation] = useState(null);
     const [initialRegion, setInitialRegion] = useState(null);
     const [selectedLocation, setSelectedLocation] = useState(null);
@@ -89,4 +87,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default MapScreen;
+export default MapComponent;

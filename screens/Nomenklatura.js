@@ -51,8 +51,8 @@ const Nomenklatura = () => {
                     keyboardType="numeric"
                 />
             </View>
-            <View style={{margin:10}}>
-                <Pressable style={{...styles.button, width:150}} >
+            <View style={{ margin: 10 }}>
+                <Pressable style={{ ...styles.button, width: 150 }} >
                     <Text style={styles.text}>Təsdiq et</Text>
                 </Pressable>
             </View>

@@ -45,7 +45,7 @@ const Index = ({ navigation }) => {
                     <Text medium center onPress={() => navigation.navigate('Orders')} style={styles.buttonText}> Sazlamalar </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
-                    <Text medium center onPress={() => navigation.navigate('MapScreen')} style={styles.buttonText}> Map </Text>
+                    <Text medium center onPress={() => navigation.navigate('MapComponent')} style={styles.buttonText}> Map </Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>

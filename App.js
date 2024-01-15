@@ -11,7 +11,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import Contracts from './screens/Contract';
 import Kontragent from './screens/Kontragent';
 import Nomenklatura from './screens/Nomenklatura';
-import MapScreen from './components/MapScreen';
+import MapComponent from './components/MapComponent';
 
 const Stack = createNativeStackNavigator();
 
@@ -26,7 +26,7 @@ export default function App() {
         <Stack.Screen name="Contracts" component={Contracts} />
         <Stack.Screen name="Kontragent" component={Kontragent} />
         <Stack.Screen name="Nomenklatura" component={Nomenklatura} />
-        <Stack.Screen name="MapScreen" component={MapScreen} />
+        <Stack.Screen name="MapComponent" component={MapComponent} />
 
         {/* <Stack.Screen name="Singup" component={Singup} Nomenklatura />
         <Stack.Screen name="Singin" component={Singin} /> */}

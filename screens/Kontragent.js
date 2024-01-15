@@ -1,15 +1,18 @@
 import React, { useState } from "react";
 import { ScrollView, View, StyleSheet, Pressable } from "react-native";
 import Text from "@kaloraat/react-native-text"
-import UserInput from "../components/auth/UserInput";
 import Table from "../components/Table";
+import Physical from "../components/Physical";
+import Legal from "../components/Legal";
 
 
 const Kontragent = () => {
-    const [name, setName] = useState("");
-    const [phone, setPhone] = useState("");
-    const [address, setAddress] = useState("");
-    const [voen, setVoen] = useState("");
+    const [selectedType, setSelectedType] = useState(null);
+
+    const handlePress = (type) => {
+        setSelectedType(type);
+    };
+    
     const headers = ["№", "Tarix", "Növ"];
     const data = ["1", "09.01.24", "Satış"];
 
@@ -17,45 +20,21 @@ const Kontragent = () => {
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
             <Text center title style={{ marginBottom: 10 }}>Kontragent</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 10 }}>
-                <Pressable style={{ ...styles.button, width: 150 }} >
+                <Pressable style={{ ...styles.button, width: 150 }} onPress={() => handlePress('fiziki')}>
                     <Text style={styles.text}>Fiziki şəxs</Text>
                 </Pressable>
 
-                <Pressable style={{ ...styles.button, width: 150 }} >
+                <Pressable style={{ ...styles.button, width: 150 }} onPress={() => handlePress('huquqi')}>
                     <Text style={styles.text}>Hüquqi şəxs</Text>
                 </Pressable>
             </View>
-            <View style={{ marginVertical: 10 }}>
-                <UserInput
-                    name="S.A.A"
-                    value={name}
-                    setValue={setName}
-                    autoCompleteType="text"
-                    keyboardType="text"
-                />
-                <UserInput
-                    name="Əlaqə nömrəsi"
-                    value={phone}
-                    setValue={setPhone}
-                    autoCompleteType="numeric"
-                    keyboardType="numeric"
-                />
-                <UserInput
-                    name="Vöen"
-                    value={voen}
-                    setValue={setVoen}
-                    autoCompleteType="text"
-                    keyboardType="text"
-                />
-                <UserInput
-                    name="Ünvan"
-                    value={address}
-                    setValue={setAddress}
-                    autoCompleteType="text"
-                    keyboardType="text"
-                />
+
+            {selectedType === 'fiziki' && <Physical />}
+            {selectedType === 'huquqi' && <Legal />}
+
+            <View style={{ marginVertical: 10 }}> 
                 <Text center title style={{ marginBottom: 10 }}>Müqavilələr</Text>
-                <Table data={data} headers={headers}/>
+                <Table data={data} headers={headers} />
             </View>
         </ScrollView>
     )
