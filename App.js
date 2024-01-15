@@ -1,5 +1,4 @@
 import React from 'react';
-import { View } from 'react-native';
 import Singup from './screens/Signup';
 import Singin from './screens/Signin';
 import Index from './screens/Index';
@@ -12,6 +11,10 @@ import Contracts from './screens/Contract';
 import Kontragent from './screens/Kontragent';
 import Nomenklatura from './screens/Nomenklatura';
 import MapComponent from './components/MapComponent';
+import Balances from './screens/Balances';
+import Debst from './screens/Debts';
+import Settings from './screens/Settings';
+import CassaOrders from './screens/CassaOrders';
 
 const Stack = createNativeStackNavigator();
 
@@ -26,11 +29,14 @@ export default function App() {
         <Stack.Screen name="Contracts" component={Contracts} />
         <Stack.Screen name="Kontragent" component={Kontragent} />
         <Stack.Screen name="Nomenklatura" component={Nomenklatura} />
+        <Stack.Screen name="Balances" component={Balances} />
+        <Stack.Screen name="Debts" component={Debst} />
+        <Stack.Screen name="CassaOrders" component={CassaOrders} />
+        <Stack.Screen name="Settings" component={Settings} />
         <Stack.Screen name="MapComponent" component={MapComponent} />
-
-        {/* <Stack.Screen name="Singup" component={Singup} Nomenklatura />
-        <Stack.Screen name="Singin" component={Singin} /> */}
-      </Stack.Navigator>
+        <Stack.Screen name="Singup" component={Singup} />
+        <Stack.Screen name="Singin" component={Singin} />
+      </Stack.Navigator> 
     </NavigationContainer>
   );
 }

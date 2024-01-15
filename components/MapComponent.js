@@ -43,7 +43,7 @@ const MapComponent = () => {
                     initialRegion={initialRegion}
                     onPress={handleMapPress}
                 >
-                    {currentLocation && (
+                    {/* {currentLocation && (
                         <Marker
                             coordinate={{
                                 latitude: currentLocation.latitude,
@@ -51,12 +51,11 @@ const MapComponent = () => {
                             }}
                             title="Your Location"
                         />
-                    )}
+                    )} */}
                     {selectedLocation && (
                         <Marker
                             coordinate={selectedLocation}
                             title="Selected Location"
-                            pinColor="green"
                         />
                     )}
                 </MapView>
@@ -69,7 +68,6 @@ const MapComponent = () => {
 
                 </View>
             )}
-            {console.log(selectedLocation)}
         </View>
     );
 };
@@ -88,3 +86,6 @@ const styles = StyleSheet.create({
 });
 
 export default MapComponent;
+
+
+// AIzaSyBXMByiyVxwbt2SKf4a-pnMaRhxxZ_uNSo

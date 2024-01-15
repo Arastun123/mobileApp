@@ -55,14 +55,14 @@ const Signin = ({ navigation }) => {
                     autoCompleteType="password"
                 />
 
-                <SubmitButton title="Sign in" handleSubmit={handleSubmit} loading={loading} />
+                <SubmitButton title="Sign in" handleSubmit={handleSubmit} loading={loading}/>
 
                 {/* <Text> {JSON.stringify({ email, password }, null, 4)} </Text> */}
                 
                 <Text small center>
                     Not Yet?   <Text onPress={() => navigation.navigate('Singup')} color="#ff2222">Sing Up </Text>
                 </Text>
-                <Text small center color="orange" style={ { marginTop:10 } }>
+                <Text small center color="red" style={ { marginTop:10 } }>
                     Forgot Password?
                 </Text>
             </View>

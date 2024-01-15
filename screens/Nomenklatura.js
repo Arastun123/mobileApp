@@ -50,6 +50,9 @@ const Nomenklatura = () => {
                     autoCompleteType="numeric"
                     keyboardType="numeric"
                 />
+                <Text>
+                    {JSON.stringify({ name, type, catgeory, brand, price }, null, 4)}
+                </Text>
             </View>
             <View style={{ margin: 10 }}>
                 <Pressable style={{ ...styles.button, width: 150 }} >

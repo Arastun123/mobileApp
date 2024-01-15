@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, TextInput, Text, View, Pressable } from "react-native";
+import { ScrollView, StyleSheet, TextInput,  View, Pressable } from "react-native";
+import Text from "@kaloraat/react-native-text"
+
 
 const Contracts = () => {
     const [inputData, setData] = useState({
@@ -19,6 +21,7 @@ const Contracts = () => {
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, marginHorizontal: 10 }}>
+           <Text center title> Müqavilələr</Text>
             <TextInput
                 placeholder="Şirkətin adı"
                 keyboardType="text"

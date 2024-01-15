@@ -7,7 +7,7 @@ const SubmitButton = ({title, handleSubmit, loading}) => {
         <TouchableOpacity
             onPress={handleSubmit}
             style={{
-                backgroundColor: "#ff9900",
+                backgroundColor: "#3498db",
                 height: 50,
                 marginBottom: 20,
                 justifyContent: "center",
@@ -15,7 +15,7 @@ const SubmitButton = ({title, handleSubmit, loading}) => {
                 borderRadius: 24,
             }}
         >
-            <Text bold medium center>
+            <Text bold medium center style={{color:'#fff'}}>
                 {loading ? "Please wait..." : title}
             </Text>
         </TouchableOpacity>
