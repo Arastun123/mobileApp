@@ -23,7 +23,7 @@ const Nomenklatura = () => {
                     keyboardType="text"
                 />
                 <UserInput
-                    name="Möv"
+                    name="Növ"
                     value={type}
                     setValue={setType}
                     autoCompleteType="text"

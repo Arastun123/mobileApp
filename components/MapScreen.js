@@ -1,14 +1,14 @@
-import { StyleSheet, View, Dimensions, Text } from "react-native";
-import * as Location from "expo-location";
-import MapView, { Marker } from "react-native-maps";
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from 'react';
+import { View, Text, Button, StyleSheet } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
 
-const windowWidth = Dimensions.get("window").width;
-const windowHeight = Dimensions.get("window").height;
+
 
 const MapScreen = () => {
     const [currentLocation, setCurrentLocation] = useState(null);
     const [initialRegion, setInitialRegion] = useState(null);
+    const [selectedLocation, setSelectedLocation] = useState(null);
 
     useEffect(() => {
         const getLocation = async () => {
@@ -32,10 +32,19 @@ const MapScreen = () => {
         getLocation();
     }, []);
 
+    const handleMapPress = (e) => {
+        const { coordinate } = e.nativeEvent;
+        setSelectedLocation(coordinate);
+    };
+
     return (
-        <View style={styles.container}>
+        <View style={{ flex: 1 }}>
             {initialRegion && (
-                <MapView style={styles.map} initialRegion={initialRegion}>
+                <MapView
+                    style={{ flex: 1 }}
+                    initialRegion={initialRegion}
+                    onPress={handleMapPress}
+                >
                     {currentLocation && (
                         <Marker
                             coordinate={{
@@ -45,9 +54,24 @@ const MapScreen = () => {
                             title="Your Location"
                         />
                     )}
+                    {selectedLocation && (
+                        <Marker
+                            coordinate={selectedLocation}
+                            title="Selected Location"
+                            pinColor="green"
+                        />
+                    )}
                 </MapView>
             )}
-            <Text> {JSON.stringify({ initialRegion }, null, 4)} </Text>
+            {selectedLocation && (
+                <View style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
+                    <Text>Selected Location:</Text>
+                    <Text>{`Latitude: ${selectedLocation.latitude.toFixed(6)}`}</Text>
+                    <Text>{`Longitude: ${selectedLocation.longitude.toFixed(6)}`}</Text>
+
+                </View>
+            )}
+            {console.log(selectedLocation)}
         </View>
     );
 };
