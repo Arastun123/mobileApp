@@ -4,7 +4,7 @@ import Text from "@kaloraat/react-native-text"
 import UserInput from "./auth/UserInput";
 import { Ionicons } from '@expo/vector-icons';
 import MapComponent from "./MapComponent";
-import axios from "axios";
+
 
 const Physical = ({selectedLocation}) => {
     const [name, setName] = useState("");
@@ -12,34 +12,11 @@ const Physical = ({selectedLocation}) => {
     const [address, setAddress] = useState("");
     const [voen, setVoen] = useState("");
     const [isModalVisible, setModalVisible] = useState(false);
-    const [receivedData, setReceivedData] = useState(null);
 
-    const handlePress = () => {
-        setModalVisible(true)
-    }
+    const handlePress = () => { setModalVisible(true) }
+    const closeModal = () => { setModalVisible(false) }
+    const onDataReceived = (data) => { setAddress(data) }
 
-    const closeModal = () => {
-        setModalVisible(false)
-    }
-    const onDataReceived = (data) => { setReceivedData(data) }
-    const findAddress = async () => {
-        let latitude = receivedData.latitude;
-        let longitude = receivedData.longitude
-        try {
-            const response = await axios.get(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-            );
-
-            const addressComponents = response.data.address || {};
-            const formattedAddress = `${addressComponents.road || ''} ${addressComponents.house_number || ''}`;
-
-            setAddress(formattedAddress)
-            return formattedAddress.trim();
-        } catch (error) {
-            console.error(error.message);
-        }
-    };
-    findAddress()
     return (
 
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>

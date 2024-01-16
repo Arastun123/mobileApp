@@ -4,12 +4,13 @@ import Text from "@kaloraat/react-native-text"
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
-
+import axios from 'axios';
 
 const MapComponent = ({ closeModal, onDataReceived }) => {
     const [currentLocation, setCurrentLocation] = useState(null);
     const [initialRegion, setInitialRegion] = useState(null);
     const [selectedLocation, setSelectedLocation] = useState(null);
+    const [address, setAddress] = useState()
 
     useEffect(() => {
         const getLocation = async () => {
@@ -33,13 +34,33 @@ const MapComponent = ({ closeModal, onDataReceived }) => {
         getLocation();
     }, []);
 
+    const findAddress = async () => {
+        let latitude = selectedLocation.latitude;
+        let longitude = selectedLocation.longitude
+        console.log('latitude', latitude, 'longitude', longitude);
+        try {
+            const response = await axios.get(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+            );
+
+            const addressComponents = response.data.address || {};
+            const formattedAddress = `${addressComponents.road || ''} ${addressComponents.house_number || ''}`;
+
+            setAddress(formattedAddress)
+            return formattedAddress.trim();
+        } catch (error) {
+            console.error(error.message);
+        }
+    }
+    findAddress()
+    
     const handleMapPress = (e) => {
         const { coordinate } = e.nativeEvent;
         setSelectedLocation(coordinate);
     };
 
     const sendDataToParent = () => {
-        onDataReceived(selectedLocation);
+        onDataReceived(address);
         closeModal();
     }
 

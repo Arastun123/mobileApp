@@ -13,31 +13,11 @@ const Legal = () => {
     const [address, setAddress] = useState("");
     const [voen, setVoen] = useState("");
     const [isModalVisible, setModalVisible] = useState(false);
-    const [receivedData, setReceivedData] = useState(null);
 
     const handlePress = () => { setModalVisible(true) }
-
     const closeModal = () => { setModalVisible(false) }
+    const onDataReceived = (data) => { setAddress(data) }
 
-    const onDataReceived = (data) => { setReceivedData(data) }
-    const findAddress = async () => {
-        let latitude = receivedData.latitude;
-        let longitude = receivedData.longitude
-        try {
-            const response = await axios.get(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-            );
-
-            const addressComponents = response.data.address || {};
-            const formattedAddress = `${addressComponents.road || ''} ${addressComponents.house_number || ''}`;
-
-            setAddress(formattedAddress)
-            return formattedAddress.trim();
-        } catch (error) {
-            console.error(error.message);
-        }
-    };
-    findAddress()
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
             <Text center title style={{ marginBottom: 10 }}>Hüquqi şəxs</Text>
@@ -72,7 +52,7 @@ const Legal = () => {
                             autoCompleteType="text"
                             keyboardType="text"
                             onChangeText={(text => (setAddress(text)))}
-                            // editable={false}
+                        // editable={false}
                         />
                     </View>
                     <View style={{ marginTop: 20 }}>
@@ -81,10 +61,7 @@ const Legal = () => {
                         </Pressable>
                     </View>
                 </View>
-                <Text>{JSON.stringify({
-                    name, phone, address,
-                    voen
-                }, null, 4)}</Text>
+                <Text>{JSON.stringify({ name, phone, address, voen }, null, 4)}</Text>
                 <Modal
                     animationType="slide"
                     transparent={true}
