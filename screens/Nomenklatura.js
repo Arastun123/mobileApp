@@ -63,7 +63,7 @@ const Nomenklatura = () => {
 
                 <View style={styles.row}>
                     <View style={styles.cell}>
-                        <Text center>Qalıqlar</Text>
+                        <Text center medium>Qalıqlar</Text>
                     </View>
                 </View>
                 <View style={styles.row}>

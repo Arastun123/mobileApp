@@ -68,6 +68,7 @@ const Invoce = () => {
     };
 
     const showDatepicker = () => { setShow(true) };
+    const [inputData, setData] = useState([]);
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
             <Text title center>Qaimələr</Text>
@@ -167,23 +168,44 @@ const Invoce = () => {
                             </View>
                         ))}
                     </View>
+                    {/* {rows.map((row, rowIndex) => (
+                        <View key={rowIndex} style={styles.row}>
+                            {row.map((cell, cellIndex) => (
+                                // <Text key={cellIndex} style={styles.cell}>
+                                //     {cell}
+                                // </Text>
+                                <TextInput
+                                    placeholder = ''
+                                    keyboardType=""
+                                    // value = ''
+                                    // onChangeText={(text) => handleInputChange(text, rowIndex, 'price')}
+                                    style={styles.cell}
+                                />
+                            ))}
+                        </View>
+                    ))} */}
                     {rows.map((row, rowIndex) => (
                         <View key={rowIndex} style={styles.row}>
                             {row.map((cell, cellIndex) => (
-                                <Text key={cellIndex} style={styles.cell}>
-                                    {cell}
-                                </Text>
+                                <View style={styles.cell} key={cellIndex}>
+                                    <TextInput
+                                        placeholder={String(headers[cellIndex])}
+                                        onChangeText={(text) => handleInputChange(rowIndex, headers[cellIndex], text)}
+                                        value={inputData[`${rowIndex}_${headers[cellIndex]}`]}
+                                        style={{ textAlign: 'center' }}
+                                    />
+                                </View>
                             ))}
                         </View>
                     ))}
                 </View>
             </View>
-
-            <View style={{ flex: 1, alignItems: 'flex-end', margin: 10 }}>
+            <View style={{ alignItems: 'flex-end', margin: 10 }}>
                 <Text>Məbləğ: <Text>{totalSum}</Text></Text>
                 <Text>Ədv:    <Text>{edv}</Text></Text>
                 <Text>Toplam: <Text>{amout}</Text></Text>
             </View>
+            <Text>{JSON.stringify({ date, number, customer }, null, 4)}</Text>
         </ScrollView>
     );
 }
