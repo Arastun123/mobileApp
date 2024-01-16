@@ -53,7 +53,6 @@ const MapComponent = ({ closeModal, onDataReceived }) => {
         }
     }
     findAddress()
-    
     const handleMapPress = (e) => {
         const { coordinate } = e.nativeEvent;
         setSelectedLocation(coordinate);
@@ -95,8 +94,8 @@ const MapComponent = ({ closeModal, onDataReceived }) => {
             {selectedLocation && (
                 <View style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
                     <Text>Selected Location:</Text>
-                    <Text>{`Latitude: ${selectedLocation.latitude.toFixed(6)}`}</Text>
-                    <Text>{`Longitude: ${selectedLocation.longitude.toFixed(6)}`}</Text>
+                    {/* <Text>{`Latitude: ${selectedLocation.latitude.toFixed(6)}`}</Text> */}
+                    <Text>{address}</Text>
                     <Pressable style={{ ...styles.button, width: 150 }} onPress={sendDataToParent}>
                         <Text style={styles.text}>Save Location</Text>
                     </Pressable>
@@ -121,10 +120,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 5,
-        paddingHorizontal: 10,
+        paddingHorizontal: 5,
         borderRadius: 4,
         backgroundColor: '#3498db',
-        marginHorizontal: 10,
         height: 40,
     },
     text: {

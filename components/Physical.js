@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import MapComponent from "./MapComponent";
 
 
-const Physical = ({selectedLocation}) => {
+const Physical = ({ selectedLocation }) => {
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
     const [address, setAddress] = useState("");
@@ -55,8 +55,8 @@ const Physical = ({selectedLocation}) => {
                         />
                     </View>
                     <View style={{ marginTop: 20 }}>
-                        <Pressable style={{ ...styles.button, width: 40 }} onPress={handlePress}>
-                            <Text style={styles.text}><Ionicons name="location" size={16} color="white" /></Text>
+                        <Pressable style={{ width: 60 }} onPress={handlePress}>
+                            <Text><Ionicons name="location" size={32} color="#333" /></Text>
                         </Pressable>
                     </View>
                 </View>
@@ -75,17 +75,6 @@ const Physical = ({selectedLocation}) => {
 }
 
 const styles = StyleSheet.create({
-    button: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderRadius: 4,
-        backgroundColor: '#3498db',
-        marginHorizontal: 10,
-        height: 40,
-
-    },
     text: {
         fontSize: 16,
         lineHeight: 21,

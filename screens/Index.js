@@ -1,10 +1,10 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import Text from "@kaloraat/react-native-text"
 import Logo from "../components/Logo";
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import SearchBar from "../components/SearchBar";
 import { Ionicons } from '@expo/vector-icons';
+import Text from "@kaloraat/react-native-text";
+import SearchBar from "../components/SearchBar";
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 
 
 const Stack = createNativeStackNavigator();
@@ -26,7 +26,7 @@ const Index = ({ navigation }) => {
                     <Text medium center onPress={() => navigation.navigate('Invoce')} style={styles.buttonText}> Qaimələr </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
-                    <Text medium center onPress={() => navigation.navigate('Contracts')} style={styles.buttonText}> <Ionicons name="document" size={16} color="white" /> Müqavilələr </Text>
+                    <Text medium center onPress={() => navigation.navigate('Contracts')} style={styles.buttonText}>  {/* <Ionicons name="document" size={16} color="white" />  */} Müqavilələr </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
                     <Text medium center onPress={() => navigation.navigate('Kontragent')} style={styles.buttonText}> Kontragentlər </Text>
@@ -44,17 +44,14 @@ const Index = ({ navigation }) => {
                     <Text medium center onPress={() => navigation.navigate('Balances')} style={styles.buttonText}> Qalıqlar </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
-                    <Text medium center onPress={() => navigation.navigate('Settings')} style={styles.buttonText}> <Ionicons name="settings" size={16} color="white" /> Sazlamalar </Text>
+                    <Text medium center onPress={() => navigation.navigate('Settings')} style={styles.buttonText}>  {/* <Ionicons name="settings" size={16} color="white" />  */} Sazlamalar </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
-                    <Text medium center onPress={() => navigation.navigate('MapComponent')} style={styles.buttonText}> <Ionicons name="location" size={16} color="white" /> Map </Text>
+                    <Text medium center onPress={() => navigation.navigate('Singin')} style={styles.buttonText}> Singin </Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.buttonContainer}>
-                    <Text medium center onPress={() => navigation.navigate('Singup')} style={styles.buttonText}> Singin </Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.buttonContainer}>
+                {/* <TouchableOpacity style={styles.buttonContainer}>
                     <Text medium center onPress={() => navigation.navigate('Singup')} style={styles.buttonText}> Singup </Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                
             </View>
         </ScrollView>

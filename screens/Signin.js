@@ -59,9 +59,9 @@ const Signin = ({ navigation }) => {
 
                 {/* <Text> {JSON.stringify({ email, password }, null, 4)} </Text> */}
                 
-                <Text small center>
+                {/* <Text small center>
                     Not Yet?   <Text onPress={() => navigation.navigate('Singup')} color="#ff2222">Sing Up </Text>
-                </Text>
+                </Text> */}
                 <Text small center color="red" style={ { marginTop:10 } }>
                     Forgot Password?
                 </Text>

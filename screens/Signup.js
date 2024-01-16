@@ -9,12 +9,10 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 
 
 const Signup = ({navigation}) => {
-    const [name, setName] = useState("Me");
-    const [email, setEmail] = useState("ekbr03@gmail.com");
-    const [password, setPassword] = useState("1234");
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
-
-    // console.log('navigation->',navigation);
 
     const handleSubmit = async () => {
         setLoading(true);
@@ -44,7 +42,6 @@ const Signup = ({navigation}) => {
             <View style={{marginVertical:100}}>
                 <Logo />
                 <Text title center>Sing Up</Text>
-
                 <UserInput
                     name="Name"
                     value={name}
