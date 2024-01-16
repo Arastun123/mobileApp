@@ -55,7 +55,7 @@ const Invoce = () => {
     };
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
-            <Text>Qaimələr</Text>
+            <Text title center>Qaimələr</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <TextInput
                     style={{ ...styles.input, width: 100 }}
@@ -64,7 +64,7 @@ const Invoce = () => {
                     value={date}
                     onChangeText={setDate}
                 />
-
+    
                 <TextInput
                     style={{ ...styles.input, width: 50 }}
                     placeholder="№"

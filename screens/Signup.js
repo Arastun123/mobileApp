@@ -4,7 +4,7 @@ import Text from "@kaloraat/react-native-text"
 import UserInput from "../components/auth/UserInput";
 import SubmitButton from "../components/auth/SubmitButton";
 import axios from "axios";
-import Logo from "../components/auth/Logo";
+import Logo from "../components/Logo";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 

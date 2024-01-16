@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import Text from "@kaloraat/react-native-text"
-import Logo from "../components/auth/Logo";
+import Logo from "../components/Logo";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SearchBar from "../components/SearchBar";
 import { Ionicons } from '@expo/vector-icons';
