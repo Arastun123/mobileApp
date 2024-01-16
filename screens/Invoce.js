@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, ScrollView, Pressable } from 'react-native';
 import Text from "@kaloraat/react-native-text";
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Ionicons } from '@expo/vector-icons';
+
 
 const Invoce = () => {
-    const [customer, setCustomer] = useState()
-    const [date, setDate] = useState()
-    const [number, setNumber] = useState()
+    const [date, setDate] = useState(new Date());
+    const [number, setNumber] = useState();
+    const [show, setShow] = useState(false);
+    const [customer, setCustomer] = useState();
+
     const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Məbləğ"];
     const data = [
         {
@@ -53,18 +58,44 @@ const Invoce = () => {
         const newRow = Array(headers.length).fill('');
         setRows((prevRows) => [...prevRows, newRow]);
     };
+
+    const onChange = (event, selectedDate) => {
+        // let currentDate = selectedDate || date;
+        setShow(Platform.OS === 'ios');
+        let formattedDate = `${selectedDate.getDate()}.${selectedDate.getMonth() + 1}.${selectedDate.getFullYear()}`
+        setDate(formattedDate)
+        console.log('formattedDate', formattedDate);
+    };
+
+    const showDatepicker = () => { setShow(true) };
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
             <Text title center>Qaimələr</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <TextInput
-                    style={{ ...styles.input, width: 100 }}
-                    placeholder="Gün-Ay-İl"
-                    keyboardType="numeric"
-                    value={date}
-                    onChangeText={setDate}
-                />
-    
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <TextInput
+                        style={{ ...styles.input, width: 100 }}
+                        placeholder="Gün-Ay-İl"
+                        keyboardType="numeric"
+                        value={date}
+                        onChangeText={setDate}
+                    />
+                    <Pressable onPress={showDatepicker}>
+                        <Text> <Ionicons name="calendar" size={20} color="#333" /></Text>
+                    </Pressable>
+                    {show && (
+                        <DateTimePicker
+                            testID="datePicker"
+                            value={date}
+                            mode="date"
+                            is24Hour={true}
+                            display="default"
+                            // display="spinner"
+                            onChange={onChange}
+                        />
+                    )}
+
+                </View>
                 <TextInput
                     style={{ ...styles.input, width: 50 }}
                     placeholder="№"
@@ -91,7 +122,7 @@ const Invoce = () => {
                             <Text style={styles.text}>+</Text>
                         </Pressable>
                     </View>
-                </View> 
+                </View>
                 <View style={styles.table}>
                     <View style={styles.row}>
                         {headers.map((header) => (
@@ -147,7 +178,7 @@ const Invoce = () => {
                     ))}
                 </View>
             </View>
-                                
+
             <View style={{ flex: 1, alignItems: 'flex-end', margin: 10 }}>
                 <Text>Məbləğ: <Text>{totalSum}</Text></Text>
                 <Text>Ədv:    <Text>{edv}</Text></Text>

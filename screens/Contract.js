@@ -23,9 +23,7 @@ const Contracts = () => {
         console.log('formattedDate', formattedDate);
     };
 
-    const showDatepicker = () => {
-        setShow(true);
-    };
+    const showDatepicker = () => { setShow(true) };
    
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, marginHorizontal: 10 }}>
