@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useState } from "react";
 import { View, StyleSheet, ScrollView, Pressable, Modal, LocationPicker } from "react-native";
 import Text from "@kaloraat/react-native-text"
@@ -19,7 +20,24 @@ const Legal = () => {
     const closeModal = () => { setModalVisible(false) }
 
     const onDataReceived = (data) => { setReceivedData(data) }
+    const findAddress = async () => {
+        let latitude = receivedData.latitude;
+        let longitude = receivedData.longitude
+        try {
+            const response = await axios.get(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+            );
 
+            const addressComponents = response.data.address || {};
+            const formattedAddress = `${addressComponents.road || ''} ${addressComponents.house_number || ''}`;
+
+            setAddress(formattedAddress)
+            return formattedAddress.trim();
+        } catch (error) {
+            console.error(error.message);
+        }
+    };
+    findAddress()
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
             <Text center title style={{ marginBottom: 10 }}>Hüquqi şəxs</Text>
@@ -49,12 +67,12 @@ const Legal = () => {
                     <View style={{ width: 250 }}>
                         <UserInput
                             name="Ünvan"
-                            value={JSON.stringify(receivedData)}
+                            value={address}
                             setValue={setAddress}
                             autoCompleteType="text"
                             keyboardType="text"
-                            onChangeText={(text => (setReceivedData(text)))}
-                            editable={false}
+                            onChangeText={(text => (setAddress(text)))}
+                            // editable={false}
                         />
                     </View>
                     <View style={{ marginTop: 20 }}>
@@ -75,7 +93,6 @@ const Legal = () => {
                 >
                     <MapComponent closeModal={closeModal} onDataReceived={onDataReceived} />
                 </Modal>
-                {console.log(receivedData)}
             </View>
         </ScrollView>
     )
