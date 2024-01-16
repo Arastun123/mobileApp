@@ -6,7 +6,7 @@ import Physical from "../components/Physical";
 import Legal from "../components/Legal";
 
 
-const Kontragent = () => {
+const Kontragent = ({selectedLocation}) => {
     const [selectedType, setSelectedType] = useState(null);
 
     const handlePress = (type) => {
@@ -29,8 +29,8 @@ const Kontragent = () => {
                 </Pressable>
             </View>
 
-            {selectedType === 'fiziki' && <Physical />}
-            {selectedType === 'huquqi' && <Legal />}
+            {selectedType === 'fiziki' && <Physical selectedLocation={selectedLocation} />}
+            {selectedType === 'huquqi' && <Legal selectedLocation={selectedLocation} />}
 
             <View style={{ marginVertical: 10 }}> 
                 <Text center title style={{ marginBottom: 10 }}>Müqavilələr</Text>

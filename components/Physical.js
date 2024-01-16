@@ -1,16 +1,25 @@
 import React, { useState } from "react";
-import { ScrollView, View, StyleSheet, Pressable } from "react-native";
+import { ScrollView, View, StyleSheet, Pressable, Modal } from "react-native";
 import Text from "@kaloraat/react-native-text"
 import UserInput from "./auth/UserInput";
 import { Ionicons } from '@expo/vector-icons';
+import MapComponent from "./MapComponent";
 
 
-const Physical = () => {
+const Physical = ({selectedLocation}) => {
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
     const [address, setAddress] = useState("");
     const [voen, setVoen] = useState("");
+    const [isModalVisible, setModalVisible] = useState(false);
 
+    const handlePress = () => {
+        setModalVisible(true)
+    }
+
+    const closeModal = () => {
+        setModalVisible(false)
+    }
     return (
 
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
@@ -41,19 +50,27 @@ const Physical = () => {
                     <View style={{ width: 250 }}>
                         <UserInput
                             name="Ünvan"
-                            value={address}
+                            value={selectedLocation}
                             setValue={setAddress}
                             autoCompleteType="text"
                             keyboardType="text"
                         />
                     </View>
                     <View style={{ marginTop: 20 }}>
-                        <Pressable style={{ ...styles.button, width: 40 }} onPress={() => handlePress('fiziki')}>
+                        <Pressable style={{ ...styles.button, width: 40 }} onPress={handlePress}>
                             <Text style={styles.text}><Ionicons name="location" size={16} color="white" /></Text>
                         </Pressable>
                     </View>
                 </View>
-                <Text>{JSON.stringify({name, phone, address, voen}, null, 4)}</Text>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={isModalVisible}
+                    onRequestClose={closeModal}
+                >
+                    <MapComponent closeModal={closeModal} />
+                </Modal>
+                <Text>{JSON.stringify({ name, phone, address, voen }, null, 4)}</Text>
             </View>
         </ScrollView>
     )

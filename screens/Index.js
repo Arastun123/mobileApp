@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 const Stack = createNativeStackNavigator();
 
 const Index = ({ navigation }) => {
+    
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15 }}>
             <View>

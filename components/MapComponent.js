@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
+import Text from "@kaloraat/react-native-text"
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { Ionicons } from '@expo/vector-icons';
 
-const MapComponent = () => {
+
+const MapComponent = ({ closeModal, onDataReceived }) => {
     const [currentLocation, setCurrentLocation] = useState(null);
     const [initialRegion, setInitialRegion] = useState(null);
     const [selectedLocation, setSelectedLocation] = useState(null);
@@ -35,8 +38,16 @@ const MapComponent = () => {
         setSelectedLocation(coordinate);
     };
 
+    const sendDataToParent = () => {
+        onDataReceived(selectedLocation);
+        closeModal();
+    }
+
     return (
         <View style={{ flex: 1 }}>
+            <View style={{ padding: 5 }}>
+                <Text right onPress={closeModal} ><Ionicons name="close" size={24} color="red" /></Text>
+            </View>
             {initialRegion && (
                 <MapView
                     style={{ flex: 1 }}
@@ -65,7 +76,9 @@ const MapComponent = () => {
                     <Text>Selected Location:</Text>
                     <Text>{`Latitude: ${selectedLocation.latitude.toFixed(6)}`}</Text>
                     <Text>{`Longitude: ${selectedLocation.longitude.toFixed(6)}`}</Text>
-
+                    <Pressable style={{ ...styles.button, width: 150 }} onPress={sendDataToParent}>
+                        <Text style={styles.text}>Save Location</Text>
+                    </Pressable>
                 </View>
             )}
         </View>
@@ -82,6 +95,23 @@ const styles = StyleSheet.create({
     map: {
         width: "100%",
         height: "100%",
+    },
+    button: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 4,
+        backgroundColor: '#3498db',
+        marginHorizontal: 10,
+        height: 40,
+    },
+    text: {
+        fontSize: 16,
+        lineHeight: 21,
+        fontWeight: 'bold',
+        letterSpacing: 0.25,
+        color: 'white',
     },
 });
 
