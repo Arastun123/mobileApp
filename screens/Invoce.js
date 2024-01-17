@@ -224,6 +224,11 @@ const Invoce = () => {
                 <Text>Ədv:    <Text>{edv}</Text></Text>
                 <Text>Toplam: <Text>{wholeAmout}</Text></Text>
             </View>
+            <View style={{ alignItems: 'flex-end', margin: 10 }}>
+                <Pressable style={{ ...styles.button, width: 150 }} >
+                    <Text style={styles.text}>Təsdiq et</Text>
+                </Pressable>
+            </View>
             {/* <Text>{JSON.stringify({ date, number, customer }, null, 4)}</Text> */}
         </ScrollView>
     );

@@ -91,7 +91,7 @@ const Contracts = () => {
                 keyboardType="text"
                 multiline
             />
-            <View style={{ margin: 10 }}>
+            <View style={{ alignItems: 'flex-end', margin: 10 }}>
                 <Pressable style={{ ...styles.button, width: 150 }} >
                     <Text style={styles.text}>Təsdiq et</Text>
                 </Pressable>

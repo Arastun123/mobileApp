@@ -29,6 +29,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    
+    alignItems:'flex-end'
   },
   input: {
     height: 40,
@@ -36,6 +38,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 8,
     borderRadius: 10,
+    width: 150,
   }
 });
 
