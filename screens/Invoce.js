@@ -10,6 +10,7 @@ const Invoce = () => {
     const [number, setNumber] = useState();
     const [show, setShow] = useState(false);
     const [customer, setCustomer] = useState();
+    const [amount, setAmount] = useState()
 
     const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Məbləğ"];
     const data = [
@@ -36,29 +37,38 @@ const Invoce = () => {
     const [tableData, setTableData] = useState(data);
 
     const handleInputChange = (text, rowIndex, fieldName) => {
-        const updatedTableData = tableData.map((row, index) => {
+        const updatedRowData = rowData.map((row, index) => {
             if (index === rowIndex) {
                 return { ...row, [fieldName]: text };
             }
             return row;
         });
 
-        setTableData(updatedTableData);
-    };
-    const totalPriceArray = tableData.map(product => product.price * product.count);
-    const totalSum = totalPriceArray.reduce((acc, totalPrice) => acc + (totalPrice), 0);
-    const calculatedValue = parseInt(tableData.price) * parseInt(tableData.count);
+        let updatedPrice = parseFloat(updatedRowData[rowIndex].price);
+        let updatedCount = parseFloat(updatedRowData[rowIndex].count);
+        let calculatedValue = updatedPrice * updatedCount; 
+        setAmount(calculatedValue)
 
-    const edv = (totalSum * 18) / 100
-    const amout = totalSum + edv
+        setRowData(updatedRowData);
+
+    };
+
+    const totalPriceArray = tableData.map(product => product.price * product.count);
+    let tableSum = totalPriceArray.reduce((acc, totalPrice,) => acc + (totalPrice), 0);
+    let totalSum = tableSum + amount;
+
+    let edv = (totalSum * 18) / 100
+    let wholeAmout = totalSum + edv
     const numColumns = 50;
-    const [rows, setRows] = useState([]);
+    // console.log(totalSum);
+    const [rowData, setRowData] = useState([]);
 
     const addRow = () => {
-        const newRow = Array(headers.length).fill('');
-        setRows((prevRows) => [...prevRows, newRow]);
+        const newRow = { name: '', count: '', price: '' };
+        setRowData((prevRows) => [...prevRows, newRow]);
     };
 
+    // tarix
     const onChange = (event, selectedDate) => {
         // let currentDate = selectedDate || date;
         setShow(Platform.OS === 'ios');
@@ -115,7 +125,6 @@ const Invoce = () => {
                     style={{ ...styles.input, width: 300 }}
                 />
             </View>
-
             <View>
                 <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
                     <View >
@@ -143,7 +152,6 @@ const Invoce = () => {
                                         placeholder={data.name}
                                         keyboardType="text"
                                         value={tableData[rowIndex].name}
-                                        onChangeText={(text) => handleInputChange(text, rowIndex, 'name')}
                                     />
                                 </View>
                                 <View style={styles.cell}>
@@ -151,7 +159,6 @@ const Invoce = () => {
                                         placeholder={String(data.count)}
                                         keyboardType="numeric"
                                         value={String(tableData[rowIndex].count)}
-                                        onChangeText={(text) => handleInputChange(text, rowIndex, 'count')}
                                     />
                                 </View>
                                 <View style={styles.cell}>
@@ -159,7 +166,6 @@ const Invoce = () => {
                                         placeholder={String(data.price)}
                                         keyboardType="numeric"
                                         value={String(tableData[rowIndex].price)}
-                                        onChangeText={(text) => handleInputChange(text, rowIndex, 'price')}
                                     />
                                 </View>
                                 <View style={styles.cell}>
@@ -168,34 +174,38 @@ const Invoce = () => {
                             </View>
                         ))}
                     </View>
-                    {/* {rows.map((row, rowIndex) => (
-                        <View key={rowIndex} style={styles.row}>
-                            {row.map((cell, cellIndex) => (
-                                // <Text key={cellIndex} style={styles.cell}>
-                                //     {cell}
-                                // </Text>
+                    {rowData.map((row, rowIndex) => (
+                        <View style={styles.row} key={rowIndex}>
+                            <View style={styles.cell}>
+                                <Text>№</Text>
+                            </View>
+                            <View style={styles.cell}>
                                 <TextInput
-                                    placeholder = ''
-                                    keyboardType=""
-                                    // value = ''
-                                    // onChangeText={(text) => handleInputChange(text, rowIndex, 'price')}
-                                    style={styles.cell}
+                                    placeholder='Malın adı'
+                                    keyboardType="text"
+                                    value={rowData[rowIndex].name}
+                                    onChangeText={(text) => handleInputChange(text, rowIndex, 'name')}
                                 />
-                            ))}
-                        </View>
-                    ))} */}
-                    {rows.map((row, rowIndex) => (
-                        <View key={rowIndex} style={styles.row}>
-                            {row.map((cell, cellIndex) => (
-                                <View style={styles.cell} key={cellIndex}>
-                                    <TextInput
-                                        placeholder={String(headers[cellIndex])}
-                                        onChangeText={(text) => handleInputChange(rowIndex, headers[cellIndex], text)}
-                                        value={inputData[`${rowIndex}_${headers[cellIndex]}`]}
-                                        style={{ textAlign: 'center' }}
-                                    />
-                                </View>
-                            ))}
+                            </View>
+                            <View style={styles.cell}>
+                                <TextInput
+                                    placeholder='Miqdar'
+                                    keyboardType="numeric"
+                                    value={rowData[rowIndex].count}
+                                    onChangeText={(text) => handleInputChange(text, rowIndex, 'count')}
+                                />
+                            </View>
+                            <View style={styles.cell}>
+                                <TextInput
+                                    placeholder='Qiymət'
+                                    keyboardType="numeric"
+                                    value={rowData[rowIndex].price}
+                                    onChangeText={(text) => handleInputChange(text, rowIndex, 'price')}
+                                />
+                            </View>
+                            <View style={styles.cell}>
+                                <Text>{amount}</Text>
+                            </View>
                         </View>
                     ))}
                 </View>
@@ -203,7 +213,7 @@ const Invoce = () => {
             <View style={{ alignItems: 'flex-end', margin: 10 }}>
                 <Text>Məbləğ: <Text>{totalSum}</Text></Text>
                 <Text>Ədv:    <Text>{edv}</Text></Text>
-                <Text>Toplam: <Text>{amout}</Text></Text>
+                <Text>Toplam: <Text>{wholeAmout}</Text></Text>
             </View>
             <Text>{JSON.stringify({ date, number, customer }, null, 4)}</Text>
         </ScrollView>
