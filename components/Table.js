@@ -32,8 +32,8 @@ const Table = ({ headers, data }) => {
             <View style={styles.table}>
 
                 <View style={styles.row}>
-                    {headers.map((header) => (
-                        <View style={styles.cell}>
+                    {headers.map((header, index) => (
+                        <View style={styles.cell} key={index}>
                             <Text style={styles.cellText}>{header}</Text>
                         </View>
                     ))}

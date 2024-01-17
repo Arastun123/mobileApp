@@ -12,10 +12,8 @@ const Routes = ({ navigation }) => {
     const data = ["1", "09.01.24", "Baku", "Me"];
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>
-            <View>
-                <Text title center> Marşurutlar </Text>
-                <Table headers={headers} data={data}/>
-            </View>
+            <Text title center> Marşurutlar </Text>
+            <Table headers={headers} data={data} />
         </ScrollView >
     )
 

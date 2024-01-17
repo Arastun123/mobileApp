@@ -32,6 +32,12 @@ const Invoce = () => {
             "count": 3,
             "price": 20,
         },
+        {
+            "id": 4,
+            "name": "Monitor",
+            "count": 5,
+            "price": 150,
+        },
     ];
 
     const [tableData, setTableData] = useState(data);
@@ -46,7 +52,7 @@ const Invoce = () => {
 
         let updatedPrice = parseFloat(updatedRowData[rowIndex].price);
         let updatedCount = parseFloat(updatedRowData[rowIndex].count);
-        let calculatedValue = updatedPrice * updatedCount; 
+        let calculatedValue = updatedPrice * updatedCount;
         setAmount(calculatedValue)
 
         setRowData(updatedRowData);
@@ -54,13 +60,17 @@ const Invoce = () => {
     };
 
     const totalPriceArray = tableData.map(product => product.price * product.count);
-    let tableSum = totalPriceArray.reduce((acc, totalPrice,) => acc + (totalPrice), 0);
+    let tableSum = totalPriceArray.reduce((acc, totalPrice) => acc + totalPrice, 0);
     let totalSum = tableSum + amount;
-
-    let edv = (totalSum * 18) / 100
-    let wholeAmout = totalSum + edv
+    
+    if (isNaN(totalSum)) {
+        totalSum = tableSum;
+    }
+    
+    let edv = (totalSum * 18) / 100;
+    let wholeAmout = totalSum + edv;
+    // yeni sətir
     const numColumns = 50;
-    // console.log(totalSum);
     const [rowData, setRowData] = useState([]);
 
     const addRow = () => {
@@ -105,7 +115,6 @@ const Invoce = () => {
                             onChange={onChange}
                         />
                     )}
-
                 </View>
                 <TextInput
                     style={{ ...styles.input, width: 50 }}
@@ -176,11 +185,11 @@ const Invoce = () => {
                     </View>
                     {rowData.map((row, rowIndex) => (
                         <View style={styles.row} key={rowIndex}>
-                            <View style={styles.cell}>
-                                <Text>№</Text>
+                            <View style={styles.cell} key={rowIndex}>
+                                <Text>{rowIndex + data.length + 1}</Text>
                             </View>
                             <View style={styles.cell}>
-                                <TextInput
+                                <TextInput  
                                     placeholder='Malın adı'
                                     keyboardType="text"
                                     value={rowData[rowIndex].name}
@@ -204,14 +213,14 @@ const Invoce = () => {
                                 />
                             </View>
                             <View style={styles.cell}>
-                                <Text>{amount}</Text>
+                                <Text>{isNaN(amount) ? 'Məbləğ' : amount}</Text>
                             </View>
                         </View>
                     ))}
                 </View>
             </View>
             <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                <Text>Məbləğ: <Text>{totalSum}</Text></Text>
+                <Text>Məbləğ: <Text>{isNaN(totalSum) ? tableSum : totalSum}</Text></Text>
                 <Text>Ədv:    <Text>{edv}</Text></Text>
                 <Text>Toplam: <Text>{wholeAmout}</Text></Text>
             </View>

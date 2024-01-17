@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, ScrollView, StyleSheet, Pressable } from "react-native";
 import Text from "@kaloraat/react-native-text"
-import UserInput from "../components/auth/UserInput";
+import UserInput from "../components/UserInput";
 
 
 const Nomenklatura = () => {

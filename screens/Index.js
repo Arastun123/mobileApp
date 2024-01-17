@@ -1,6 +1,6 @@
 import React from "react";
 import Logo from "../components/Logo";
-import { Ionicons } from '@expo/vector-icons';
+// import { Ionicons } from '@expo/vector-icons';
 import Text from "@kaloraat/react-native-text";
 import SearchBar from "../components/SearchBar";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';

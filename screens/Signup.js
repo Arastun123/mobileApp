@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { View } from 'react-native';
 import Text from "@kaloraat/react-native-text"
-import UserInput from "../components/auth/UserInput";
-import SubmitButton from "../components/auth/SubmitButton";
+import UserInput from "../components/UserInput";
+import SubmitButton from "../components/SubmitButton";
 import axios from "axios";
 import Logo from "../components/Logo";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'

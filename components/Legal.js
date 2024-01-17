@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { View, StyleSheet, ScrollView, Pressable, Modal, LocationPicker } from "react-native";
 import Text from "@kaloraat/react-native-text"
-import UserInput from "./auth/UserInput";
+import UserInput from "./UserInput";
 import { Ionicons } from '@expo/vector-icons';
 import MapComponent from "./MapComponent";
 

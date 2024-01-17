@@ -12,10 +12,8 @@ const Orders = ({ navigation }) => {
     const data = ["1", "09.01.24", "Me", "2000"];
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>
-            <View>
-                <Text title center> Sifarişlər </Text>
-                <Table headers={headers} data={data}/>
-            </View>
+            <Text title center> Sifarişlər </Text>
+            <Table headers={headers} data={data}/>
         </ScrollView >
     )
 

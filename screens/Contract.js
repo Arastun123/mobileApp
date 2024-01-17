@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, TextInput, View, Pressable, Button } from "reac
 import Text from "@kaloraat/react-native-text";
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import UserInput from "../components/auth/UserInput";
+import UserInput from "../components/UserInput";
 
 
 const Contracts = () => {

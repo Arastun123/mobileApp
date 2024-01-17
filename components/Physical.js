@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ScrollView, View, StyleSheet, Pressable, Modal } from "react-native";
 import Text from "@kaloraat/react-native-text"
-import UserInput from "./auth/UserInput";
+import UserInput from "./UserInput";
 import { Ionicons } from '@expo/vector-icons';
 import MapComponent from "./MapComponent";
 

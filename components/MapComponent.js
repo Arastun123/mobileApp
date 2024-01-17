@@ -37,7 +37,6 @@ const MapComponent = ({ closeModal, onDataReceived }) => {
     const findAddress = async () => {
         let latitude = selectedLocation.latitude;
         let longitude = selectedLocation.longitude
-        console.log('latitude', latitude, 'longitude', longitude);
         try {
             const response = await axios.get(
                 `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
