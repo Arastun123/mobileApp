@@ -65,7 +65,7 @@ const Table = ({ headers, data }) => {
                     <Text style={styles.text}>Təsdiq et</Text>
                 </Pressable>
             </View>
-            <Text> {JSON.stringify({ inputData }, null, 4)} </Text>
+            {/* <Text> {JSON.stringify({ inputData }, null, 4)} </Text> */}
         </View>
     );
 }

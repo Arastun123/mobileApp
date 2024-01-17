@@ -185,7 +185,7 @@ const Invoce = () => {
                     </View>
                     {rowData.map((row, rowIndex) => (
                         <View style={styles.row} key={rowIndex}>
-                            <View style={styles.cell} key={rowIndex}>
+                            <View style={styles.cell}>
                                 <Text>{rowIndex + data.length + 1}</Text>
                             </View>
                             <View style={styles.cell}>
@@ -224,7 +224,7 @@ const Invoce = () => {
                 <Text>Ədv:    <Text>{edv}</Text></Text>
                 <Text>Toplam: <Text>{wholeAmout}</Text></Text>
             </View>
-            <Text>{JSON.stringify({ date, number, customer }, null, 4)}</Text>
+            {/* <Text>{JSON.stringify({ date, number, customer }, null, 4)}</Text> */}
         </ScrollView>
     );
 }

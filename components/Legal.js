@@ -61,7 +61,7 @@ const Legal = () => {
                         </Pressable>
                     </View>
                 </View>
-                <Text>{JSON.stringify({ name, phone, address, voen }, null, 4)}</Text>
+                {/* <Text>{JSON.stringify({ name, phone, address, voen }, null, 4)}</Text> */}
                 <Modal
                     animationType="slide"
                     transparent={true}

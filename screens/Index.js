@@ -47,7 +47,7 @@ const Index = ({ navigation }) => {
                     <Text medium center onPress={() => navigation.navigate('Settings')} style={styles.buttonText}>  {/* <Ionicons name="settings" size={16} color="white" />  */} Sazlamalar </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
-                    <Text medium center onPress={() => navigation.navigate('Singin')} style={styles.buttonText}> Singin </Text>
+                    <Text medium center onPress={() => navigation.navigate('Singin')} style={styles.buttonText}> Daxil ol </Text>
                 </TouchableOpacity>
                 {/* <TouchableOpacity style={styles.buttonContainer}>
                     <Text medium center onPress={() => navigation.navigate('Singup')} style={styles.buttonText}> Singup </Text>

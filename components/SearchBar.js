@@ -17,7 +17,7 @@ const SearchScreen = () => {
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        placeholder="Search..."
+        placeholder="Axtarış..."
         value={searchQuery}
         onChangeText={handleSearch}
       />

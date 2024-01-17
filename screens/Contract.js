@@ -97,7 +97,7 @@ const Contracts = () => {
                 </Pressable>
             </View>
             <Text>
-            <Text>{JSON.stringify({ companyName, number, date, type, name, comment }, null, 4)}</Text>
+            {/* <Text>{JSON.stringify({ companyName, number, date, type, name, comment }, null, 4)}</Text> */}
             </Text>
         </ScrollView>
     )

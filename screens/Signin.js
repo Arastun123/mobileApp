@@ -36,9 +36,9 @@ const Signin = ({ navigation }) => {
 
     return (
         <KeyboardAwareScrollView contentContainerStyle={{ flex: 1, justifyContent: 'center' }}>
-            <View style={{marginVertical:100}}>
+            <View style={{ marginVertical: 100 }}>
                 <Logo />
-                <Text title center>Sing In</Text>
+                <Text title center>Daxil ol</Text>
 
                 <UserInput
                     name="Email"
@@ -48,22 +48,22 @@ const Signin = ({ navigation }) => {
                     keyboardType="email-address"
                 />
                 <UserInput
-                    name="Password"
+                    name="Parol"
                     value={password}
                     setValue={setPassword}
                     secureTextEntry={true}
                     autoCompleteType="password"
                 />
 
-                <SubmitButton title="Sign in" handleSubmit={handleSubmit} loading={loading}/>
+                <SubmitButton title="Təsdiq et" handleSubmit={handleSubmit} loading={loading} />
 
                 {/* <Text> {JSON.stringify({ email, password }, null, 4)} </Text> */}
-                
+
                 {/* <Text small center>
                     Not Yet?   <Text onPress={() => navigation.navigate('Singup')} color="#ff2222">Sing Up </Text>
                 </Text> */}
-                <Text small center color="red" style={ { marginTop:10 } }>
-                    Forgot Password?
+                <Text small center color="red" style={{ marginTop: 10 }}>
+                    Şifrəni unutmusunuz?
                 </Text>
             </View>
         </KeyboardAwareScrollView>

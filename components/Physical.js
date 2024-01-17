@@ -68,7 +68,7 @@ const Physical = ({ selectedLocation }) => {
                 >
                     <MapComponent closeModal={closeModal} onDataReceived={onDataReceived} />
                 </Modal>
-                <Text>{JSON.stringify({ name, phone, address, voen }, null, 4)}</Text>
+                {/* <Text>{JSON.stringify({ name, phone, address, voen }, null, 4)}</Text> */}
             </View>
         </ScrollView>
     )
