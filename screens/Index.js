@@ -3,14 +3,13 @@ import { Ionicons } from '@expo/vector-icons';
 import SearchBar from "../components/SearchBar";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, StyleSheet, TouchableOpacity, ScrollView, Text } from 'react-native';
-import AppLoading from "expo-app-loading";
 import {useFonts} from 'expo-font';
 
 const Stack = createNativeStackNavigator();
 
 const Index = ({ navigation }) => {
     let [fontsLoad] = useFonts({
-        'Montserrat': require('../assets/fonts/static/DancingScript-Medium.ttf')
+        'Medium': require('../assets/fonts/static/DancingScript-Medium.ttf')
     })
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15 }}>
@@ -72,7 +71,7 @@ const styles = StyleSheet.create({
         color: '#ffffff',
         textAlign: 'center',
         fontWeight: 'bold',
-        fontFamily: 'Montserrat',
+        fontFamily: 'Medium',
         fontSize: 20
     },
 });
