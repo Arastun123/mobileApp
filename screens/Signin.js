@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { View } from 'react-native';
-import Text from "@kaloraat/react-native-text"
+import { View, Text } from 'react-native';
 import UserInput from "../components/UserInput";
 import SubmitButton from "../components/SubmitButton";
 import axios from "axios";
 import Logo from "../components/Logo";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useFonts } from "expo-font";
 
 
 const Signin = ({ navigation }) => {
@@ -34,11 +34,15 @@ const Signin = ({ navigation }) => {
         }
     }
 
+    let [fontsLoad] = useFonts({
+        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
+    })
+
     return (
         <KeyboardAwareScrollView contentContainerStyle={{ flex: 1, justifyContent: 'center' }}>
             <View style={{ marginVertical: 100 }}>
                 <Logo />
-                <Text title center>Daxil ol</Text>
+                <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32}}>Daxil ol</Text>
 
                 <UserInput
                     name="Email"
@@ -62,7 +66,7 @@ const Signin = ({ navigation }) => {
                 {/* <Text small center>
                     Not Yet?   <Text onPress={() => navigation.navigate('Singup')} color="#ff2222">Sing Up </Text>
                 </Text> */}
-                <Text small center color="red" style={{ marginTop: 10 }}>
+                <Text style={{ marginTop: 10, textAlign: 'center', fontFamily: 'Medium', color: 'red' }}>
                     Şifrəni unutmusunuz?
                 </Text>
             </View>

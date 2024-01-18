@@ -1,6 +1,6 @@
 import React, { useState, useRef  } from "react";
-import { View, StyleSheet, Pressable, TextInput } from "react-native";
-import Text from "@kaloraat/react-native-text"
+import { View, StyleSheet, Pressable, TextInput, Text } from "react-native";
+import { useFonts } from "expo-font";
 
 const Table = ({ headers, data }) => {
     const numColumns = 5;
@@ -19,6 +19,10 @@ const Table = ({ headers, data }) => {
             [key]: value,
         }));
     }
+   
+    let [fontsLoad] = useFonts({
+        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
+    })
 
     return (
         <View>
@@ -107,5 +111,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         letterSpacing: 0.25,
         color: 'white',
+        fontFamily : 'Medium'
     },
 });

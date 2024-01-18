@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, ScrollView, Pressable } from 'react-native';
-import Text from "@kaloraat/react-native-text";
+import { View, TextInput, StyleSheet, ScrollView, Pressable, Text } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
+import { useFonts } from 'expo-font';
 
 
 const Invoce = () => {
@@ -89,9 +89,14 @@ const Invoce = () => {
 
     const showDatepicker = () => { setShow(true) };
     const [inputData, setData] = useState([]);
+
+    let [fontsLoad] = useFonts({
+        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
+    })
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
-            <Text title center>Qaimələr</Text>
+            <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}>Qaimələr</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                     <TextInput
@@ -273,6 +278,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         letterSpacing: 0.25,
         color: 'white',
+        fontFamily: 'Medium'
     },
 });
 export default Invoce;

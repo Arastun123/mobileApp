@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
-import Text from "@kaloraat/react-native-text"
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
+import { useFonts } from 'expo-font';
 
 const MapComponent = ({ closeModal, onDataReceived }) => {
     const [currentLocation, setCurrentLocation] = useState(null);
@@ -62,10 +62,14 @@ const MapComponent = ({ closeModal, onDataReceived }) => {
         closeModal();
     }
 
+    let [fontsLoad] = useFonts({
+        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
+    })
+
     return (
         <View style={{ flex: 1 }}>
             <View style={{ padding: 5 }}>
-                <Text right onPress={closeModal} ><Ionicons name="close" size={24} color="red" /></Text>
+                <Text style={ {textAlign: 'right' }} onPress={closeModal} ><Ionicons name="close" size={24} color="red" /></Text>
             </View>
             {initialRegion && (
                 <MapView
@@ -130,6 +134,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         letterSpacing: 0.25,
         color: 'white',
+        fontFamily: 'Medium'
     },
 });
 

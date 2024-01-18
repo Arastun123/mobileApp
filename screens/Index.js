@@ -1,49 +1,53 @@
 import React from "react";
 import { Ionicons } from '@expo/vector-icons';
-import Text from "@kaloraat/react-native-text";
 import SearchBar from "../components/SearchBar";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-
+import { View, StyleSheet, TouchableOpacity, ScrollView, Text } from 'react-native';
+import AppLoading from "expo-app-loading";
+import {useFonts} from 'expo-font';
 
 const Stack = createNativeStackNavigator();
 
 const Index = ({ navigation }) => {
-
+    let [fontsLoad] = useFonts({
+        'Montserrat': require('../assets/fonts/static/DancingScript-Medium.ttf')
+    })
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15 }}>
             <View>
                 <SearchBar setCLicked={true} />
-                <View style={{marginTop:10}}>
+                <View style={{ marginTop: 10 }}>
                     <TouchableOpacity style={styles.buttonContainer}>
-                        <Text medium center onPress={() => navigation.navigate('Routes')} style={styles.buttonText}> Marşurutlar </Text>
+                        <Text onPress={() => navigation.navigate('Routes')} style={styles.buttonText}> Marşurutlar </Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.buttonContainer}>
-                        <Text medium center onPress={() => navigation.navigate('Orders')} style={styles.buttonText}>  Müştəri sifarişlər </Text>
+                        <Text onPress={() => navigation.navigate('Orders')} style={styles.buttonText}>  Müştəri sifarişlər </Text>
+                    </TouchableOpacity>
+                    <View style={{ flexDirection:'row', justifyContent: 'space-around',}}>
+                        <TouchableOpacity style={styles.buttonContainer}>
+                            <Text onPress={() => navigation.navigate('Invoce')} style={styles.buttonText}> Qaimələr </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.buttonContainer}>
+                            <Text onPress={() => navigation.navigate('Contracts')} style={styles.buttonText}>  {/* <Ionicons name="document" size={16} color="white" />  */} Müqavilələr </Text>
+                        </TouchableOpacity>
+                    </View>
+                    <TouchableOpacity style={styles.buttonContainer}>
+                        <Text onPress={() => navigation.navigate('Kontragent')} style={styles.buttonText}> Kontragentlər </Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.buttonContainer}>
-                        <Text medium center onPress={() => navigation.navigate('Invoce')} style={styles.buttonText}> Qaimələr </Text>
+                        <Text onPress={() => navigation.navigate('Nomenklatura')} style={styles.buttonText}> Nomenklatura </Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.buttonContainer}>
-                        <Text medium center onPress={() => navigation.navigate('Contracts')} style={styles.buttonText}>  {/* <Ionicons name="document" size={16} color="white" />  */} Müqavilələr </Text>
+                        <Text onPress={() => navigation.navigate('CassaOrders')} style={styles.buttonText}> Kassa Orderləri </Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.buttonContainer}>
-                        <Text medium center onPress={() => navigation.navigate('Kontragent')} style={styles.buttonText}> Kontragentlər </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.buttonContainer}>
-                        <Text medium center onPress={() => navigation.navigate('Nomenklatura')} style={styles.buttonText}> Nomenklatura </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.buttonContainer}>
-                        <Text medium center onPress={() => navigation.navigate('CassaOrders')} style={styles.buttonText}> Kassa Orderləri </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.buttonContainer}>
-                        <Text medium center onPress={() => navigation.navigate('Debts')} style={styles.buttonText}> Borclar / Qalıqlar </Text>
+                        <Text onPress={() => navigation.navigate('Debts')} style={styles.buttonText}> Borclar / Qalıqlar </Text>
                     </TouchableOpacity>
                     {/* <TouchableOpacity style={styles.buttonContainer}>
                     <Text medium center onPress={() => navigation.navigate('Balances')} style={styles.buttonText}> Qalıqlar </Text>
                 </TouchableOpacity> */}
                     <TouchableOpacity style={styles.buttonContainer}>
-                        <Text medium center onPress={() => navigation.navigate('Settings')} style={styles.buttonText}>  <Ionicons name="settings" size={16} color="white" />  </Text>
+                        <Text onPress={() => navigation.navigate('Settings')} style={styles.buttonText}>  <Ionicons name="settings" size={16} color="white" />  </Text>
                     </TouchableOpacity>
                     {/* <TouchableOpacity style={styles.buttonContainer}>
                     <Text medium center onPress={() => navigation.navigate('Singin')} style={styles.buttonText}> Daxil ol </Text>
@@ -68,6 +72,8 @@ const styles = StyleSheet.create({
         color: '#ffffff',
         textAlign: 'center',
         fontWeight: 'bold',
+        fontFamily: 'Montserrat',
+        fontSize: 20
     },
 });
 

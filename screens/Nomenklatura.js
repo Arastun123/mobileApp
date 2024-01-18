@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { View, ScrollView, StyleSheet, Pressable } from "react-native";
-import Text from "@kaloraat/react-native-text"
+import { View, ScrollView, StyleSheet, Pressable, Text } from "react-native";
 import UserInput from "../components/UserInput";
+import { useFonts } from "expo-font";
 
 
 const Nomenklatura = () => {
@@ -11,9 +11,13 @@ const Nomenklatura = () => {
     const [brand, setBrand] = useState("");
     const [price, setPrice] = useState("");
 
+    let [fontsLoad] = useFonts({
+        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
+    })
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
-            <Text center title style={{ marginBottom: 10 }}> Nomenklatura </Text>
+            <Text style={{ marginBottom: 10, textAlign: 'center', fontFamily: 'Medium', fontSize: 32}}> Nomenklatura </Text>
             <View style={{ marginVertical: 10 }}>
                 <UserInput
                     name="Ad"
@@ -61,23 +65,23 @@ const Nomenklatura = () => {
 
                 <View style={styles.row}>
                     <View style={styles.cell}>
-                        <Text center medium>Qalıqlar</Text>
+                        <Text style={{ textAlign: 'center', fontSize: 20}}>Qalıqlar</Text>
                     </View>
                 </View>
                 <View style={styles.row}>
                     <View style={styles.cell} >
-                        <Text center>Baş anbar</Text>
+                        <Text style={{ textAlign: 'center'}}>Baş anbar</Text>
                     </View>
                     <View style={styles.cell} >
-                        <Text center>3</Text>
+                        <Text style={{ textAlign: 'center'}}>3</Text>
                     </View>
                 </View>
                 <View style={styles.row}>
                     <View style={styles.cell}>
-                        <Text center>Anbar</Text>
+                        <Text style={{ textAlign: 'center'}}>Anbar</Text>
                     </View>
                     <View style={styles.cell}>
-                        <Text center>5</Text>
+                        <Text style={{ textAlign: 'center'}}>5</Text>
                     </View>
                 </View>
             </View>
@@ -118,6 +122,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         letterSpacing: 0.25,
         color: 'white',
+        fontFamily: 'Medium'
     },
 });
 

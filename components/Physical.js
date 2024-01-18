@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { ScrollView, View, StyleSheet, Pressable, Modal } from "react-native";
-import Text from "@kaloraat/react-native-text"
+import { ScrollView, View, StyleSheet, Pressable, Modal, Text } from "react-native";
 import UserInput from "./UserInput";
 import { Ionicons } from '@expo/vector-icons';
 import MapComponent from "./MapComponent";
+import { useFonts } from "expo-font";
 
 
 const Physical = ({ selectedLocation }) => {
@@ -17,10 +17,14 @@ const Physical = ({ selectedLocation }) => {
     const closeModal = () => { setModalVisible(false) }
     const onDataReceived = (data) => { setAddress(data) }
 
+    let [fontsLoad] = useFonts({
+        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
+    })
+
     return (
 
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
-            <Text center title style={{ marginBottom: 10 }}>Fiziki şəxs</Text>
+            <Text style={{ marginBottom: 10, textAlign: 'center', fontSize: 32 }}>Fiziki şəxs</Text>
             <View style={{ marginVertical: 10 }}>
                 <UserInput
                     name="S.A.A"
@@ -81,6 +85,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         letterSpacing: 0.25,
         color: 'white',
+        fontFamily: 'Medium'
     },
 });
 

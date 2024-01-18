@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, TextInput, View, Pressable, Button } from "react-native";
-import Text from "@kaloraat/react-native-text";
+import { ScrollView, StyleSheet, Text, View, Pressable} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import UserInput from "../components/UserInput";
+import { useFonts } from "expo-font";
 
 
 const Contracts = () => {
@@ -25,9 +25,12 @@ const Contracts = () => {
 
     const showDatepicker = () => { setShow(true) };
    
+    let [fontsLoad] = useFonts({
+        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
+    })
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, marginHorizontal: 10 }}>
-            <Text center title> Müqavilələr</Text>
+            <Text style={{textAlign: 'center', fontFamily: 'Medium', fontSize: 32}}> Müqavilələr</Text>
             <UserInput
                 name="Şirkətin adı"
                 value={name}
@@ -125,6 +128,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         letterSpacing: 0.25,
         color: 'white',
+        fontFamily: 'Medium'
     },
 });
 

@@ -1,10 +1,10 @@
 import axios from "axios";
-import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Pressable, Modal, LocationPicker } from "react-native";
-import Text from "@kaloraat/react-native-text"
 import UserInput from "./UserInput";
-import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from "react";
 import MapComponent from "./MapComponent";
+import { Ionicons } from '@expo/vector-icons';
+import { View, StyleSheet, ScrollView, Pressable, Modal, Text } from "react-native";
+import { useFonts } from "expo-font";
 
 
 const Legal = () => {
@@ -18,9 +18,13 @@ const Legal = () => {
     const closeModal = () => { setModalVisible(false) }
     const onDataReceived = (data) => { setAddress(data) }
 
+    let [fontsLoad] = useFonts({
+        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
+    })
+    
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
-            <Text center title style={{ marginBottom: 10 }}>Hüquqi şəxs</Text>
+            <Text style={{ marginBottom: 10, textAlign: 'center', fontSize: 32 }}>Hüquqi şəxs</Text>
             <View style={{ marginVertical: 10 }}>
                 <UserInput
                     name="S.A.A"
@@ -52,7 +56,7 @@ const Legal = () => {
                             autoCompleteType="text"
                             keyboardType="text"
                             onChangeText={(text => (setAddress(text)))}
-                            // editable={false}
+                        // editable={false}
                         />
                     </View>
                     <View style={{ marginTop: 20 }}>
@@ -83,6 +87,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         letterSpacing: 0.25,
         color: 'white',
+        fontFamily: 'Medium'
     },
 });
 
