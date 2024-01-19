@@ -4,10 +4,8 @@ import { ScrollView, Text } from "react-native";
 
 
 const Settings = () => {
-
-    let [fontsLoad] = useFonts({
-        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
-    })
+    let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
+    if (!fontsLoad) {  return null }
 
     return(
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 20 }}>

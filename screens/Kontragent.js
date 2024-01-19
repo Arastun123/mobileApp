@@ -8,17 +8,14 @@ import { useFonts } from "expo-font";
 
 const Kontragent = ({selectedLocation}) => {
     const [selectedType, setSelectedType] = useState(null);
+    let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
 
-    const handlePress = (type) => {
-        setSelectedType(type);
-    };
+    const handlePress = (type) => { setSelectedType(type) };
     
     const headers = ["№", "Tarix", "Növ"];
     const data = ["1", "09.01.24", "Satış"];
-    
-    let [fontsLoad] = useFonts({
-        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
-    })
+
+    if (!fontsLoad) {  return null }
     
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>

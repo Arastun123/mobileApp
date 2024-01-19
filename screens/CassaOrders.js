@@ -4,12 +4,12 @@ import Table from "../components/Table";
 import { useFonts } from "expo-font";
 
 const CassaOrders = () => {
+    let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
+
     const headers = ["№", "Ad", "Miqdar"]
     const data = ["1", "Monitor", 15]
 
-    let [fontsLoad] = useFonts({
-        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
-    })
+    if (!fontsLoad) {  return null }
 
     return(
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 25 }}>

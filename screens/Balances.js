@@ -1,15 +1,16 @@
 import React from "react";
 import { ScrollView, Text } from "react-native";
 import Table from "../components/Table";
+import { useFonts } from "expo-font";
 
 
 const Balances = () =>{
+    let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
+    
     const headers = ["№", "Ad", "Miqdar"];
     const data = ["1", "Kompüter", 10];
 
-    let [fontsLoad] = useFonts({
-        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
-    })
+    if (!fontsLoad) {  return null }
 
     return(
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15 }}>

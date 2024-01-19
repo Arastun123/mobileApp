@@ -8,12 +8,11 @@ import { useFonts } from "expo-font";
 const Stack = createNativeStackNavigator();
 
 const Orders = ({ navigation }) => {
+    let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
     const headers = ["№", "Tarix", "Müştəri", "Məbləğ"];
     const data = ["1", "09.01.24", "Me", "2000"];
-    
-    let [fontsLoad] = useFonts({
-        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
-    })
+
+    if (!fontsLoad) {  return null }
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>

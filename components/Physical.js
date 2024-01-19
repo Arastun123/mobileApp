@@ -7,19 +7,17 @@ import { useFonts } from "expo-font";
 
 
 const Physical = ({ selectedLocation }) => {
+    let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });    
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
     const [address, setAddress] = useState("");
     const [voen, setVoen] = useState("");
     const [isModalVisible, setModalVisible] = useState(false);
-
+    
+    if (!fontsLoad) {  return null }
     const handlePress = () => { setModalVisible(true) }
     const closeModal = () => { setModalVisible(false) }
     const onDataReceived = (data) => { setAddress(data) }
-
-    let [fontsLoad] = useFonts({
-        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
-    })
 
     return (
 

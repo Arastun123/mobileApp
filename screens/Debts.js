@@ -5,12 +5,13 @@ import { useFonts } from "expo-font";
 
 
 const Debst = () =>{
+    let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
+    
     const headers = ["№", "Şirkətin adı", "Məbləğ"]
     const data = ["1", "İrşad", 4300]
     
-    let [fontsLoad] = useFonts({
-        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
-    })
+    if (!fontsLoad) {  return null }
+
     return(
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15 }}>
             <Text style={{textAlign: 'center', fontFamily: 'Medium', fontSize: 32}}>Borclar</Text>

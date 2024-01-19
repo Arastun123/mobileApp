@@ -27,7 +27,7 @@ const UserInput = ({
                 value={value}
                 onChangeText={(text) => setValue(text)}
             />
-            
+
         </View>
     )
 }

@@ -3,15 +3,19 @@ import { View, StyleSheet, Pressable, TextInput, Text } from "react-native";
 import { useFonts } from "expo-font";
 
 const Table = ({ headers, data }) => {
-    const numColumns = 5;
+    let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
     const [rows, setRows] = useState([]);
+    const [inputData, setData] = useState([]);
+
+    if (!fontsLoad) {  return null }
+
+    const numColumns = 5;
 
     const addRow = () => {
         const newRow = Array(headers.length).fill('');
         setRows((prevRows) => [...prevRows, newRow]);
     };
 
-    const [inputData, setData] = useState([]);
     const handleInputChange = (rowIndex, header, value) => {
         const key = `${header}`;
         setData((prevData) => ({
@@ -19,10 +23,6 @@ const Table = ({ headers, data }) => {
             [key]: value,
         }));
     }
-   
-    let [fontsLoad] = useFonts({
-        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
-    })
 
     return (
         <View>
@@ -58,6 +58,7 @@ const Table = ({ headers, data }) => {
                                     onChangeText={(text) => handleInputChange(rowIndex, headers[cellIndex], text)}
                                     value={inputData[`${rowIndex}_${headers[cellIndex]}`]}
                                     style={{textAlign:'center'}}
+                                    keyboardType= {String(headers[cellIndex]) == "Məbləğ" | "Miqdar"     ? 'numeric' : 'text'}
                                 />
                             </View>
                         ))}

@@ -12,6 +12,8 @@ const Signin = ({ navigation }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
+
     const handleSubmit = async () => {
         setLoading(true);
         if (!email || !password) {
@@ -34,9 +36,7 @@ const Signin = ({ navigation }) => {
         }
     }
 
-    let [fontsLoad] = useFonts({
-        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
-    })
+    if (!fontsLoad) {  return null }
 
     return (
         <KeyboardAwareScrollView contentContainerStyle={{ flex: 1, justifyContent: 'center' }}>

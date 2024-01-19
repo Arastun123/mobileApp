@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, View, Pressable} from "react-native";
+import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import UserInput from "../components/UserInput";
@@ -16,21 +16,21 @@ const Contracts = () => {
     const [show, setShow] = useState(false);
 
     const onChange = (event, selectedDate) => {
-        // let currentDate = selectedDate || date;
+        let currentDate = selectedDate || date;
         setShow(Platform.OS === 'ios');
         let formattedDate = `${selectedDate.getDate()}.${selectedDate.getMonth() + 1}.${selectedDate.getFullYear()}`
         setDate(formattedDate)
-        console.log('formattedDate', formattedDate);
     };
 
     const showDatepicker = () => { setShow(true) };
-   
-    let [fontsLoad] = useFonts({
-        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
-    })
+
+    let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
+
+    if (!fontsLoad) {  return null }
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, marginHorizontal: 10 }}>
-            <Text style={{textAlign: 'center', fontFamily: 'Medium', fontSize: 32}}> Müqavilələr</Text>
+            <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Müqavilələr</Text>
             <UserInput
                 name="Şirkətin adı"
                 value={name}
@@ -100,7 +100,7 @@ const Contracts = () => {
                 </Pressable>
             </View>
             <Text>
-            {/* <Text>{JSON.stringify({ companyName, number, date, type, name, comment }, null, 4)}</Text> */}
+                {/* <Text>{JSON.stringify({ companyName, number, date, type, name, comment }, null, 4)}</Text> */}
             </Text>
         </ScrollView>
     )

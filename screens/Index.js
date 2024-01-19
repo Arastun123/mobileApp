@@ -3,14 +3,14 @@ import { Ionicons } from '@expo/vector-icons';
 import SearchBar from "../components/SearchBar";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, StyleSheet, TouchableOpacity, ScrollView, Text } from 'react-native';
-import {useFonts} from 'expo-font';
+import { useFonts } from 'expo-font';
 
 const Stack = createNativeStackNavigator();
 
 const Index = ({ navigation }) => {
-    let [fontsLoad] = useFonts({
-        'Medium': require('../assets/fonts/static/DancingScript-Medium.ttf')
-    })
+    let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
+
+    if (!fontsLoad) { return null; }
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15 }}>
             <View>
@@ -22,16 +22,16 @@ const Index = ({ navigation }) => {
                     <TouchableOpacity style={styles.buttonContainer}>
                         <Text onPress={() => navigation.navigate('Orders')} style={styles.buttonText}>  Müştəri sifarişlər </Text>
                     </TouchableOpacity>
-                    <View style={{ flexDirection:'row', justifyContent: 'space-around',}}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
                         <TouchableOpacity style={styles.buttonContainer}>
                             <Text onPress={() => navigation.navigate('Invoce')} style={styles.buttonText}> Qaimələr </Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.buttonContainer}>
-                            <Text onPress={() => navigation.navigate('Contracts')} style={styles.buttonText}>  {/* <Ionicons name="document" size={16} color="white" />  */} Müqavilələr </Text>
+                            <Text onPress={() => navigation.navigate('Kontragent')} style={styles.buttonText}> Kontragentlər </Text>
                         </TouchableOpacity>
                     </View>
                     <TouchableOpacity style={styles.buttonContainer}>
-                        <Text onPress={() => navigation.navigate('Kontragent')} style={styles.buttonText}> Kontragentlər </Text>
+                        <Text onPress={() => navigation.navigate('Contracts')} style={styles.buttonText}>  {/* <Ionicons name="document" size={16} color="white" />  */} Müqavilələr </Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.buttonContainer}>
                         <Text onPress={() => navigation.navigate('Nomenklatura')} style={styles.buttonText}> Nomenklatura </Text>
@@ -39,12 +39,14 @@ const Index = ({ navigation }) => {
                     <TouchableOpacity style={styles.buttonContainer}>
                         <Text onPress={() => navigation.navigate('CassaOrders')} style={styles.buttonText}> Kassa Orderləri </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.buttonContainer}>
-                        <Text onPress={() => navigation.navigate('Debts')} style={styles.buttonText}> Borclar / Qalıqlar </Text>
-                    </TouchableOpacity>
-                    {/* <TouchableOpacity style={styles.buttonContainer}>
-                    <Text medium center onPress={() => navigation.navigate('Balances')} style={styles.buttonText}> Qalıqlar </Text>
-                </TouchableOpacity> */}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
+                        <TouchableOpacity style={styles.buttonContainer}>
+                            <Text onPress={() => navigation.navigate('Debts')} style={styles.buttonText}> Borclar</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.buttonContainer}>
+                            <Text medium center onPress={() => navigation.navigate('Balances')} style={styles.buttonText}> Qalıqlar </Text>
+                        </TouchableOpacity>
+                    </View>
                     <TouchableOpacity style={styles.buttonContainer}>
                         <Text onPress={() => navigation.navigate('Settings')} style={styles.buttonText}>  <Ionicons name="settings" size={16} color="white" />  </Text>
                     </TouchableOpacity>
