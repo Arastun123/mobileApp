@@ -50,12 +50,6 @@ const Index = ({ navigation }) => {
                     <TouchableOpacity style={styles.buttonContainer}>
                         <Text onPress={() => navigation.navigate('Settings')} style={styles.buttonText}>  <Ionicons name="settings" size={16} color="white" />  </Text>
                     </TouchableOpacity>
-                    {/* <TouchableOpacity style={styles.buttonContainer}>
-                    <Text medium center onPress={() => navigation.navigate('Singin')} style={styles.buttonText}> Daxil ol </Text>
-                </TouchableOpacity> */}
-                    {/* <TouchableOpacity style={styles.buttonContainer}>
-                    <Text medium center onPress={() => navigation.navigate('Singup')} style={styles.buttonText}> Singup </Text>
-                </TouchableOpacity> */}
                 </View>
             </View>
         </ScrollView>
@@ -67,7 +61,8 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         paddingHorizontal: 20,
         borderRadius: 5,
-        margin: 5
+        margin: 5,
+        minWidth: 170
     },
     buttonText: {
         color: '#ffffff',

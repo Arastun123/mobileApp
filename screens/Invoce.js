@@ -16,10 +16,11 @@ const Invoce = () => {
     const [date, setDate] = useState(new Date());
     const [tableData, setTableData] = useState([]);
 
+    let count = 0;
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
 
     const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Məbləğ"];
-
+    
     useEffect(() => {
         const fetchDataAsync = async () => {
             try {
@@ -65,7 +66,6 @@ const Invoce = () => {
         setRowData((prevRows) => [...prevRows, newRow]);
     };
 
-
     const onChange = (event, selectedDate) => {
         let currentDate = selectedDate || date;
         setShow(Platform.OS === 'ios');
@@ -75,9 +75,9 @@ const Invoce = () => {
 
     const showDatepicker = () => { setShow(true) };
 
-    const apiUrl = 'http://192.168.88.41:3000/api/invoice';
-
+    
     const sendInvoiceData = async () => {
+        const apiUrl = 'http://192.168.88.41:3000/api/invoice';
         try {
             const postData = {
                 date: formatDateString(date),
@@ -89,7 +89,6 @@ const Invoce = () => {
                     price: row.price
                 }))
             };
-
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
@@ -98,16 +97,16 @@ const Invoce = () => {
                 body: JSON.stringify(postData),
             });
 
-            if (response.status === 200) Alert.alert('Success', 'Invoice data sent successfully!');
-            else Alert.alert('Error', 'Failed to send invoice data. Please try again.');
+            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
+            else Alert.alert('Uğursuz cəht!');
         } catch (error) {
-            console.error('Error sending invoice data:', error);
+            console.error(error);
         }
     };
 
     const formatDateString = (dateStr) => {
         const dateParts = dateStr.split('.');
-        return `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
+        return `${padStart(2, '0').padStart(2, '0')}-${dateParts[0].dateParts[2]}-${dateParts[1]}`;
     };
 
     return (
@@ -175,7 +174,7 @@ const Invoce = () => {
                         {data.map((item, rowIndex) => (
                             <View style={styles.row} key={rowIndex + 1}>
                                 <View style={styles.cell}>
-                                    <Text>{item.id}</Text>
+                                    <Text>{++count}</Text>
                                 </View>
                                 <View style={styles.cell}>
                                     <TextInput

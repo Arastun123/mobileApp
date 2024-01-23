@@ -8,8 +8,8 @@ export const fetchData = async () => {
         const response = await axios.get(`${apiUrl}/data`);
         return response.data;
     } catch (error) {
-        console.error('Error fetching data:', error);
-        throw error;
+        console.error(error);
+        // throw error;
     }
 };
 
