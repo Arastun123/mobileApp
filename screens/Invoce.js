@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, TextInput, StyleSheet, ScrollView, Pressable, Text } from 'react-native';
+import { View, TextInput, StyleSheet, ScrollView, Pressable, Text, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { fetchData } from '../services/Server';
-import axios from 'axios';
-
 
 const Invoce = () => {
     const [number, setNumber] = useState();
@@ -45,13 +43,13 @@ const Invoce = () => {
         });
 
         let updatedPrice = parseFloat(updatedRowData[rowIndex].price);
-        let updatedCount = parseFloat(updatedRowData[rowIndex].count);
+        let updatedCount = parseFloat(updatedRowData[rowIndex].quantity);
         let calculatedValue = updatedPrice * updatedCount;
         setAmount(calculatedValue);
         setRowData(updatedRowData);
     };
 
-    const totalPriceArray = tableData.map(product => product.price * product.count);
+    const totalPriceArray = tableData.map(product => product.price * product.quantity);
     let tableSum = totalPriceArray.reduce((acc, totalPrice) => acc + totalPrice, 0);
     let totalSum = tableSum + amount;
 
@@ -63,9 +61,10 @@ const Invoce = () => {
     const numColumns = 50;
 
     const addRow = () => {
-        const newRow = { name: '', count: '', price: '' };
+        const newRow = { product_name: '', count: '', price: '' };
         setRowData((prevRows) => [...prevRows, newRow]);
     };
+
 
     const onChange = (event, selectedDate) => {
         let currentDate = selectedDate || date;
@@ -76,17 +75,21 @@ const Invoce = () => {
 
     const showDatepicker = () => { setShow(true) };
 
-    const apiUrl = 'http://localhost:3000/api/invoice'; 
+    const apiUrl = 'http://192.168.88.41:3000/api/invoice';
 
     const sendInvoiceData = async () => {
         try {
             const postData = {
-                date: date,
+                date: formatDateString(date),
                 number: number,
                 customer: customer,
-                rowsData: rowData,
+                rowsData: rowData.map(row => ({
+                    product_name: row.product_name,
+                    quantity: row.quantity,
+                    price: row.price
+                }))
             };
-            
+
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
@@ -94,18 +97,18 @@ const Invoce = () => {
                 },
                 body: JSON.stringify(postData),
             });
-    
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-    
-            console.log('Response:', await response.json());
+
+            if (response.status === 200) Alert.alert('Success', 'Invoice data sent successfully!');
+            else Alert.alert('Error', 'Failed to send invoice data. Please try again.');
         } catch (error) {
-            console.error('Error sending invoice data:', error.message);
+            console.error('Error sending invoice data:', error);
         }
     };
-    
-    
+
+    const formatDateString = (dateStr) => {
+        const dateParts = dateStr.split('.');
+        return `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
+    };
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
@@ -176,16 +179,16 @@ const Invoce = () => {
                                 </View>
                                 <View style={styles.cell}>
                                     <TextInput
-                                        placeholder={item.name}
+                                        placeholder={item.product_name}
                                         keyboardType="text"
-                                        value={item.name}
+                                        value={item.product_name}
                                     />
                                 </View>
                                 <View style={styles.cell}>
                                     <TextInput
-                                        placeholder={String(item.count)}
+                                        placeholder={String(item.quantity)}
                                         keyboardType="numeric"
-                                        value={String(item.count)}
+                                        value={String(item.quantity)}
                                     />
                                 </View>
                                 <View style={styles.cell}>
@@ -196,7 +199,7 @@ const Invoce = () => {
                                     />
                                 </View>
                                 <View style={styles.cell}>
-                                    <Text>{item.price * item.count}</Text>
+                                    <Text>{item.price * item.quantity}</Text>
                                 </View>
                             </View>
                         ))}
@@ -210,16 +213,16 @@ const Invoce = () => {
                                 <TextInput
                                     placeholder='Malın adı'
                                     keyboardType="text"
-                                    value={rowData[rowIndex].name}
-                                    onChangeText={(text) => handleInputChange(text, rowIndex, 'name')}
+                                    value={rowData[rowIndex].product_name}
+                                    onChangeText={(text) => handleInputChange(text, rowIndex, 'product_name')}
                                 />
                             </View>
                             <View style={styles.cell}>
                                 <TextInput
                                     placeholder='Miqdar'
                                     keyboardType="numeric"
-                                    value={rowData[rowIndex].count}
-                                    onChangeText={(text) => handleInputChange(text, rowIndex, 'count')}
+                                    value={rowData[rowIndex].quantity}
+                                    onChangeText={(text) => handleInputChange(text, rowIndex, 'quantity')}
                                 />
                             </View>
                             <View style={styles.cell}>
