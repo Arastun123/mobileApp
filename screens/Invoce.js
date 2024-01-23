@@ -4,6 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { fetchData } from '../services/Server';
+import axios from 'axios';
 
 
 const Invoce = () => {
@@ -20,42 +21,15 @@ const Invoce = () => {
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
 
     const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Məbləğ"];
-    // const data = [
-    //     {
-    //         "id": 1,
-    //         "name": "Computer",
-    //         "count": 2,
-    //         "price": 2000,
-    //     },
-    //     {
-    //         "id": 2,
-    //         "name": "Phone",
-    //         "count": 1,
-    //         "price": 1800,
-    //     },
-    //     {
-    //         "id": 3,
-    //         "name": "Mouse",
-    //         "count": 3,
-    //         "price": 20,
-    //     },
-    //     {
-    //         "id": 4,
-    //         "name": "Monitor",
-    //         "count": 5,
-    //         "price": 150,
-    //     },
-    // ];
 
     useEffect(() => {
         const fetchDataAsync = async () => {
             try {
                 const result = await fetchData();
-                console.log(result);
                 setResData(result);
                 setTableData(result);
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error(error);
             }
         };
 
@@ -101,6 +75,37 @@ const Invoce = () => {
     };
 
     const showDatepicker = () => { setShow(true) };
+
+    const apiUrl = 'http://localhost:3000/api/invoice'; 
+
+    const sendInvoiceData = async () => {
+        try {
+            const postData = {
+                date: date,
+                number: number,
+                customer: customer,
+                rowsData: rowData,
+            };
+            
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(postData),
+            });
+    
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            console.log('Response:', await response.json());
+        } catch (error) {
+            console.error('Error sending invoice data:', error.message);
+        }
+    };
+    
+    
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
@@ -165,7 +170,7 @@ const Invoce = () => {
                     </View>
                     <View>
                         {data.map((item, rowIndex) => (
-                            <View style={styles.row} key={rowIndex}>
+                            <View style={styles.row} key={rowIndex + 1}>
                                 <View style={styles.cell}>
                                     <Text>{item.id}</Text>
                                 </View>
@@ -173,63 +178,63 @@ const Invoce = () => {
                                     <TextInput
                                         placeholder={item.name}
                                         keyboardType="text"
-                                        value={tableData[rowIndex].name}
+                                        value={item.name}
                                     />
                                 </View>
                                 <View style={styles.cell}>
                                     <TextInput
                                         placeholder={String(item.count)}
                                         keyboardType="numeric"
-                                        value={String(tableData[rowIndex].count)}
+                                        value={String(item.count)}
                                     />
                                 </View>
                                 <View style={styles.cell}>
                                     <TextInput
                                         placeholder={String(item.price)}
                                         keyboardType="numeric"
-                                        value={String(tableData[rowIndex].price)}
+                                        value={String(item.price)}
                                     />
                                 </View>
                                 <View style={styles.cell}>
-                                    <Text>{tableData[rowIndex].price * tableData[rowIndex].count}</Text>
+                                    <Text>{item.price * item.count}</Text>
                                 </View>
                             </View>
                         ))}
                     </View>
-                    {/* {rowData.map((row, rowIndex) => (
-                            <View style={styles.row} key={rowIndex}>
-                                <View style={styles.cell}>
-                                    <Text>{rowIndex + data.length + 1}</Text>
-                                </View>
-                                <View style={styles.cell}>
-                                    <TextInput
-                                        placeholder='Malın adı'
-                                        keyboardType="text"
-                                        value={rowData[rowIndex].name}
-                                        onChangeText={(text) => handleInputChange(text, rowIndex, 'name')}
-                                    />
-                                </View>
-                                <View style={styles.cell}>
-                                    <TextInput
-                                        placeholder='Miqdar'
-                                        keyboardType="numeric"
-                                        value={rowData[rowIndex].count}
-                                        onChangeText={(text) => handleInputChange(text, rowIndex, 'count')}
-                                    />
-                                </View>
-                                <View style={styles.cell}>
-                                    <TextInput
-                                        placeholder='Qiymət'
-                                        keyboardType="numeric"
-                                        value={rowData[rowIndex].price}
-                                        onChangeText={(text) => handleInputChange(text, rowIndex, 'price')}
-                                    />
-                                </View>
-                                <View style={styles.cell}>
-                                    <Text>{isNaN(amount) ? amount : 'Məbləğ'}</Text>
-                                </View>
+                    {rowData.map((row, rowIndex) => (
+                        <View style={styles.row} key={rowIndex}>
+                            <View style={styles.cell}>
+                                <Text>{rowIndex + data.length + 1}</Text>
                             </View>
-                        ))} */}
+                            <View style={styles.cell}>
+                                <TextInput
+                                    placeholder='Malın adı'
+                                    keyboardType="text"
+                                    value={rowData[rowIndex].name}
+                                    onChangeText={(text) => handleInputChange(text, rowIndex, 'name')}
+                                />
+                            </View>
+                            <View style={styles.cell}>
+                                <TextInput
+                                    placeholder='Miqdar'
+                                    keyboardType="numeric"
+                                    value={rowData[rowIndex].count}
+                                    onChangeText={(text) => handleInputChange(text, rowIndex, 'count')}
+                                />
+                            </View>
+                            <View style={styles.cell}>
+                                <TextInput
+                                    placeholder='Qiymət'
+                                    keyboardType="numeric"
+                                    value={rowData[rowIndex].price}
+                                    onChangeText={(text) => handleInputChange(text, rowIndex, 'price')}
+                                />
+                            </View>
+                            <View style={styles.cell}>
+                                <Text>{isNaN(amount) ? 'Məbləğ' : amount}</Text>
+                            </View>
+                        </View>
+                    ))}
                 </View>
             </View>
             <View style={{ alignItems: 'flex-end', margin: 10 }}>
@@ -238,7 +243,7 @@ const Invoce = () => {
                 <Text>Toplam: <Text>{wholeAmout}</Text></Text>
             </View>
             <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                <Pressable style={{ ...styles.button, width: 150 }} >
+                <Pressable style={{ ...styles.button, width: 150 }} onPress={sendInvoiceData}>
                     <Text style={styles.text}>Təsdiq et</Text>
                 </Pressable>
             </View>
