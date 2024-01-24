@@ -20,11 +20,11 @@ const Invoce = () => {
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
 
     const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Məbləğ"];
-    
+
     useEffect(() => {
         const fetchDataAsync = async () => {
             try {
-                const result = await fetchData();
+                const result = await fetchData('invoice');
                 setResData(result);
                 setTableData(result);
             } catch (error) {
@@ -66,16 +66,9 @@ const Invoce = () => {
         setRowData((prevRows) => [...prevRows, newRow]);
     };
 
-    const onChange = (event, selectedDate) => {
-        let currentDate = selectedDate || date;
-        setShow(Platform.OS === 'ios');
-        let formattedDate = `${selectedDate.getDate()}.${selectedDate.getMonth() + 1}.${selectedDate.getFullYear()}`
-        setDate(formattedDate)
-    };
 
     const showDatepicker = () => { setShow(true) };
 
-    
     const sendInvoiceData = async () => {
         const apiUrl = 'http://192.168.88.41:3000/api/invoice';
         try {
@@ -97,11 +90,17 @@ const Invoce = () => {
                 body: JSON.stringify(postData),
             });
 
-            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
+            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!'); 
             else Alert.alert('Uğursuz cəht!');
         } catch (error) {
             console.error(error);
         }
+    };
+    const onChange = (event, selectedDate) => {
+        let currentDate = selectedDate || date;
+        setShow(Platform.OS === 'ios');
+        let formattedDate = `${selectedDate.getDate()}.${selectedDate.getMonth() + 1}.${selectedDate.getFullYear()}`
+        setDate(formattedDate)
     };
 
     const formatDateString = (dateStr) => {
@@ -122,7 +121,7 @@ const Invoce = () => {
                         onChangeText={setDate}
                     />
                     <Pressable onPress={showDatepicker}>
-                        <Text> <Ionicons name="calendar" size={20} color="#333" /></Text>
+                        <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
                     </Pressable>
                     {show && (
                         <DateTimePicker
