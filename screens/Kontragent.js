@@ -1,19 +1,36 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, View, StyleSheet, Pressable, Text } from "react-native";
 import Table from "../components/Table";
 import Physical from "../components/Physical";
 import Legal from "../components/Legal";
 import { useFonts } from "expo-font";
+import { fetchData } from '../services/Server';
 
 
 const Kontragent = ({selectedLocation}) => {
     const [selectedType, setSelectedType] = useState(null);
+    const [resData, setData] = useState([]);
     let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
+
+    useEffect(() => {
+        const fetchDataAsync = async () => {
+            try {
+                const result = await fetchData('kontragent');
+                if (result !== null) {
+                    setData(result);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchDataAsync();
+    }, []);
 
     const handlePress = (type) => { setSelectedType(type) };
     
-    const headers = ["№", "Tarix", "Növ"];
-    const data = ["1", "09.01.24", "Satış"];
+    const headers = ["№","Adı", "Əlaqə nömrəsi", "Vöen", "Ünvan"];
+    const extractedData = resData.map((item) => [String(item.id), item.name, item.phone_number, item.tin, item.address]);
 
     if (!fontsLoad) {  return null }
     
@@ -35,7 +52,7 @@ const Kontragent = ({selectedLocation}) => {
 
             <View style={{ marginVertical: 10 }}> 
                 <Text style={{ marginBottom: 10, textAlign: 'center', fontSize: 24 }}>Müqavilələr</Text>
-                <Table data={data} headers={headers} />
+                <Table data={extractedData} headers={headers} />
             </View>
         </ScrollView>
     )

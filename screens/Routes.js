@@ -15,9 +15,9 @@ const Routes = ({ navigation }) => {
         const fetchDataAsync = async () => {
             try {
                 const result = await fetchData('routes');
-                // if (result !== null) {
+                if (result !== null) {
                     setData(result);
-                // }
+                }
             } catch (error) {
                 console.error(error);
             }
@@ -30,7 +30,6 @@ const Routes = ({ navigation }) => {
 
     const headers = ["№", "Tarix", "Ünvan"];
 
-    // console.log(extractedData);
     if (!fontsLoad) {  return null }
 
     return (

@@ -70,7 +70,7 @@ const Invoce = () => {
     const showDatepicker = () => { setShow(true) };
 
     const sendInvoiceData = async () => {
-        const apiUrl = 'http://192.168.88.41:3000/api/invoice';
+        const apiUrl = 'http://192.168.107.57:3000/api/invoice';
         try {
             const postData = {
                 date: formatDateString(date),
@@ -105,7 +105,7 @@ const Invoce = () => {
 
     const formatDateString = (dateStr) => {
         const dateParts = dateStr.split('.');
-        return `${padStart(2, '0').padStart(2, '0')}-${dateParts[0].dateParts[2]}-${dateParts[1]}`;
+        return `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
     };
 
     return (

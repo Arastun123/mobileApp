@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, ScrollView, StyleSheet, Pressable, Text, Modal } from "react-native";
 import { useFonts } from "expo-font";
 import { Ionicons } from '@expo/vector-icons';
 import UserInput from "../components/UserInput";
 import Table from "../components/Table";
 import DropDown from "../components/DropDown";
+import { fetchData } from '../services/Server';
 
 
 const Nomenklatura = () => {
@@ -14,26 +15,50 @@ const Nomenklatura = () => {
     const [brand, setBrand] = useState();
     const [price, setPrice] = useState();
     const [isModalVisible, setModalVisible] = useState(false);
+    const [resNomenklatura, setNomenklatura] = useState([]);
+    const [resKontragent, setKontragent] = useState([]);
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
 
-    if (!fontsLoad) {  return null }
-    
+    useEffect(() => {
+        const fetchDataAsync = async () => {
+            try {
+                const nomenklatura = await fetchData('nomenklatura');
+                if (result !== null) {
+                    setNomenklatura(nomenklatura);
+                }
+
+                const result = await fetchData('kontragent');
+                if (result !== null) {
+                    setKontragent(result);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchDataAsync();
+    }, []);
+
+    if (!fontsLoad) { return null }
+
     const handlePress = () => { setModalVisible(true) }
     const closeModal = () => { setModalVisible(false) }
 
-    const headers = ["№", "Tarix", "Müştəri", "Məbləğ"];
-    const data = ["1", "09.01.24", "Me", "2000"];
+    const headers = ["№", "Ad", "Növ"];
 
-    const nomenklatura = [
-        { label: 'Nomenklatura 1', value: 'Nomenklatura' },
-        { label: 'Nomenklatura 2', value: 'Nomenklatura' },
-        { label: 'Nomenklatura 3', value: 'Nomenklatura' },
-    ];
-    const kontragent = [
-        { label: 'Kontragent 1', value: 'Kontragent' },
-        { label: 'Kontragent 2', value: 'Kontragent' },
-        { label: 'Kontragent 3', value: 'Kontragent' },
-    ];
+    let extractedData = resNomenklatura.map((item) => [String(item.id), item.name, item.type]);
+
+    let kontragentOptions = resKontragent.map((item) => [String(item.id), item.name]);
+
+    let nomenklatura = extractedData.map(([id, name]) => ({
+        label: `${name}`,
+        value: name,
+    }));
+
+    let kontragent = kontragentOptions.map(([id, name]) => ({
+        label : name,
+        value: name,
+    }))
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
             <Text style={{ marginBottom: 10, textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Nomenklatura </Text>
@@ -93,7 +118,7 @@ const Nomenklatura = () => {
                     </Pressable>
                 </View>
             </Modal>
-            <Table headers={headers} data={data} />
+            <Table headers={headers} data={extractedData} />
             <View style={styles.table}>
                 <View style={styles.row}>
                     <View style={styles.cell}>
