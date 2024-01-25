@@ -23,7 +23,6 @@ const Kontragent = ({selectedLocation}) => {
                 console.error(error);
             }
         };
-
         fetchDataAsync();
     }, []);
 

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, TextInput, StyleSheet, ScrollView, Pressable, Text, Alert } from 'react-native';
+import { View, TextInput, StyleSheet, ScrollView, Pressable, Text, Alert, Modal } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { fetchData } from '../services/Server';
+import UserInput from '../components/UserInput';
 
 const Invoce = () => {
     const [number, setNumber] = useState();
@@ -15,6 +16,11 @@ const Invoce = () => {
     const [rowData, setRowData] = useState([]);
     const [date, setDate] = useState(new Date());
     const [tableData, setTableData] = useState([]);
+    const [isModalVisible, setModalVisible] = useState(false);
+
+    const [product, setProduct] = useState();
+    const [quantity, setQuanity] = useState();
+    const [price, setPrice] = useState();
 
     let count = 0;
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
@@ -66,21 +72,18 @@ const Invoce = () => {
         setRowData((prevRows) => [...prevRows, newRow]);
     };
 
-
     const showDatepicker = () => { setShow(true) };
 
     const sendInvoiceData = async () => {
-        const apiUrl = 'http://192.168.107.57:3000/api/invoice';
+        const apiUrl = 'http://192.168.190.57:3000/api/invoice';
         try {
             const postData = {
                 date: formatDateString(date),
                 number: number,
                 customer: customer,
-                rowsData: rowData.map(row => ({
-                    product_name: row.product_name,
-                    quantity: row.quantity,
-                    price: row.price
-                }))
+                product_name: product,
+                quantity: quantity,
+                price: price,
             };
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -90,12 +93,13 @@ const Invoce = () => {
                 body: JSON.stringify(postData),
             });
 
-            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!'); 
+            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
             else Alert.alert('Uğursuz cəht!');
         } catch (error) {
             console.error(error);
         }
     };
+
     const onChange = (event, selectedDate) => {
         let currentDate = selectedDate || date;
         setShow(Platform.OS === 'ios');
@@ -108,10 +112,101 @@ const Invoce = () => {
         return `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
     };
 
+    const handlePress = () => { setModalVisible(true) }
+    const closeModal = () => {
+        setModalVisible(false)
+        setCustomer()
+        setAmount()
+        setNumber()
+        setQuanity()
+        setPrice()
+    }
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}>Qaimələr</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
+                <Pressable style={{ ...styles.button, width: 250 }} onPress={handlePress}>
+                    <Text style={styles.text}>Yeni Qaimə əlavə et</Text>
+                </Pressable>
+            </View>
+            <Modal visible={isModalVisible} animationType="slide">
+                <View style={{ marginVertical: 10 }} >
+                    <View style={{ padding: 5 }}>
+                        <Text style={{ textAlign: 'right' }} onPress={closeModal} ><Ionicons name="close" size={24} color="red" /></Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <TextInput
+                                style={{ ...styles.input, width: 100 }}
+                                placeholder="Gün-Ay-İl"
+                                keyboardType="numeric"
+                                value={date}
+                                onChangeText={setDate}
+                            />
+                            <Pressable onPress={showDatepicker}>
+                                <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
+                            </Pressable>
+                            {show && (
+                                <DateTimePicker
+                                    testID="datePicker"
+                                    value={date}
+                                    mode="date"
+                                    is24Hour={true}
+                                    display="default"
+                                    // display="spinner"
+                                    onChange={onChange}
+                                />
+                            )}
+                        </View>
+                        <TextInput
+                            style={{ ...styles.input, width: 50 }}
+                            placeholder="№"
+                            keyboardType="numeric"
+                            value={number}
+                            onChangeText={setNumber}
+                        />
+                    </View>
+                    <TextInput
+                        style={{ ...styles.input, }}
+                        placeholder="Müştəri"
+                        keyboardType="text"
+                        value={customer}
+                        onChangeText={(text) => setCustomer(text)}
+                    />
+
+                    <TextInput
+                        style={{ ...styles.input, }}
+                        placeholder="Malın adı"
+                        keyboardType="text"
+                        value={product}
+                        onChangeText={(text) => setProduct(text)}
+                    />
+
+                    <TextInput
+                        style={{ ...styles.input, }}
+                        placeholder="Miqdarı"
+                        keyboardType="numeric"
+                        value={quantity}
+                        onChangeText={(text) => setQuanity(text)}
+                    />
+
+                    <TextInput
+                        style={{ ...styles.input, }}
+                        placeholder="Qiymət"
+                        keyboardType="numeric"
+                        value={price}
+                        onChangeText={(text) => setPrice(text)}
+                    />
+                    <Text > {isNaN(price && quantity) ? '...' : price * quantity}</Text>
+                </View>
+                <View style={{ alignItems: 'flex-end', margin: 10 }}>
+                    <Pressable style={{ ...styles.button, width: 150 }} onPress={sendInvoiceData}>
+                        <Text style={styles.text}>Təsdiq et</Text>
+                    </Pressable>
+                </View>
+            </Modal>
+            {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                     <TextInput
                         style={{ ...styles.input, width: 100 }}
@@ -152,7 +247,7 @@ const Invoce = () => {
                     onChangeText={setCustomer}
                     style={{ ...styles.input, width: 300 }}
                 />
-            </View>
+            </View> */}
             <View>
                 <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
                     <View>
@@ -244,7 +339,7 @@ const Invoce = () => {
                 <Text>Toplam: <Text>{wholeAmout}</Text></Text>
             </View>
             <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                <Pressable style={{ ...styles.button, width: 150 }} onPress={sendInvoiceData}>
+                <Pressable style={{ ...styles.button, width: 150 }} >
                     <Text style={styles.text}>Təsdiq et</Text>
                 </Pressable>
             </View>

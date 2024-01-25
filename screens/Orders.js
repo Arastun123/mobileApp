@@ -26,8 +26,6 @@ const Orders = ({ navigation }) => {
 
         fetchDataAsync();
     }, []);
-    
-    console.log(resData);
 
     const extractedData = resData.map((item) => [String(item.id), item.date, item.amount]);
 

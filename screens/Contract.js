@@ -45,7 +45,7 @@ const Contracts = () => {
                         value={number}
                         setValue={setNumber}
                         autoCompleteType="text"
-                        keyboardType="numric"
+                        keyboardType="numeric"
                     />
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -54,7 +54,7 @@ const Contracts = () => {
                         value={date}
                         setValue={setDate}
                         autoCompleteType="date"
-                        keyboardType="numric"
+                        keyboardType="numeric"
                     />
                     <Pressable onPress={showDatepicker}>
                         <Text> <Ionicons name="calendar" size={20} color="#333" /></Text>

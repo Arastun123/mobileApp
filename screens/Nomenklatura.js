@@ -11,26 +11,30 @@ import { fetchData } from '../services/Server';
 const Nomenklatura = () => {
     const [name, setName] = useState();
     const [type, setType] = useState();
-    const [catgeory, setCategory] = useState();
+    const [category, setCategory] = useState([]);
     const [brand, setBrand] = useState();
-    const [price, setPrice] = useState();
+    const [price, setPrice] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [resNomenklatura, setNomenklatura] = useState([]);
-    const [resKontragent, setKontragent] = useState([]);
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
 
     useEffect(() => {
         const fetchDataAsync = async () => {
             try {
                 const nomenklatura = await fetchData('nomenklatura');
-                if (result !== null) {
+                if (nomenklatura !== null) {
                     setNomenklatura(nomenklatura);
                 }
 
-                const result = await fetchData('kontragent');
-                if (result !== null) {
-                    setKontragent(result);
-                }
+                // const optionCategory = await fetchData('category');
+                // if (optionCategory !== null) {
+                //     setCategory(optionCategory);
+                // }
+
+                // const price = await fetchData('price');
+                // if (price !== null) {
+                //     setPrice(price);
+                // }
             } catch (error) {
                 console.error(error);
             }
@@ -48,17 +52,49 @@ const Nomenklatura = () => {
 
     let extractedData = resNomenklatura.map((item) => [String(item.id), item.name, item.type]);
 
-    let kontragentOptions = resKontragent.map((item) => [String(item.id), item.name]);
+    // let categorytOptions = category.map((item) => [String(item.id), item.name]);
 
-    let nomenklatura = extractedData.map(([id, name]) => ({
-        label: `${name}`,
-        value: name,
-    }));
 
-    let kontragent = kontragentOptions.map(([id, name]) => ({
-        label : name,
-        value: name,
-    }))
+    // let pricetOptions = price.map((item) => [String(item.id), item.price]);
+
+    // let allCategory = categorytOptions.map(([id, name]) => ({
+    //     label: `${name}`,
+    //     value: name,
+    // }));
+
+    // let priceSelect = pricetOptions.map(([id,price]) => ({
+    //     label: price,
+    //     value: price,
+    // }))
+
+    // const sendInvoiceData = async () => {
+    //     const apiUrl = 'http://192.168.190.57:3000/api/invoice';
+    //     try {
+    //         const postData = {
+    //             date: formatDateString(date),
+    //             number: number,
+    //             customer: customer,
+    //             rowsData: rowData.map(row => ({
+    //                 product_name: row.product_name,
+    //                 quantity: row.quantity,
+    //                 price: row.price
+    //             }))
+    //         };
+    //         const response = await fetch(apiUrl, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify(postData),
+    //         });
+
+    //         if (response.status === 200) Alert.alert('Məlumatlar göndərildi!'); 
+    //         else Alert.alert('Uğursuz cəht!');
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // };
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
             <Text style={{ marginBottom: 10, textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Nomenklatura </Text>
@@ -86,13 +122,16 @@ const Nomenklatura = () => {
                         autoCompleteType="text"
                         keyboardType="text"
                     />
+
                     <UserInput
                         name="Kateqoriya"
-                        value={catgeory}
+                        value={category}
                         setValue={setCategory}
                         autoCompleteType="text"
                         keyboardType="text"
                     />
+                    {/* <DropDown items={allCategory} placeholder={'Kateqoriya'} /> */}
+
                     <UserInput
                         name="Brend"
                         value={brand}
@@ -107,9 +146,10 @@ const Nomenklatura = () => {
                         autoCompleteType="numeric"
                         keyboardType="numeric"
                     />
+                    {/* <DropDown items={priceSelect} placeholder={'Qiymet'} /> */}
                     <View style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <DropDown items={nomenklatura} placeholder={'Nomenklatura'} />
-                        <DropDown items={kontragent} placeholder={'Kontragent'} />
+                        {/* <DropDown items={nomenklatura} placeholder={'Nomenklatura'} /> */}
+                        {/* <DropDown items={priceSelect} placeholder={'Kontragent'} /> */}
                     </View>
                 </View>
                 <View style={{ alignItems: 'flex-end', margin: 10 }}>

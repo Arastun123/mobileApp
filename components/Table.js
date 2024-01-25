@@ -52,7 +52,6 @@ const Table = ({ headers, data }) => {
                 ))}
                 {rows.map((row, rowIndex) => (
                     <View key={rowIndex} style={styles.row}>
-                        {console.log(row)}
                         {row.map((cell, cellIndex) => (
                             <View style={styles.cell} key={cellIndex}>
                                 <TextInput
