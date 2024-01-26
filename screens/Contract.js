@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import UserInput from "../components/UserInput";
 import { useFonts } from "expo-font";
+import { text } from "body-parser";
 
 
 const Contracts = () => {
@@ -14,6 +15,7 @@ const Contracts = () => {
     const [name, setName] = useState()
     const [comment, setComment] = useState()
     const [show, setShow] = useState(false);
+    let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
 
     const onChange = (event, selectedDate) => {
         let currentDate = selectedDate || date;
@@ -24,10 +26,33 @@ const Contracts = () => {
 
     const showDatepicker = () => { setShow(true) };
 
-    let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
-
     if (!fontsLoad) {  return null }
 
+    const sendData = async () => {
+        const apiUrl = 'http://192.168.88.41:3000/api/contract';
+        try {
+            const postData = {
+                name: name,
+                number: number,
+                date: date,
+                type: type,
+                companyName: companyName,
+                comment: comment
+            };
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(postData),
+            });
+
+            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
+            else Alert.alert('Uğursuz cəht!');
+        } catch (error) {
+            console.error(error);
+        }
+    };
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, marginHorizontal: 10 }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Müqavilələr</Text>
@@ -37,6 +62,7 @@ const Contracts = () => {
                 setValue={setCompanyName}
                 autoCompleteType="text"
                 keyboardType="text"
+                onChangeText = {(text) => setCompanyName(text)} 
             />
             <View style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
                 <View>
@@ -46,6 +72,7 @@ const Contracts = () => {
                         setValue={setNumber}
                         autoCompleteType="text"
                         keyboardType="numeric"
+                        onChangeText = {(text) => setNumber(text)}
                     />
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -55,6 +82,7 @@ const Contracts = () => {
                         setValue={setDate}
                         autoCompleteType="date"
                         keyboardType="numeric"
+                        onChangeText = {(text) => setDate(text)}
                     />
                     <Pressable onPress={showDatepicker}>
                         <Text> <Ionicons name="calendar" size={20} color="#333" /></Text>
@@ -78,6 +106,7 @@ const Contracts = () => {
                 setValue={setType}
                 autoCompleteType="text"
                 keyboardType="text"
+                onChangeText = { (text) => setType(text)}
             />
             <UserInput
                 name="Ad"
@@ -85,6 +114,7 @@ const Contracts = () => {
                 setValue={setName}
                 autoCompleteType="text"
                 keyboardType="text"
+                onChangeText = { (text) => setName(text)}
             />
             <UserInput
                 name="Şərh"
@@ -93,9 +123,10 @@ const Contracts = () => {
                 autoCompleteType="text"
                 keyboardType="text"
                 multiline
+                onChangeText = {(text) => setComment(text)}
             />
             <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                <Pressable style={{ ...styles.button, width: 150 }} >
+                <Pressable style={{ ...styles.button, width: 150 }} onPress={sendData}>
                     <Text style={styles.text}>Təsdiq et</Text>
                 </Pressable>
             </View>

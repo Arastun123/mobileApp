@@ -6,7 +6,6 @@ import Legal from "../components/Legal";
 import { useFonts } from "expo-font";
 import { fetchData } from '../services/Server';
 
-
 const Kontragent = ({selectedLocation}) => {
     const [selectedType, setSelectedType] = useState(null);
     const [resData, setData] = useState([]);

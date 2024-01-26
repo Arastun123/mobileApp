@@ -74,8 +74,8 @@ const Invoce = () => {
 
     const showDatepicker = () => { setShow(true) };
 
-    const sendInvoiceData = async () => {
-        const apiUrl = 'http://192.168.190.57:3000/api/invoice';
+    const sendData = async () => {
+        const apiUrl = 'http://192.168.88.41:3000/api/invoice';
         try {
             const postData = {
                 date: formatDateString(date),
@@ -131,7 +131,7 @@ const Invoce = () => {
                 </Pressable>
             </View>
             <Modal visible={isModalVisible} animationType="slide">
-                <View style={{ marginVertical: 10 }} >
+                <View style={{ margin: 10 }} >
                     <View style={{ padding: 5 }}>
                         <Text style={{ textAlign: 'right' }} onPress={closeModal} ><Ionicons name="close" size={24} color="red" /></Text>
                     </View>
@@ -174,7 +174,6 @@ const Invoce = () => {
                         value={customer}
                         onChangeText={(text) => setCustomer(text)}
                     />
-
                     <TextInput
                         style={{ ...styles.input, }}
                         placeholder="Malın adı"
@@ -182,7 +181,6 @@ const Invoce = () => {
                         value={product}
                         onChangeText={(text) => setProduct(text)}
                     />
-
                     <TextInput
                         style={{ ...styles.input, }}
                         placeholder="Miqdarı"
@@ -190,7 +188,6 @@ const Invoce = () => {
                         value={quantity}
                         onChangeText={(text) => setQuanity(text)}
                     />
-
                     <TextInput
                         style={{ ...styles.input, }}
                         placeholder="Qiymət"
@@ -198,10 +195,14 @@ const Invoce = () => {
                         value={price}
                         onChangeText={(text) => setPrice(text)}
                     />
-                    <Text > {isNaN(price && quantity) ? '...' : price * quantity}</Text>
+                    <View style={{ alignItems: 'flex-end', margin: 10 }}>
+                        <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{ isNaN(price) ? '000' : ((price * quantity) * 18) / 100}</Text></Text>
+                        <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{ isNaN(price) ? '000' :  (price * quantity) + ((price * quantity) * 18) / 100 }</Text></Text>
+                        <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(price) ? '000': price * quantity}</Text></Text>
+                    </View>
                 </View>
                 <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                    <Pressable style={{ ...styles.button, width: 150 }} onPress={sendInvoiceData}>
+                    <Pressable style={{ ...styles.button, width: 150 }} onPress={sendData}>
                         <Text style={styles.text}>Təsdiq et</Text>
                     </Pressable>
                 </View>

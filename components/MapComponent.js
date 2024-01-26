@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable, Text } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,7 +11,7 @@ const MapComponent = ({ closeModal, onDataReceived }) => {
     const [initialRegion, setInitialRegion] = useState(null);
     const [selectedLocation, setSelectedLocation] = useState(null);
     const [address, setAddress] = useState()
-
+    let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
     useEffect(() => {
         const getLocation = async () => {
             let { status } = await Location.requestForegroundPermissionsAsync();
@@ -35,22 +35,29 @@ const MapComponent = ({ closeModal, onDataReceived }) => {
     }, []);
 
     const findAddress = async () => {
+        if (!selectedLocation) {
+            // console.error("Selected location is null");
+            return;
+        }
+    
         let latitude = selectedLocation.latitude;
-        let longitude = selectedLocation.longitude
+        let longitude = selectedLocation.longitude;
+    
         try {
             const response = await axios.get(
                 `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
             );
-
+    
             const addressComponents = response.data.address || {};
             const formattedAddress = `${addressComponents.road || ''} ${addressComponents.house_number || ''}`;
-
-            setAddress(formattedAddress)
+    
+            setAddress(formattedAddress);
             return formattedAddress.trim();
         } catch (error) {
             console.error(error.message);
         }
     }
+    
     findAddress()
     const handleMapPress = (e) => {
         const { coordinate } = e.nativeEvent;
@@ -62,9 +69,7 @@ const MapComponent = ({ closeModal, onDataReceived }) => {
         closeModal();
     }
 
-    let [fontsLoad] = useFonts({
-        'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf')
-    })
+    
 
     return (
         <View style={{ flex: 1 }}>
