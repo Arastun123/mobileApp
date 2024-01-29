@@ -12,7 +12,7 @@ const Orders = ({ navigation }) => {
     const [resData, setData] = useState([]);
     let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
     const headers = ["№", "Tarix", "Məbləğ"];
-    // const data = ["1", "09.01.24", "Me", "2000"];
+    // const data = ["1", "09.01.24", "2000"];
 
     useEffect(() => {
         const fetchDataAsync = async () => {

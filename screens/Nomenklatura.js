@@ -130,8 +130,6 @@ const Nomenklatura = () => {
                         autoCompleteType="text"
                         keyboardType="text"
                     />
-                    {/* <DropDown items={allCategory} placeholder={'Kateqoriya'} /> */}
-
                     <UserInput
                         name="Brend"
                         value={brand}

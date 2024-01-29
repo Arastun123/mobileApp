@@ -7,7 +7,6 @@ import { useFonts } from "expo-font";
 // import { text } from "body-parser";
 
 
-
 const Contracts = () => {
     const [companyName, setCompanyName] = useState()
     const [number, setNumber] = useState()
@@ -54,10 +53,12 @@ const Contracts = () => {
             console.error(error);
         }
     };
+
     const formatDateString = (dateStr) => {
         const dateParts = dateStr.split('.');
         return `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
     };
+    
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, marginHorizontal: 10 }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Müqavilələr</Text>
@@ -135,9 +136,6 @@ const Contracts = () => {
                     <Text style={styles.text}>Təsdiq et</Text>
                 </Pressable>
             </View>
-            <Text>
-                {/* <Text>{JSON.stringify({ companyName, number, date, type, name, comment }, null, 4)}</Text> */}
-            </Text>
         </ScrollView>
     )
 }
