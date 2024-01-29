@@ -146,11 +146,11 @@ const Nomenklatura = () => {
                         autoCompleteType="numeric"
                         keyboardType="numeric"
                     />
-                    {/* <DropDown items={priceSelect} placeholder={'Qiymet'} /> */}
-                    <View style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        {/* <DropDown items={nomenklatura} placeholder={'Nomenklatura'} /> */}
-                        {/* <DropDown items={priceSelect} placeholder={'Kontragent'} /> */}
-                    </View>
+                    {/*<View style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <DropDown items={priceSelect} placeholder={'Qiymet'} />
+                        <DropDown items={nomenklatura} placeholder={'Nomenklatura'} />
+                        <DropDown items={priceSelect} placeholder={'Kontragent'} />
+                    </View>*/}
                 </View>
                 <View style={{ alignItems: 'flex-end', margin: 10 }}>
                     <Pressable style={{ ...styles.button, width: 150 }} >

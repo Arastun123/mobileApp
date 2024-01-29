@@ -31,6 +31,28 @@ const Orders = ({ navigation }) => {
 
     if (!fontsLoad) {  return null }
 
+    const sendData = async () => {
+        const apiUrl = 'http://192.168.88.41:3000/api/orders';
+        try {
+            const postData = {
+                date: formatDateString(date),
+                amount: amount,
+            };
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(postData),
+            });
+
+            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
+            else Alert.alert('Uğursuz cəht!');
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32}}> Sifarişlər </Text>

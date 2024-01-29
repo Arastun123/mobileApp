@@ -27,6 +27,29 @@ const CassaOrders = () => {
 
     if (!fontsLoad) { return null }
 
+    const sendData = async () => {
+        const apiUrl = 'http://192.168.88.41:3000/api/cassa_orders';
+        try {
+            const postData = {
+                date: formatDateString(date),
+                kontragentId: kontragentId,
+                amount: amount,
+            };
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(postData),
+            });
+
+            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
+            else Alert.alert('Uğursuz cəht!');
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 25 }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Kassa Orderləri </Text>

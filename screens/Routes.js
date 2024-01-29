@@ -26,11 +26,34 @@ const Routes = ({ navigation }) => {
         fetchDataAsync();
     }, []);
 
-    const extractedData = resData.map((item) => [String(item.id), item.address, item.date]);
+    const extractedData = resData.map((item) => [String(item.id), item.date, item.address,]);
 
     const headers = ["№", "Tarix", "Ünvan"];
 
     if (!fontsLoad) {  return null }
+
+    const sendData = async () => {
+        const apiUrl = 'http://192.168.88.41:3000/api/routes';
+        try {
+            const postData = {
+                date: formatDateString(date),
+                kontragentId: kontragentId,
+                amount: amount,
+            };
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(postData),
+            });
+
+            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
+            else Alert.alert('Uğursuz cəht!');
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>
