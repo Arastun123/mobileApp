@@ -5,12 +5,23 @@ import { useFonts } from 'expo-font';
 
 const Server = ({ navigation }) => {
     const [path, setPath] = useState();
+    const [connectionStatus, setConnectionStatus] = useState('');
+
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
 
     if (!fontsLoad) { return null; }
 
     const goServer = () => {
-        console.log(path);
+        if (!serverPath) {
+            alert('Please enter a server path');
+            return;
+        }
+        setConnectionStatus(`Connected to ${path}`);
+        fetch(`${path}/endpoint`)
+            .then(response => response.json())
+            .then(data => { console.log(data) })
+            .catch(error => { console.error('Error:', error) });
+            
     }
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15 }}>
