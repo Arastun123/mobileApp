@@ -4,7 +4,7 @@ import { View, StyleSheet, Pressable, ScrollView, Text, TextInput } from 'react-
 import { useFonts } from 'expo-font';
 
 const Server = ({ navigation }) => {
-    const [path, setPath] = useState();
+    const [path, setPath] = useState('https://jsonplaceholder.typicode.com');
     const [connectionStatus, setConnectionStatus] = useState('');
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
@@ -12,20 +12,20 @@ const Server = ({ navigation }) => {
     if (!fontsLoad) { return null; }
 
     const goServer = () => {
-        if (!serverPath) {
-            alert('Please enter a server path');
+        if (!path) {
+            alert('Server yolunu daxil edin');
             return;
         }
         setConnectionStatus(`Connected to ${path}`);
-        fetch(`${path}/endpoint`)
+        fetch(`${path}/todos/1`)
             .then(response => response.json())
             .then(data => { console.log(data) })
             .catch(error => { console.error('Error:', error) });
             
     }
     return (
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15 }}>
-            <Text style={styles.text}> Server</Text>
+        <ScrollView contentContainerStyle={{ marginVertical: 30 }}>
+            <Text style={{ ...styles.text, color: '#333', fontSize: 32, marginVertical: 10}}> Server</Text>
             <View>
                 <TextInput
                     placeholder='Server yolu'
@@ -54,9 +54,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         lineHeight: 21,
         fontWeight: 'bold',
-        letterSpacing: 0.25,
-        color: 'white',
-        fontFamily: 'Medium'
+        color: '#fff',
+        fontFamily: 'Medium',
+        textAlign: 'center'
     },
     button: {
         alignItems: 'center',

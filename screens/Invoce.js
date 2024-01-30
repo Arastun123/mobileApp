@@ -11,21 +11,19 @@ const Invoce = () => {
     const [amount, setAmount] = useState();
     const [data, setResData] = useState([]);
     const [show, setShow] = useState(false);
-    const [inputData, setData] = useState([]);
     const [customer, setCustomer] = useState();
+    const [units, setUnits] = useState();
     const [rowData, setRowData] = useState([]);
     const [date, setDate] = useState(new Date());
     const [tableData, setTableData] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
-
-    const [product, setProduct] = useState();
-    const [quantity, setQuanity] = useState();
-    const [price, setPrice] = useState();
+    const [formTable, setFormTable] = useState([]);
+    const [totalAmount, setTotalAmount] = useState(0);
 
     let count = 0;
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
 
-    const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Məbləğ"];
+    const headers = ["№", "Malın adı", "Miqdarı", "Ölçü vahidi", "Qiymət", "Məbləğ"];
 
     useEffect(() => {
         const fetchDataAsync = async () => {
@@ -41,31 +39,37 @@ const Invoce = () => {
         fetchDataAsync();
     }, []);
 
-    const handleInputChange = (text, rowIndex, fieldName) => {
-        const updatedRowData = rowData.map((row, index) => {
-            if (index === rowIndex) {
-                return { ...row, [fieldName]: text };
-            }
-            return row;
-        });
-
-        let updatedPrice = parseFloat(updatedRowData[rowIndex].price);
-        let updatedCount = parseFloat(updatedRowData[rowIndex].quantity);
-        let calculatedValue = updatedPrice * updatedCount;
-        setAmount(calculatedValue);
-        setRowData(updatedRowData);
+    const handleTableInputChange = (index, field, value) => {
+        const updatedFormTable = [...formTable];
+        const amount = quantity * price;
+        updatedFormTable[index] = {
+          ...updatedFormTable[index],
+          amount: amount.toFixed(2), 
+        };
+        setFormTable(updatedFormTable);
+        recalculateTotalAmount(updatedFormTable)
     };
 
-    const totalPriceArray = tableData.map(product => product.price * product.quantity);
-    let tableSum = totalPriceArray.reduce((acc, totalPrice) => acc + totalPrice, 0);
-    let totalSum = tableSum + amount;
+    const recalculateTotalAmount = (table) => {
+        const total = table.reduce((sum, item) => sum + parseFloat(item.amount), 0);
+        setTotalAmount(total.toFixed(2)); 
+      };
+      
 
-    if (isNaN(totalSum)) { totalSum = tableSum }
+    // const totalPriceArray = tableData.map(product => product.price * product.quantity);
+    // let tableSum = totalPriceArray.reduce((acc, totalPrice) => acc + totalPrice, 0);
+    // let totalSum = tableSum + amount;
 
-    let edv = (totalSum * 18) / 100;
-    let wholeAmout = totalSum + edv;
+    // if (isNaN(totalSum)) { totalSum = tableSum }
 
-    const numColumns = 50;
+    // let edv = (totalSum * 18) / 100;
+    // let wholeAmout = totalSum + edv;
+
+    // let totalSum = 0;
+    // let edv = 0;
+    // let wholeAmout = 0;
+    // const numColumns = 50;
+    let newCount = 0;
 
     const addRow = () => {
         const newRow = { product_name: '', count: '', price: '' };
@@ -81,9 +85,7 @@ const Invoce = () => {
                 date: formatDateString(date),
                 number: number,
                 customer: customer,
-                product_name: product,
-                quantity: quantity,
-                price: price,
+                formTable: formTable,
             };
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -93,8 +95,11 @@ const Invoce = () => {
                 body: JSON.stringify(postData),
             });
 
-            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
-            else Alert.alert('Uğursuz cəht!');
+            if (response.status === 200) {
+                Alert.alert('Məlumatlar göndərildi!');
+            } else {
+                Alert.alert('Uğursuz cəht!');
+            }
         } catch (error) {
             console.error(error);
         }
@@ -113,13 +118,12 @@ const Invoce = () => {
     };
 
     const handlePress = () => { setModalVisible(true) }
+
     const closeModal = () => {
         setModalVisible(false)
         setCustomer()
-        setAmount()
-        setNumber()
-        setQuanity()
-        setPrice()
+        setDate()
+        setFormTable()
     }
 
     return (
@@ -131,81 +135,142 @@ const Invoce = () => {
                 </Pressable>
             </View>
             <Modal visible={isModalVisible} animationType="slide">
-                <View style={{ margin: 10 }} >
-                    <View style={{ padding: 5 }}>
-                        <Text style={{ textAlign: 'right' }} onPress={closeModal} ><Ionicons name="close" size={24} color="red" /></Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <TextInput
-                                style={{ ...styles.input, width: 100 }}
-                                placeholder="Gün-Ay-İl"
-                                keyboardType="numeric"
-                                value={date}
-                                onChangeText={setDate}
-                            />
-                            <Pressable onPress={showDatepicker}>
-                                <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
-                            </Pressable>
-                            {show && (
-                                <DateTimePicker
-                                    testID="datePicker"
+                <ScrollView>
+
+                    <View style={{ margin: 10 }} >
+                        <View style={{ padding: 5 }}>
+                            <Text style={{ textAlign: 'right' }} onPress={closeModal} ><Ionicons name="close" size={24} color="red" /></Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <TextInput
+                                    style={{ ...styles.input, width: 100 }}
+                                    placeholder="Gün-Ay-İl"
+                                    keyboardType="numeric"
                                     value={date}
-                                    mode="date"
-                                    is24Hour={true}
-                                    display="default"
-                                    // display="spinner"
-                                    onChange={onChange}
+                                    onChangeText={setDate}
                                 />
-                            )}
+                                <Pressable onPress={showDatepicker}>
+                                    <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
+                                </Pressable>
+                                {show && (
+                                    <DateTimePicker
+                                        testID="datePicker"
+                                        value={date}
+                                        mode="date"
+                                        is24Hour={true}
+                                        display="default"
+                                        // display="spinner"
+                                        onChange={onChange}
+                                    />
+                                )}
+                            </View>
+                            <TextInput
+                                style={{ ...styles.input, width: 50 }}
+                                placeholder="№"
+                                keyboardType="numeric"
+                                value={number}
+                                onChangeText={setNumber}
+                            />
                         </View>
                         <TextInput
-                            style={{ ...styles.input, width: 50 }}
-                            placeholder="№"
-                            keyboardType="numeric"
-                            value={number}
-                            onChangeText={setNumber}
+                            style={{ ...styles.input, }}
+                            placeholder="Müştəri"
+                            keyboardType="text"
+                            value={customer}
+                            onChangeText={(text) => setCustomer(text)}
                         />
+                        {/* <View>
+                        <TextInput
+                            style={{ ...styles.input, }}
+                            placeholder="Malın adı"
+                            keyboardType="text"
+                            value={product}
+                            onChangeText={(text) => setProduct(text)}
+                        />
+                        <TextInput
+                            style={{ ...styles.input, }}
+                            placeholder="Miqdarı"
+                            keyboardType="numeric"
+                            value={quantity}
+                            onChangeText={(text) => setQuanity(text)}
+                        />
+                        <TextInput
+                            style={{ ...styles.input, }}
+                            placeholder="Qiymət"
+                            keyboardType="numeric"
+                            value={price}
+                            onChangeText={(text) => setPrice(text)}
+                        />
+                    </View> */}
                     </View>
-                    <TextInput
-                        style={{ ...styles.input, }}
-                        placeholder="Müştəri"
-                        keyboardType="text"
-                        value={customer}
-                        onChangeText={(text) => setCustomer(text)}
-                    />
-                    <TextInput
-                        style={{ ...styles.input, }}
-                        placeholder="Malın adı"
-                        keyboardType="text"
-                        value={product}
-                        onChangeText={(text) => setProduct(text)}
-                    />
-                    <TextInput
-                        style={{ ...styles.input, }}
-                        placeholder="Miqdarı"
-                        keyboardType="numeric"
-                        value={quantity}
-                        onChangeText={(text) => setQuanity(text)}
-                    />
-                    <TextInput
-                        style={{ ...styles.input, }}
-                        placeholder="Qiymət"
-                        keyboardType="numeric"
-                        value={price}
-                        onChangeText={(text) => setPrice(text)}
-                    />
+                    <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
+                        <View>
+                            <Pressable style={styles.button} onPress={addRow}>
+                                <Text style={styles.text}>+</Text>
+                            </Pressable>
+                        </View>
+                    </View>
+                    <View style={{ ...styles.row, marginHorizontal: 10 }}>
+                        {headers.map((header) => (
+                            <View style={styles.cell}>
+                                <Text bold center>{header}</Text>
+                            </View>
+                        ))}
+                    </View>
+                    {rowData.map((row, rowIndex) => (
+                        <View style={{ ...styles.row, marginHorizontal: 10 }} key={rowIndex}>
+                            <View style={styles.cell}>
+                                <Text>{++newCount}</Text>
+                            </View>
+                            <View style={styles.cell}>
+                                <TextInput
+                                    placeholder='Malın adı'
+                                    keyboardType="text"
+                                    value={formTable[rowIndex]?.product_name}
+                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'product_name', text)}
+                                />
+                            </View>
+                            <View style={styles.cell}>
+                                <TextInput
+                                    placeholder='Miqdar'
+                                    keyboardType="numeric"
+                                    value={formTable[rowIndex]?.quantity}
+                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'quantity', text)}
+                                />
+                            </View>
+                            <View style={styles.cell}>
+                                <TextInput
+                                    placeholder='Ölçü vahidi'
+                                    keyboardType="text"
+                                    value={formTable[rowIndex]?.units}
+                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'units', text)}
+                                />
+                            </View>
+                            <View style={styles.cell}>
+                                <TextInput
+                                    placeholder='Qiymət'
+                                    keyboardType="numeric"
+                                    value={formTable[rowIndex]?.price}
+                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'price', text)}
+                                />
+                            </View>
+                            <View style={styles.cell}>
+                                <Text>{amount}</Text>
+                            </View>
+                        </View>
+                    ))}
                     <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                        <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{ isNaN(price) ? '000' : ((price * quantity) * 18) / 100}</Text></Text>
-                        <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{ isNaN(price) ? '000' :  (price * quantity) + ((price * quantity) * 18) / 100 }</Text></Text>
-                        <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(price) ? '000': price * quantity}</Text></Text>
+                        <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(formTable.price) ? '000' : parseInt(formTable.price * formTable.quantity)}</Text></Text>
+                        <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(formTable.price) ? '000' : parseInt(((formTable.price * formTable.quantity) * 18) / 100)}</Text></Text>
+                        <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(formTable.price) ? '000' : parseInt((formTable.price * formTable.quantity) + ((formTable.price * formTable.quantity) * 18) / 100)}</Text></Text>
                     </View>
-                </View>
-                <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                    <Pressable style={{ ...styles.button, width: 150 }} onPress={sendData}>
-                        <Text style={styles.text}>Təsdiq et</Text>
-                    </Pressable>
-                </View>
+                    <View style={{ alignItems: 'flex-end', margin: 10 }}>
+                        <Pressable style={{ ...styles.button, width: 150 }} onPress={sendData}>
+                            <Text style={styles.text}>Təsdiq et</Text>
+                        </Pressable>
+                    </View>
+                </ScrollView>
             </Modal>
             {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -250,13 +315,6 @@ const Invoce = () => {
                 />
             </View> */}
             <View>
-                <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
-                    <View>
-                        <Pressable style={styles.button} onPress={addRow}>
-                            <Text style={styles.text}>+</Text>
-                        </Pressable>
-                    </View>
-                </View>
                 <View style={styles.table}>
                     <View style={styles.row}>
                         {headers.map((header) => (
@@ -287,6 +345,13 @@ const Invoce = () => {
                                 </View>
                                 <View style={styles.cell}>
                                     <TextInput
+                                        placeholder={item.units}
+                                        keyboardType="text"
+                                        value={item.units}
+                                    />
+                                </View>
+                                <View style={styles.cell}>
+                                    <TextInput
                                         placeholder={String(item.price)}
                                         keyboardType="numeric"
                                         value={String(item.price)}
@@ -298,52 +363,18 @@ const Invoce = () => {
                             </View>
                         ))}
                     </View>
-                    {rowData.map((row, rowIndex) => (
-                        <View style={styles.row} key={rowIndex}>
-                            <View style={styles.cell}>
-                                <Text>{rowIndex + data.length + 1}</Text>
-                            </View>
-                            <View style={styles.cell}>
-                                <TextInput
-                                    placeholder='Malın adı'
-                                    keyboardType="text"
-                                    value={rowData[rowIndex].product_name}
-                                    onChangeText={(text) => handleInputChange(text, rowIndex, 'product_name')}
-                                />
-                            </View>
-                            <View style={styles.cell}>
-                                <TextInput
-                                    placeholder='Miqdar'
-                                    keyboardType="numeric"
-                                    value={rowData[rowIndex].quantity}
-                                    onChangeText={(text) => handleInputChange(text, rowIndex, 'quantity')}
-                                />
-                            </View>
-                            <View style={styles.cell}>
-                                <TextInput
-                                    placeholder='Qiymət'
-                                    keyboardType="numeric"
-                                    value={rowData[rowIndex].price}
-                                    onChangeText={(text) => handleInputChange(text, rowIndex, 'price')}
-                                />
-                            </View>
-                            <View style={styles.cell}>
-                                <Text>{isNaN(amount) ? 'Məbləğ' : amount}</Text>
-                            </View>
-                        </View>
-                    ))}
                 </View>
             </View>
-            <View style={{ alignItems: 'flex-end', margin: 10 }}>
+            {/* <View style={{ alignItems: 'flex-end', margin: 10 }}>
                 <Text>Məbləğ: <Text>{isNaN(totalSum) ? tableSum : totalSum}</Text></Text>
                 <Text>Ədv:    <Text>{edv}</Text></Text>
                 <Text>Toplam: <Text>{wholeAmout}</Text></Text>
-            </View>
-            <View style={{ alignItems: 'flex-end', margin: 10 }}>
+            </View> */}
+            {/* <View style={{ alignItems: 'flex-end', margin: 10 }}>
                 <Pressable style={{ ...styles.button, width: 150 }} >
                     <Text style={styles.text}>Təsdiq et</Text>
                 </Pressable>
-            </View>
+            </View> */}
         </ScrollView>
     );
 }
