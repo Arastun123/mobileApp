@@ -29,7 +29,7 @@ const Contracts = () => {
     if (!fontsLoad) {  return null }
 
     const sendData = async () => {
-        const apiUrl = 'http://192.168.88.41:3000/api/contract';
+        const apiUrl = 'http://192.168.88.44:3000/api/contract';
         try {
             const postData = {
                 name: name,

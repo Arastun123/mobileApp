@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, Pressable, TextInput, Text } from "react-native";
 import { useFonts } from "expo-font";
 
@@ -10,10 +10,10 @@ const Table = ({ headers, data }) => {
     if (!fontsLoad) { return null }
     const numColumns = 5;
 
-    const addRow = () => {
-        const newRow = Array(headers.length).fill('');
-        setRows((prevRows) => [...prevRows, newRow]);
-    };
+    // const addRow = () => {
+    //     const newRow = Array(headers.length).fill('');
+    //     setRows((prevRows) => [...prevRows, newRow]);
+    // };
 
     const handleInputChange = (rowIndex, header, value) => {
         const key = `${header}`;
@@ -25,13 +25,13 @@ const Table = ({ headers, data }) => {
 
     return (
         <View>
-            <View style={{ flex: 1, justifyContent: 'end', marginVertical: 20, marginHorizontal: 10 }}>
+            {/* <View style={{ flex: 1, justifyContent: 'end', marginVertical: 20, marginHorizontal: 10 }}>
                 <View >
                     <Pressable style={{ ...styles.button, width: 50 }} onPress={addRow}>
                         <Text style={styles.text}>+</Text>
                     </Pressable>
                 </View>
-            </View>
+            </View> */}
             <View style={styles.table}>
 
                 <View style={styles.row}>

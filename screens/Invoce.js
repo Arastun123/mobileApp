@@ -4,26 +4,28 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { fetchData } from '../services/Server';
-import UserInput from '../components/UserInput';
+import { addRow, formatDateString } from '../services/Functions';
 
 const Invoce = () => {
     const [number, setNumber] = useState();
-    const [amount, setAmount] = useState();
     const [data, setResData] = useState([]);
     const [show, setShow] = useState(false);
     const [customer, setCustomer] = useState();
-    const [units, setUnits] = useState();
     const [rowData, setRowData] = useState([]);
     const [date, setDate] = useState(new Date());
     const [tableData, setTableData] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [formTable, setFormTable] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
-
-    let count = 0;
+    const [edv, setEdv] = useState(0);
+    const [wholeAmout, setWholeAmount] = useState(0);
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
 
-    const headers = ["№", "Malın adı", "Miqdarı", "Ölçü vahidi", "Qiymət", "Məbləğ"];
+    let count = 0;
+    let rowCount = 0;
+    const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
+    const showDatepicker = () => { setShow(true) };
+    const handlePress = () => { setModalVisible(true) }
 
     useEffect(() => {
         const fetchDataAsync = async () => {
@@ -40,49 +42,46 @@ const Invoce = () => {
     }, []);
 
     const handleTableInputChange = (index, field, value) => {
-        const updatedFormTable = [...formTable];
-        const amount = quantity * price;
+        let updatedFormTable = [...formTable];
+        let quantity = parseFloat(updatedFormTable[index]?.quantity) || 0;
+        let price = parseFloat(updatedFormTable[index]?.price) || 0;
+        let amount = (quantity * price).toFixed(2);
+
+        console.log('quantity', quantity, 'price', price, 'amount', amount);
+
         updatedFormTable[index] = {
-          ...updatedFormTable[index],
-          amount: amount.toFixed(2), 
+            ...updatedFormTable[index],
+            [field]: value,
+            amount: amount,
         };
-        setFormTable(updatedFormTable);
-        recalculateTotalAmount(updatedFormTable)
+
+        setFormTable((prevFormTable) => {
+            return updatedFormTable;
+        });
+        recalculateTotalAmount(updatedFormTable);
     };
 
     const recalculateTotalAmount = (table) => {
-        const total = table.reduce((sum, item) => sum + parseFloat(item.amount), 0);
-        setTotalAmount(total.toFixed(2)); 
-      };
-      
+        let totalAmount = table.reduce((sum, row) => {
+            let rowAmount = parseFloat(row.amount) || 0;
+            return sum + rowAmount;
+        }, 0);
 
-    // const totalPriceArray = tableData.map(product => product.price * product.quantity);
-    // let tableSum = totalPriceArray.reduce((acc, totalPrice) => acc + totalPrice, 0);
-    // let totalSum = tableSum + amount;
+        let edv = (totalAmount * 18) / 100;
+        let wholeAmount = edv + totalAmount;
 
-    // if (isNaN(totalSum)) { totalSum = tableSum }
-
-    // let edv = (totalSum * 18) / 100;
-    // let wholeAmout = totalSum + edv;
-
-    // let totalSum = 0;
-    // let edv = 0;
-    // let wholeAmout = 0;
-    // const numColumns = 50;
-    let newCount = 0;
-
-    const addRow = () => {
-        const newRow = { product_name: '', count: '', price: '' };
-        setRowData((prevRows) => [...prevRows, newRow]);
+        setTotalAmount(totalAmount.toFixed(2));
+        setEdv(edv.toFixed(2));
+        setWholeAmount(wholeAmount.toFixed(2));
     };
 
-    const showDatepicker = () => { setShow(true) };
+    const handleAddRow = () => { addRow(setRowData) };
 
     const sendData = async () => {
-        const apiUrl = 'http://192.168.88.41:3000/api/invoice';
+        const apiUrl = 'http://192.168.88.44:3000/api/invoice';
         try {
             const postData = {
-                date: formatDateString(date),
+                date: handleDate(date),
                 number: number,
                 customer: customer,
                 formTable: formTable,
@@ -112,18 +111,13 @@ const Invoce = () => {
         setDate(formattedDate)
     };
 
-    const formatDateString = (dateStr) => {
-        const dateParts = dateStr.split('.');
-        return `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
-    };
-
-    const handlePress = () => { setModalVisible(true) }
+    const handleDate = () => { formatDateString(dateStr) }
 
     const closeModal = () => {
         setModalVisible(false)
         setCustomer()
         setDate()
-        setFormTable()
+        setFormTable([])
     }
 
     return (
@@ -136,7 +130,6 @@ const Invoce = () => {
             </View>
             <Modal visible={isModalVisible} animationType="slide">
                 <ScrollView>
-
                     <View style={{ margin: 10 }} >
                         <View style={{ padding: 5 }}>
                             <Text style={{ textAlign: 'right' }} onPress={closeModal} ><Ionicons name="close" size={24} color="red" /></Text>
@@ -180,33 +173,10 @@ const Invoce = () => {
                             value={customer}
                             onChangeText={(text) => setCustomer(text)}
                         />
-                        {/* <View>
-                        <TextInput
-                            style={{ ...styles.input, }}
-                            placeholder="Malın adı"
-                            keyboardType="text"
-                            value={product}
-                            onChangeText={(text) => setProduct(text)}
-                        />
-                        <TextInput
-                            style={{ ...styles.input, }}
-                            placeholder="Miqdarı"
-                            keyboardType="numeric"
-                            value={quantity}
-                            onChangeText={(text) => setQuanity(text)}
-                        />
-                        <TextInput
-                            style={{ ...styles.input, }}
-                            placeholder="Qiymət"
-                            keyboardType="numeric"
-                            value={price}
-                            onChangeText={(text) => setPrice(text)}
-                        />
-                    </View> */}
                     </View>
                     <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
                         <View>
-                            <Pressable style={styles.button} onPress={addRow}>
+                            <Pressable style={styles.button} onPress={handleAddRow}>
                                 <Text style={styles.text}>+</Text>
                             </Pressable>
                         </View>
@@ -221,7 +191,7 @@ const Invoce = () => {
                     {rowData.map((row, rowIndex) => (
                         <View style={{ ...styles.row, marginHorizontal: 10 }} key={rowIndex}>
                             <View style={styles.cell}>
-                                <Text>{++newCount}</Text>
+                                <Text>{++rowCount}</Text>
                             </View>
                             <View style={styles.cell}>
                                 <TextInput
@@ -241,14 +211,6 @@ const Invoce = () => {
                             </View>
                             <View style={styles.cell}>
                                 <TextInput
-                                    placeholder='Ölçü vahidi'
-                                    keyboardType="text"
-                                    value={formTable[rowIndex]?.units}
-                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'units', text)}
-                                />
-                            </View>
-                            <View style={styles.cell}>
-                                <TextInput
                                     placeholder='Qiymət'
                                     keyboardType="numeric"
                                     value={formTable[rowIndex]?.price}
@@ -256,14 +218,24 @@ const Invoce = () => {
                                 />
                             </View>
                             <View style={styles.cell}>
-                                <Text>{amount}</Text>
+                                <TextInput
+                                    placeholder='Ölçü vahidi'
+                                    keyboardType="text"
+                                    value={formTable[rowIndex]?.units}
+                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'units', text)}
+                                />
+                            </View>
+                            <View style={styles.cell}>
+                                <Text>{
+                                    isNaN(!formTable[rowIndex]?.price & formTable[rowIndex]?.quantity) ? '000' : parseFloat(formTable[rowIndex]?.price * formTable[rowIndex]?.quantity)
+                                }</Text>
                             </View>
                         </View>
                     ))}
                     <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                        <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(formTable.price) ? '000' : parseInt(formTable.price * formTable.quantity)}</Text></Text>
-                        <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(formTable.price) ? '000' : parseInt(((formTable.price * formTable.quantity) * 18) / 100)}</Text></Text>
-                        <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(formTable.price) ? '000' : parseInt((formTable.price * formTable.quantity) + ((formTable.price * formTable.quantity) * 18) / 100)}</Text></Text>
+                        <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(totalAmount) ? '000' : totalAmount}</Text></Text>
+                        <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(edv) ? '000' : edv}</Text></Text>
+                        <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(wholeAmout) ? '000' : wholeAmout}</Text></Text>
                     </View>
                     <View style={{ alignItems: 'flex-end', margin: 10 }}>
                         <Pressable style={{ ...styles.button, width: 150 }} onPress={sendData}>
@@ -272,48 +244,6 @@ const Invoce = () => {
                     </View>
                 </ScrollView>
             </Modal>
-            {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <TextInput
-                        style={{ ...styles.input, width: 100 }}
-                        placeholder="Gün-Ay-İl"
-                        keyboardType="numeric"
-                        value={date}
-                        onChangeText={setDate}
-                    />
-                    <Pressable onPress={showDatepicker}>
-                        <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
-                    </Pressable>
-                    {show && (
-                        <DateTimePicker
-                            testID="datePicker"
-                            value={date}
-                            mode="date"
-                            is24Hour={true}
-                            display="default"
-                            // display="spinner"
-                            onChange={onChange}
-                        />
-                    )}
-                </View>
-                <TextInput
-                    style={{ ...styles.input, width: 50 }}
-                    placeholder="№"
-                    keyboardType="numeric"
-                    value={number}
-                    onChangeText={setNumber}
-                />
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                <TextInput
-                    placeholder="Müştəri"
-                    autoCompleteType="text"
-                    keyboardType="text"
-                    value={customer}
-                    onChangeText={setCustomer}
-                    style={{ ...styles.input, width: 300 }}
-                />
-            </View> */}
             <View>
                 <View style={styles.table}>
                     <View style={styles.row}>

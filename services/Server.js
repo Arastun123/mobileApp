@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 
-const apiUrl = 'http://192.168.88.41:3000/api';
+const apiUrl = 'http://192.168.88.44:3000/api';
 
 export const fetchData = async (tableName) => {
     try {

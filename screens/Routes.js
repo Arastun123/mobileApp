@@ -33,7 +33,7 @@ const Routes = ({ navigation }) => {
     if (!fontsLoad) {  return null }
 
     const sendData = async () => {
-        const apiUrl = 'http://192.168.88.41:3000/api/routes';
+        const apiUrl = 'http://192.168.88.44:3000/api/routes';
         try {
             const postData = {
                 date: formatDateString(date),

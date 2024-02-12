@@ -20,13 +20,14 @@ const Physical = ({ selectedLocation }) => {
     const onDataReceived = (data) => { setAddress(data) }
 
     const sendData = async () => {
-        const apiUrl = 'http://192.168.88.41:3000/api/kontragent';
+        const apiUrl = 'http://192.168.88.44:3000/api/kontragent';
         try {
             const postData = {
                 name: name,
                 phone_number: phone,
                 tin: tin,
                 address: address,
+                type: 'fiziki'
             };
             const response = await fetch(apiUrl, {
                 method: 'POST',

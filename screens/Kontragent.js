@@ -27,8 +27,8 @@ const Kontragent = ({ selectedLocation }) => {
 
     const handlePress = (type) => { setSelectedType(type) };
 
-    const headers = ["№", "Adı", "Əlaqə nömrəsi", "Vöen", "Ünvan"];
-    const extractedData = resData.map((item) => [String(item.id), item.name, item.phone_number, item.tin, item.address]);
+    const headers = ["№", "Adı", "Əlaqə nömrəsi", "Vöen", "Ünvan", "Növü"];
+    const extractedData = resData.map((item) => [String(item.id), item.name, item.phone_number, item.tin, item.address, item.type]);
 
     if (!fontsLoad) { return null }
 
