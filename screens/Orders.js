@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, Text, Modal, TextInput, Pressable, StyleSheet } from 'react-native';
+import { View, ScrollView, Text, Modal, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Table from "../components/Table";
@@ -17,8 +17,14 @@ const Orders = ({ navigation }) => {
     const [rowData, setRowData] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [date, setDate] = useState(new Date());
+    const [customer, setCustomer] = useState()
+    const [formTable, setFormTable] = useState([]);
+    const [totalAmount, setTotalAmount] = useState(0);
+    const [edv, setEdv] = useState(0);
+    const [wholeAmout, setWholeAmount] = useState(0);
+
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
-    const headers = ["№", "Malın adı", "Məbləğ", "Miqdarı"];
+    const headers = ["№","Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
     let rowCount = 0;
 
     useEffect(() => {
@@ -33,18 +39,51 @@ const Orders = ({ navigation }) => {
 
         fetchDataAsync();
     }, []);
-
-    const extractedData = resData.map((item) => [String(item.id), item.date, item.amount]);
+    const extractedData = resData.map((item) => [String(item.id), item.date, item.customer, item. product_name, item.price, item.quantity, item.units]);
 
     if (!fontsLoad) { return null }
+
+    const handleTableInputChange = (index, field, value) => {
+        let updatedFormTable = [...formTable];
+        let quantity = parseFloat(updatedFormTable[index]?.quantity) || 0;
+        let price = parseFloat(updatedFormTable[index]?.price) || 0;
+        let amount = (quantity * price).toFixed(2);
+
+        updatedFormTable[index] = {
+            ...updatedFormTable[index],
+            [field]: value,
+            // amount: amount,
+        };
+
+        setFormTable((prevFormTable) => {
+            return updatedFormTable;
+        });
+        recalculateTotalAmount(updatedFormTable);
+    };
+
+    const recalculateTotalAmount = (table) => {
+        let totalAmount = table.reduce((sum, row) => {
+            let rowAmount = parseFloat(row.amount) || 0;
+            return sum + rowAmount;
+        }, 0);
+
+        let edv = (totalAmount * 18) / 100;
+        let wholeAmount = edv + totalAmount;
+
+        setTotalAmount(totalAmount.toFixed(2));
+        setEdv(edv.toFixed(2));
+        setWholeAmount(wholeAmount.toFixed(2));
+    };
 
     const sendData = async () => {
         const apiUrl = 'http://192.168.88.44:3000/api/orders';
         try {
             const postData = {
-                date: handleDate(date),
-                amount: amount,
+                date: formatDateString(date),
+                customer: customer,
+                formTable: formTable,
             };
+            console.log(postData);
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
@@ -53,8 +92,11 @@ const Orders = ({ navigation }) => {
                 body: JSON.stringify(postData),
             });
 
-            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
-            else Alert.alert('Uğursuz cəht!');
+            if (response.status === 200) {
+                Alert.alert('Məlumatlar göndərildi!');
+            } else {
+                Alert.alert('Uğursuz cəht!');
+            }
         } catch (error) {
             console.error(error);
         }
@@ -68,7 +110,6 @@ const Orders = ({ navigation }) => {
     };
 
     const handleDate = () => { formatDateString(dateStr) }
-
     const handlePress = () => { setModalVisible(true) }
     const showDatepicker = () => { setShow(true) };
 
@@ -129,10 +170,9 @@ const Orders = ({ navigation }) => {
                             style={{ ...styles.input, }}
                             placeholder="Müştəri"
                             keyboardType="text"
-                        // value={customer}
-                        // onChangeText={(text) => setCustomer(text)}
+                            value={customer}
+                            onChangeText={(text) => setCustomer(text)}
                         />
-
                     </View>
                     <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
                         <View>
@@ -157,32 +197,45 @@ const Orders = ({ navigation }) => {
                                 <TextInput
                                     placeholder='Malın adı'
                                     keyboardType="text"
-                                // value={formTable[rowIndex]?.product_name}
-                                // onChangeText={(text) => handleTableInputChange(rowIndex, 'product_name', text)}
+                                    value={formTable[rowIndex]?.product_name}
+                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'product_name', text)}
                                 />
                             </View>
                             <View style={styles.cell}>
                                 <TextInput
                                     placeholder='Miqdar'
                                     keyboardType="numeric"
-                                // value={formTable[rowIndex]?.quantity}
-                                // onChangeText={(text) => handleTableInputChange(rowIndex, 'quantity', text)}
+                                    value={formTable[rowIndex]?.quantity}
+                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'quantity', text)}
                                 />
                             </View>
                             <View style={styles.cell}>
                                 <TextInput
                                     placeholder='Qiymət'
                                     keyboardType="numeric"
-                                // value={formTable[rowIndex]?.price}
-                                // onChangeText={(text) => handleTableInputChange(rowIndex, 'price', text)}
+                                    value={formTable[rowIndex]?.price}
+                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'price', text)}
                                 />
+                            </View>
+                            <View style={styles.cell}>
+                                <TextInput
+                                    placeholder='Ölçü vahidi'
+                                    keyboardType="text"
+                                    value={formTable[rowIndex]?.units}
+                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'units', text)}
+                                />
+                            </View>
+                            <View style={styles.cell}>
+                                <Text>{
+                                    isNaN(!formTable[rowIndex]?.price & formTable[rowIndex]?.quantity) ? '000' : parseFloat(formTable[rowIndex]?.price * formTable[rowIndex]?.quantity)
+                                }</Text>
                             </View>
                         </View>
                     ))}
                     <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                        {/* <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(totalAmount) ? '000' : totalAmount}</Text></Text> */}
-                        {/* <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(edv) ? '000' : edv}</Text></Text> */}
-                        {/* <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(wholeAmout) ? '000' : wholeAmout}</Text></Text> */}
+                        <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(totalAmount) ? '000' : totalAmount}</Text></Text>
+                        <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(edv) ? '000' : edv}</Text></Text>
+                        <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(wholeAmout) ? '000' : wholeAmout}</Text></Text>
                     </View>
                     <View style={{ alignItems: 'flex-end', margin: 10 }}>
                         <Pressable style={{ ...styles.button, width: 150 }} onPress={sendData}>

@@ -4,7 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import UserInput from "../components/UserInput";
 import { useFonts } from "expo-font";
-// import { text } from "body-parser";
+import { formatDateString } from '../services/Functions';
+
 
 
 const Contracts = () => {
@@ -34,7 +35,7 @@ const Contracts = () => {
             const postData = {
                 name: name,
                 number: number,
-                date: formatDateString(date),
+                date: handleDate(date),
                 type: type,
                 company_name: companyName,
                 comment: comment
@@ -54,10 +55,8 @@ const Contracts = () => {
         }
     };
 
-    const formatDateString = (dateStr) => {
-        const dateParts = dateStr.split('.');
-        return `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
-    };
+    const handleDate = () => { formatDateString(dateStr) }
+
     
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, marginHorizontal: 10 }}>
