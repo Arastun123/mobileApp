@@ -10,11 +10,6 @@ const Table = ({ headers, data }) => {
     if (!fontsLoad) { return null }
     const numColumns = 5;
 
-    // const addRow = () => {
-    //     const newRow = Array(headers.length).fill('');
-    //     setRows((prevRows) => [...prevRows, newRow]);
-    // };
-
     const handleInputChange = (rowIndex, header, value) => {
         const key = `${header}`;
         setData((prevData) => ({
@@ -23,6 +18,7 @@ const Table = ({ headers, data }) => {
         }));
     }
 
+    let count = 0;
     return (
         <View>
             {/* <View style={{ flex: 1, justifyContent: 'end', marginVertical: 20, marginHorizontal: 10 }}>
@@ -42,7 +38,7 @@ const Table = ({ headers, data }) => {
                     ))}
                 </View>
                 {data.map((row, rowIndex) => (
-                    <View key={rowIndex} style={styles.row}>
+                    <View key={rowIndex} style={styles.row}>                        
                         {row.map((cell, cellIndex) => (
                             <View style={styles.cell} key={cellIndex}>
                                 <Text style={styles.cellText}>{cell}</Text>

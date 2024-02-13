@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, StyleSheet, Pressable, Text, Modal } from "react-native";
+import { View, ScrollView, StyleSheet, Pressable, Text, Modal, Alert } from "react-native";
 import { useFonts } from "expo-font";
 import { Ionicons } from '@expo/vector-icons';
 import UserInput from "../components/UserInput";
@@ -10,7 +10,7 @@ import { fetchData } from '../services/Server';
 
 const Nomenklatura = () => {
     const [name, setName] = useState();
-    const [type, setType] = useState();
+    const [kind, setKind] = useState();
     const [category, setCategory] = useState([]);
     const [brand, setBrand] = useState();
     const [price, setPrice] = useState([]);
@@ -46,57 +46,46 @@ const Nomenklatura = () => {
     if (!fontsLoad) { return null }
 
     const handlePress = () => { setModalVisible(true) }
-    const closeModal = () => { setModalVisible(false) }
+    const closeModal = () => { 
+        setModalVisible(false) 
+        setName()
+        setCategory()
+        setBrand()
+        setPrice()
+        setKind()
+    }
 
-    const headers = ["№", "Ad", "Növ"];
+    const headers = ["№", "Ad", "Növ", 'Kateqoriya', 'Brend', 'Qiymət'];
 
-    let extractedData = resNomenklatura.map((item) => [String(item.id), item.name, item.type]);
+    let extractedData = resNomenklatura.map((item) => [String(item.id), item.name, item.kind, item.brand, item.category, item.price]);
 
-    // let categorytOptions = category.map((item) => [String(item.id), item.name]);
+    const sendData = async () => {
+        const apiUrl = 'http://192.168.88.44:3000/api/nomenklatura';
+        try {
+            const postData = {
+                name: name,
+                category: category,
+                brand: brand,
+                price: price,
+                kind: kind, 
+            };
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(postData),
+            });
 
-
-    // let pricetOptions = price.map((item) => [String(item.id), item.price]);
-
-    // let allCategory = categorytOptions.map(([id, name]) => ({
-    //     label: `${name}`,
-    //     value: name,
-    // }));
-
-    // let priceSelect = pricetOptions.map(([id,price]) => ({
-    //     label: price,
-    //     value: price,
-    // }))
-
-    // const sendInvoiceData = async () => {
-    //     const apiUrl = 'http://192.168.190.57:3000/api/invoice';
-    //     try {
-    //         const postData = {
-    //             date: formatDateString(date),
-    //             number: number,
-    //             customer: customer,
-    //             rowsData: rowData.map(row => ({
-    //                 product_name: row.product_name,
-    //                 quantity: row.quantity,
-    //                 price: row.price
-    //             }))
-    //         };
-    //         const response = await fetch(apiUrl, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify(postData),
-    //         });
-
-    //         if (response.status === 200) Alert.alert('Məlumatlar göndərildi!'); 
-    //         else Alert.alert('Uğursuz cəht!');
-    //     } catch (error) {
-    //         console.error(error);
-    //     }
-    // };
+            if (response.status === 200)  Alert.alert('Məlumatlar göndərildi!');
+            else Alert.alert('Uğursuz cəht!');
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     return (
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
+        <ScrollView contentContainerStyle={{ paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
             <Text style={{ marginBottom: 10, textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Nomenklatura </Text>
             <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
                 <Pressable style={{ ...styles.button, width: 250 }} onPress={handlePress}>
@@ -104,7 +93,7 @@ const Nomenklatura = () => {
                 </Pressable>
             </View>
             <Modal visible={isModalVisible} animationType="slide">
-                <View style={{ marginVertical: 10 }} >
+                <ScrollView contentContainerStyle={{ marginVertical: 10 }} >
                     <View style={{ padding: 5 }}>
                         <Text style={{ textAlign: 'right' }} onPress={closeModal} ><Ionicons name="close" size={24} color="red" /></Text>
                     </View>
@@ -117,12 +106,11 @@ const Nomenklatura = () => {
                     />
                     <UserInput
                         name="Növ"
-                        value={type}
-                        setValue={setType}
+                        value={kind}
+                        setValue={setKind}
                         autoCompleteType="text"
                         keyboardType="text"
                     />
-
                     <UserInput
                         name="Kateqoriya"
                         value={category}
@@ -149,9 +137,9 @@ const Nomenklatura = () => {
                         <DropDown items={nomenklatura} placeholder={'Nomenklatura'} />
                         <DropDown items={priceSelect} placeholder={'Kontragent'} />
                     </View>*/}
-                </View>
+                </ScrollView>
                 <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                    <Pressable style={{ ...styles.button, width: 150 }} >
+                    <Pressable style={{ ...styles.button, width: 150 }} onPress={sendData}>
                         <Text style={styles.text}>Təsdiq et</Text>
                     </Pressable>
                 </View>

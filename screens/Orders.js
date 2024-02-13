@@ -24,7 +24,8 @@ const Orders = ({ navigation }) => {
     const [wholeAmout, setWholeAmount] = useState(0);
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
-    const headers = ["№","Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
+    const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
+    const mainHeaders = ["№","Tarix","Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
     let rowCount = 0;
 
     useEffect(() => {
@@ -244,7 +245,7 @@ const Orders = ({ navigation }) => {
                     </View>
                 </ScrollView>
             </Modal>
-            <Table headers={headers} data={extractedData} />
+            <Table headers={mainHeaders} data={extractedData} />
         </ScrollView >
     )
 

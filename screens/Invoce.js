@@ -33,6 +33,7 @@ const Invoce = () => {
                 const result = await fetchData('invoice');
                 setResData(result);
                 setTableData(result);
+
             } catch (error) {
                 console.error(error);
             }
@@ -81,24 +82,19 @@ const Invoce = () => {
         const apiUrl = 'http://192.168.88.44:3000/api/invoice';
         try {
             const postData = {
-                date: handleDate(date),
+                date: formatDateString(date),
                 number: number,
                 customer: customer,
                 formTable: formTable,
             };
             const response = await fetch(apiUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: {'Content-Type': 'application/json',},
                 body: JSON.stringify(postData),
             });
 
-            if (response.status === 200) {
-                Alert.alert('Məlumatlar göndərildi!');
-            } else {
-                Alert.alert('Uğursuz cəht!');
-            }
+            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
+            else Alert.alert('Uğursuz cəht!');
         } catch (error) {
             console.error(error);
         }

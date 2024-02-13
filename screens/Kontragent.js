@@ -34,24 +34,24 @@ const Kontragent = ({ selectedLocation }) => {
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
-                    <Text style={{ marginBottom: 10, textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}>Kontragent</Text>
-                    <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 10 }}>
-                        <Pressable style={{ ...styles.button, width: 150 }} onPress={() => handlePress('fiziki')}>
-                            <Text style={styles.text}>Fiziki şəxs</Text>
-                        </Pressable>
+            <Text style={{ marginBottom: 10, textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}>Kontragent</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 10 }}>
+                <Pressable style={{ ...styles.button, width: 150 }} onPress={() => handlePress('fiziki')}>
+                    <Text style={styles.text}>Fiziki şəxs</Text>
+                </Pressable>
 
-                        <Pressable style={{ ...styles.button, width: 150 }} onPress={() => handlePress('huquqi')}>
-                            <Text style={styles.text}>Hüquqi şəxs</Text>
-                        </Pressable>
-                    </View>
+                <Pressable style={{ ...styles.button, width: 150 }} onPress={() => handlePress('huquqi')}>
+                    <Text style={styles.text}>Hüquqi şəxs</Text>
+                </Pressable>
+            </View>
 
-                    {selectedType === 'fiziki' && <Physical selectedLocation={selectedLocation} />}
-                    {selectedType === 'huquqi' && <Legal selectedLocation={selectedLocation} />}
+            {selectedType === 'fiziki' && <Physical selectedLocation={selectedLocation} />}
+            {selectedType === 'huquqi' && <Legal selectedLocation={selectedLocation} />}
 
-                    <View style={{ marginVertical: 10 }}> 
-                        <Text style={{ marginBottom: 10, textAlign: 'center', fontSize: 24 }}>Müqavilələr</Text>
-                        <Table data={extractedData} headers={headers} />
-                    </View>
+            <View style={{ marginVertical: 10 }}>
+                <Text style={{ marginBottom: 10, textAlign: 'center', fontSize: 24 }}>Müqavilələr</Text>
+                <Table data={extractedData} headers={headers} />
+            </View>
         </ScrollView>
     )
 }
