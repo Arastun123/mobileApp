@@ -7,6 +7,7 @@ import { useFonts } from "expo-font";
 import { fetchData } from '../services/Server';
 import { Ionicons } from '@expo/vector-icons';
 import { addRow, formatDateString } from '../services/Functions';
+import { sendRequest } from '../services/Server';
 
 
 const Stack = createNativeStackNavigator();
@@ -77,31 +78,20 @@ const Orders = ({ navigation }) => {
     };
 
     const sendData = async () => {
-        const apiUrl = 'http://192.168.88.44:3000/api/orders';
-        try {
-            const postData = {
-                date: formatDateString(date),
-                customer: customer,
-                formTable: formTable,
-            };
-            console.log(postData);
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(postData),
-            });
+        let apiUrl = '/orders'
+        const postData = {
+            date: formatDateString(date),
+            customer: customer,
+            formTable: formTable,
+        };
+        const result = await sendRequest(apiUrl, postData);
 
-            if (response.status === 200) {
-                Alert.alert('Məlumatlar göndərildi!');
-            } else {
-                Alert.alert('Uğursuz cəht!');
-            }
-        } catch (error) {
-            console.error(error);
+        if (result.success) {
+            Alert.alert(result.message);
+        } else {
+            Alert.alert(result.message);
         }
-    };
+    }
 
     const onChange = (event, selectedDate) => {
         let currentDate = selectedDate || date;
@@ -113,13 +103,12 @@ const Orders = ({ navigation }) => {
     const handleDate = () => { formatDateString(dateStr) }
     const handlePress = () => { setModalVisible(true) }
     const showDatepicker = () => { setShow(true) };
+    const handleAddRow = () => { addRow(setRowData) };
 
     const closeModal = () => {
         setModalVisible(false)
         setDate()
     }
-
-    const handleAddRow = () => { addRow(setRowData) };
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>

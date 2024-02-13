@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { fetchData } from '../services/Server';
 import { addRow, formatDateString } from '../services/Functions';
+import { sendRequest } from '../services/Server';
 
 const Invoce = () => {
     const [number, setNumber] = useState();
@@ -47,9 +48,6 @@ const Invoce = () => {
         let quantity = parseFloat(updatedFormTable[index]?.quantity) || 0;
         let price = parseFloat(updatedFormTable[index]?.price) || 0;
         let amount = (quantity * price).toFixed(2);
-
-        console.log('quantity', quantity, 'price', price, 'amount', amount);
-
         updatedFormTable[index] = {
             ...updatedFormTable[index],
             [field]: value,
@@ -77,28 +75,24 @@ const Invoce = () => {
     };
 
     const handleAddRow = () => { addRow(setRowData) };
-
+    
     const sendData = async () => {
-        const apiUrl = 'http://192.168.88.44:3000/api/invoice';
-        try {
-            const postData = {
-                date: formatDateString(date),
-                number: number,
-                customer: customer,
-                formTable: formTable,
-            };
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json',},
-                body: JSON.stringify(postData),
-            });
+        let apiUrl = '/invoice'
+        const postData = {
+            date: formatDateString(date),
+            number: number,
+            customer: customer,
+            formTable: formTable,
+        };
 
-            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
-            else Alert.alert('Uğursuz cəht!');
-        } catch (error) {
-            console.error(error);
+        const result = await sendRequest(apiUrl, postData);
+
+        if (result.success) {
+            Alert.alert(result.message);
+        } else {
+            Alert.alert(result.message);
         }
-    };
+    }
 
     const onChange = (event, selectedDate) => {
         let currentDate = selectedDate || date;

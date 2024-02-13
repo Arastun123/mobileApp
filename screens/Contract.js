@@ -5,7 +5,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import UserInput from "../components/UserInput";
 import { useFonts } from "expo-font";
 import { formatDateString } from '../services/Functions';
-
+import { sendRequest } from '../services/Server';
 
 
 const Contracts = () => {
@@ -16,7 +16,7 @@ const Contracts = () => {
     const [name, setName] = useState()
     const [comment, setComment] = useState()
     const [show, setShow] = useState(false);
-    let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
+    let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
 
     const onChange = (event, selectedDate) => {
         let currentDate = selectedDate || date;
@@ -27,37 +27,31 @@ const Contracts = () => {
 
     const showDatepicker = () => { setShow(true) };
 
-    if (!fontsLoad) {  return null }
+    if (!fontsLoad) { return null }
 
     const sendData = async () => {
-        const apiUrl = 'http://192.168.88.44:3000/api/contract';
-        try {
-            const postData = {
-                name: name,
-                number: number,
-                date: handleDate(date),
-                type: type,
-                company_name: companyName,
-                comment: comment
-            };
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(postData),
-            });
+        let apiUrl = '/contract'
+        const postData = {
+            name: name,
+            number: number,
+            date: formatDateString(date),
+            type: type,
+            company_name: companyName,
+            comment: comment
+        };
 
-            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
-            else Alert.alert('Uğursuz cəht!');
-        } catch (error) {
-            console.error(error);
+        const result = await sendRequest(apiUrl, postData);
+
+        if (result.success) {
+            Alert.alert(result.message);
+        } else {
+            Alert.alert(result.message);
         }
     };
 
     const handleDate = () => { formatDateString(dateStr) }
 
-    
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, marginHorizontal: 10 }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Müqavilələr</Text>
@@ -67,7 +61,7 @@ const Contracts = () => {
                 setValue={setCompanyName}
                 autoCompleteType="text"
                 keyboardType="text"
-                onChangeText = {(text) => setCompanyName(text)} 
+                onChangeText={(text) => setCompanyName(text)}
             />
             <View style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
                 <View>
@@ -77,7 +71,7 @@ const Contracts = () => {
                         setValue={setNumber}
                         autoCompleteType="text"
                         keyboardType="numeric"
-                        onChangeText = {(text) => setNumber(text)}
+                        onChangeText={(text) => setNumber(text)}
                     />
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -87,7 +81,7 @@ const Contracts = () => {
                         setValue={setDate}
                         autoCompleteType="date"
                         keyboardType="numeric"
-                        onChangeText = {(text) => setDate(text)}
+                        onChangeText={(text) => setDate(text)}
                     />
                     <Pressable onPress={showDatepicker}>
                         <Text> <Ionicons name="calendar" size={20} color="#333" /></Text>
@@ -111,7 +105,7 @@ const Contracts = () => {
                 setValue={setType}
                 autoCompleteType="text"
                 keyboardType="text"
-                onChangeText = { (text) => setType(text)}
+                onChangeText={(text) => setType(text)}
             />
             <UserInput
                 name="Ad"
@@ -119,7 +113,7 @@ const Contracts = () => {
                 setValue={setName}
                 autoCompleteType="text"
                 keyboardType="text"
-                onChangeText = { (text) => setName(text)}
+                onChangeText={(text) => setName(text)}
             />
             <UserInput
                 name="Şərh"
@@ -128,7 +122,7 @@ const Contracts = () => {
                 autoCompleteType="text"
                 keyboardType="text"
                 multiline
-                onChangeText = {(text) => setComment(text)}
+                onChangeText={(text) => setComment(text)}
             />
             <View style={{ alignItems: 'flex-end', margin: 10 }}>
                 <Pressable style={{ ...styles.button, width: 150 }} onPress={sendData}>

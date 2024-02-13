@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Table from "../components/Table";
 import { useFonts } from "expo-font";
 import { fetchData } from '../services/Server';
+import { sendRequest } from '../services/Server';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,27 +34,20 @@ const Routes = ({ navigation }) => {
     if (!fontsLoad) {  return null }
 
     const sendData = async () => {
-        const apiUrl = 'http://192.168.88.44:3000/api/routes';
-        try {
-            const postData = {
-                date: formatDateString(date),
-                kontragentId: kontragentId,
-                amount: amount,
-            };
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(postData),
-            });
+        let apiUrl = '/routes'
+        const postData = {
+            date: formatDateString(date),
+            kontragentId: kontragentId,
+            amount: amount,
+        };
+        const result = await sendRequest(apiUrl, postData);
 
-            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
-            else Alert.alert('Uğursuz cəht!');
-        } catch (error) {
-            console.error(error);
+        if (result.success) {
+            Alert.alert(result.message);
+        } else {
+            Alert.alert(result.message);
         }
-    };
+    }
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>

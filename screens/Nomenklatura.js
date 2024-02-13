@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, StyleSheet, Pressable, Text, Modal, Alert } from "react-native";
+import { View, ScrollView, StyleSheet, Pressable, Text, Modal, Alert, TextInput, TouchableOpacity } from "react-native";
 import { useFonts } from "expo-font";
 import { Ionicons } from '@expo/vector-icons';
 import UserInput from "../components/UserInput";
 import Table from "../components/Table";
 import DropDown from "../components/DropDown";
 import { fetchData } from '../services/Server';
+import { sendRequest } from '../services/Server';
 
 
 const Nomenklatura = () => {
@@ -16,7 +17,12 @@ const Nomenklatura = () => {
     const [price, setPrice] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [resNomenklatura, setNomenklatura] = useState([]);
+    const [formTable, setFormTable] = useState([]);
+    const [selectedRow, setSelectedRow] = useState(null);
+
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
+    const headers = ["№", "Ad", "Növ", 'Kateqoriya', 'Brend', 'Qiymət'];
+    let rowCount = 0;
 
     useEffect(() => {
         const fetchDataAsync = async () => {
@@ -25,7 +31,6 @@ const Nomenklatura = () => {
                 if (nomenklatura !== null) {
                     setNomenklatura(nomenklatura);
                 }
-
                 // const optionCategory = await fetchData('category');
                 // if (optionCategory !== null) {
                 //     setCategory(optionCategory);
@@ -46,8 +51,8 @@ const Nomenklatura = () => {
     if (!fontsLoad) { return null }
 
     const handlePress = () => { setModalVisible(true) }
-    const closeModal = () => { 
-        setModalVisible(false) 
+    const closeModal = () => {
+        setModalVisible(false)
         setName()
         setCategory()
         setBrand()
@@ -55,35 +60,43 @@ const Nomenklatura = () => {
         setKind()
     }
 
-    const headers = ["№", "Ad", "Növ", 'Kateqoriya', 'Brend', 'Qiymət'];
-
     let extractedData = resNomenklatura.map((item) => [String(item.id), item.name, item.kind, item.brand, item.category, item.price]);
 
     const sendData = async () => {
-        const apiUrl = 'http://192.168.88.44:3000/api/nomenklatura';
-        try {
-            const postData = {
-                name: name,
-                category: category,
-                brand: brand,
-                price: price,
-                kind: kind, 
-            };
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(postData),
-            });
+        let apiUrl = '/nomenklatura'
+        const postData = {
+            name: name,
+            category: category,
+            brand: brand,
+            price: price,
+            kind: kind,
+        };
 
-            if (response.status === 200)  Alert.alert('Məlumatlar göndərildi!');
-            else Alert.alert('Uğursuz cəht!');
-        } catch (error) {
-            console.error(error)
+        const result = await sendRequest(apiUrl, postData);
+
+        if (result.success) {
+            Alert.alert(result.message);
+        } else {
+            Alert.alert(result.message);
         }
-    }
+    };
 
+    const handleTableInputChange = (index, field, value) => {
+        let updatedFormTable = [...formTable];
+        updatedFormTable[index] = {
+            ...updatedFormTable[index],
+            [field]: value,
+        };
+
+        setFormTable((prevFormTable) => {
+            return updatedFormTable;
+        });
+    };
+
+    const handleRowPress = (row) => {
+        setSelectedRow(row);
+        setModalVisible(true);
+    };
     return (
         <ScrollView contentContainerStyle={{ paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
             <Text style={{ marginBottom: 10, textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Nomenklatura </Text>
@@ -144,7 +157,92 @@ const Nomenklatura = () => {
                     </Pressable>
                 </View>
             </Modal>
-            <Table headers={headers} data={extractedData} />
+            {/* <Table headers={headers} data={extractedData} /> */}
+            <View style={{ ...styles.row, marginHorizontal: 10 }}>
+                {headers.map((header) => (
+                    <View style={styles.cell}>
+                        <Text bold center>{header}</Text>
+                    </View>
+                ))}
+            </View>
+
+            {resNomenklatura.map((row, rowIndex) => (
+                <TouchableOpacity key={rowIndex} onPress={() => handleRowPress(row)}>
+
+                    <View style={{ ...styles.row, marginHorizontal: 10 }} key={rowIndex}>
+                        <View style={styles.cell}>
+                            <Text>{++rowCount}</Text>
+                        </View>
+                        <View style={styles.cell}>
+                            <TextInput
+                                placeholder='Malın adı'
+                                keyboardType="text"
+                                value={resNomenklatura[rowIndex]?.name}
+                                onChangeText={(text) => handleTableInputChange(rowIndex, 'name', text)}
+                            />
+                        </View>
+                        <View style={styles.cell}>
+                            <TextInput
+                                placeholder='Miqdar'
+                                keyboardType="numeric"
+                                value={resNomenklatura[rowIndex]?.kind}
+                                onChangeText={(text) => handleTableInputChange(rowIndex, 'kind', text)}
+                            />
+                        </View>
+                        <View style={styles.cell}>
+                            <TextInput
+                                placeholder='Kateqoriyası'
+                                keyboardType="numeric"
+                                value={resNomenklatura[rowIndex]?.category}
+                                onChangeText={(text) => handleTableInputChange(rowIndex, 'category', text)}
+                            />
+                        </View>
+                        <View style={styles.cell}>
+                            <TextInput
+                                placeholder='Brendi'
+                                keyboardType="text"
+                                value={resNomenklatura[rowIndex]?.brand}
+                                onChangeText={(text) => handleTableInputChange(rowIndex, 'brand', text)}
+                            />
+                        </View>
+                        <View style={styles.cell}>
+                            <TextInput
+                                placeholder='Qiymət'
+                                keyboardType="numeric"
+                                value={resNomenklatura[rowIndex]?.price}
+                                onChangeText={(text) => handleTableInputChange(rowIndex, 'price', text)}
+                            />
+                        </View>
+                        {/* <TouchableOpacity onPress={() => handleUpdate(row)}>
+                        <View style={styles.updateButton}>
+                            <Text>Update</Text>
+                        </View>
+                    </TouchableOpacity> */}
+                    </View>
+                </TouchableOpacity>
+            ))}
+
+            {/* <Modal visible={isModalVisible} transparent animationType="slide">
+                <ScrollView contentContainerStyle={{ marginVertical: 10 }} >
+                    <View style={{ padding: 5 }}>
+                        <Text style={{ textAlign: 'right' }} onPress={closeModal} ><Ionicons name="close" size={24} color="red" /></Text>
+                    </View>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+
+                            <TextInput
+                                placeholder='Malın adı'
+                                keyboardType="text"
+                                value={selectedRow?.name}
+                                onChangeText={(text) => handleTableInputChange(selectedRow, 'name', text)}
+                            />
+                            <Button title="Update" onPress={handleUpdate} />
+                            <Button title="Close" onPress={handleModalClose} />
+                        </View>
+                    </View>
+                </ScrollView>
+            </Modal> */}
+
             <View style={styles.table}>
                 <View style={styles.row}>
                     <View style={styles.cell}>

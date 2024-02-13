@@ -4,6 +4,7 @@ import UserInput from "./UserInput";
 import { Ionicons } from '@expo/vector-icons';
 import MapComponent from "./MapComponent";
 import { useFonts } from "expo-font";
+import { sendRequest } from '../services/Server';
 
 
 const Physical = ({ selectedLocation }) => {
@@ -20,29 +21,22 @@ const Physical = ({ selectedLocation }) => {
     const onDataReceived = (data) => { setAddress(data) }
 
     const sendData = async () => {
-        const apiUrl = 'http://192.168.88.44:3000/api/kontragent';
-        try {
-            const postData = {
-                name: name,
-                phone_number: phone,
-                tin: tin,
-                address: address,
-                type: 'fiziki'
-            };
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(postData),
-            });
+        let apiUrl = '/legal'
+        const postData = {
+            name: name,
+            phone_number: phone,
+            tin: tin,
+            address: address,
+            type: 'fiziki'
+        };
+        const result = await sendRequest(apiUrl, postData);
 
-            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
-            else Alert.alert('Uğursuz cəht!');
-        } catch (error) {
-            console.error(error);
+        if (result.success) {
+            Alert.alert(result.message);
+        } else {
+            Alert.alert(result.message);
         }
-    };
+    }
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>

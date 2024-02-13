@@ -1,15 +1,37 @@
 
 import axios from 'axios';
 
-const apiUrl = 'http://192.168.88.44:3000/api';
+const url = 'http://192.168.88.44:3000/api';
 
 export const fetchData = async (tableName) => {
     try {
-        const response = await axios.get(`${apiUrl}/${tableName}`);
+        const response = await axios.get(`${url}/${tableName}`);
         return response.data;
     } catch (error) {
         console.error('Request Error:', error);
         throw error;
+    }
+};
+
+export const sendRequest = async (apiUrl, postData) => {
+    let endpoint = `${url}${apiUrl}`;
+    try {
+        const response = await fetch(endpoint, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(postData),
+        });
+
+        if (response.status === 200) {
+            return { success: true, message: 'Məlumatlar göndərildi!' };
+        } else {
+            return { success: false, message: 'Uğursuz cəht!' };
+        }
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: 'Error occurred during the request.' };
     }
 };
 

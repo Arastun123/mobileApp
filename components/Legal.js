@@ -4,45 +4,39 @@ import UserInput from "./UserInput";
 import { Ionicons } from '@expo/vector-icons';
 import MapComponent from "./MapComponent";
 import { useFonts } from "expo-font";
+import { sendRequest } from '../services/Server';
 
 
 const Legal = ({ selectedLocation }) => {
-    let [fontsLoad] = useFonts({'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });    
+    let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
     const [address, setAddress] = useState("");
     const [tin, setTin] = useState("");
     const [isModalVisible, setModalVisible] = useState(false);
-    
-    if (!fontsLoad) {  return null }
+
+    if (!fontsLoad) { return null }
     const handlePress = () => { setModalVisible(true) }
     const closeModal = () => { setModalVisible(false) }
     const onDataReceived = (data) => { setAddress(data) }
 
     const sendData = async () => {
-        const apiUrl = 'http://192.168.88.44:3000/api/kontragent';
-        try {
-            const postData = {
-                name: name,
-                phone_number: phone,
-                tin: tin,
-                address: address,
-                type: 'hüquqi'
-            };
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(postData),
-            });
+        let apiUrl = '/kontragent'
+        const postData = {
+            name: name,
+            phone_number: phone,
+            tin: tin,
+            address: address,
+            type: 'hüquqi'
+        };
+        const result = await sendRequest(apiUrl, postData);
 
-            if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
-            else Alert.alert('Uğursuz cəht!');
-        } catch (error) {
-            console.error(error);
+        if (result.success) {
+            Alert.alert(result.message);
+        } else {
+            Alert.alert(result.message);
         }
-    };
+    }
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
@@ -54,7 +48,7 @@ const Legal = ({ selectedLocation }) => {
                     setValue={setName}
                     autoCompleteType="text"
                     keyboardType="text"
-                    onChangeText = {(text) => setName(text)}
+                    onChangeText={(text) => setName(text)}
                 />
                 <UserInput
                     name="Əlaqə nömrəsi"
@@ -62,7 +56,7 @@ const Legal = ({ selectedLocation }) => {
                     setValue={setPhone}
                     autoCompleteType="numeric"
                     keyboardType="numeric"
-                    onChangeText = {(text) => setPhone(text)}
+                    onChangeText={(text) => setPhone(text)}
                 />
                 <UserInput
                     name="Vöen"
@@ -70,7 +64,7 @@ const Legal = ({ selectedLocation }) => {
                     setValue={setTin}
                     autoCompleteType="text"
                     keyboardType="text"
-                    onChangeText = {(text) => setTin(text)}
+                    onChangeText={(text) => setTin(text)}
                 />
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <View style={{ width: 250 }}>
@@ -96,7 +90,7 @@ const Legal = ({ selectedLocation }) => {
                     onRequestClose={closeModal}
                 >
                     <MapComponent closeModal={closeModal} onDataReceived={onDataReceived} />
-                    
+
                 </Modal>
                 {/* <Text>{JSON.stringify({ name, phone, address, voen }, null, 4)}</Text> */}
                 <View style={{ alignItems: 'flex-end', margin: 10 }}>

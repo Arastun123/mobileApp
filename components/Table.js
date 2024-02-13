@@ -18,7 +18,7 @@ const Table = ({ headers, data }) => {
         }));
     }
 
-    let count = 0;
+    let count = 1;
     return (
         <View>
             {/* <View style={{ flex: 1, justifyContent: 'end', marginVertical: 20, marginHorizontal: 10 }}>
@@ -38,10 +38,12 @@ const Table = ({ headers, data }) => {
                     ))}
                 </View>
                 {data.map((row, rowIndex) => (
-                    <View key={rowIndex} style={styles.row}>                        
+                    <View key={rowIndex} style={styles.row}>
                         {row.map((cell, cellIndex) => (
                             <View style={styles.cell} key={cellIndex}>
-                                <Text style={styles.cellText}>{cell}</Text>
+                                <Text style={styles.cellText}>
+                                    {cellIndex === 0 ? count++ : cell}
+                                </Text>
                             </View>
                         ))}
                     </View>
