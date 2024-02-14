@@ -6,7 +6,7 @@ import UserInput from "../components/UserInput";
 import Table from "../components/Table";
 import DropDown from "../components/DropDown";
 import { fetchData } from '../services/Server';
-import { sendRequest, editData } from '../services/Server';
+import { sendRequest, editData, deleteData } from '../services/Server';
 
 
 const Nomenklatura = () => {
@@ -85,6 +85,7 @@ const Nomenklatura = () => {
 
         if (result.success) {
             Alert.alert(result.message);
+            setModalVisible(false)
         } else {
             Alert.alert(result.message);
         }
@@ -95,6 +96,7 @@ const Nomenklatura = () => {
         const result = await editData(id, updateData)
         if (result.success) {
             Alert.alert(result.message);
+            setUpdateModalVisible(false)
         } else {
             Alert.alert(result.message);
         }
@@ -109,7 +111,6 @@ const Nomenklatura = () => {
 
     const handleRowPress = (row) => {
         setSelectedRow(row);
-        console.log(row);
         setUpdateData({
             id: row.id,
             name: row.name,
@@ -120,6 +121,19 @@ const Nomenklatura = () => {
         });
         setUpdateModalVisible(true);
     };
+
+    const deleteRow = async () => {
+        let id = updateData.id
+        let tableName = 'nomenklatura';
+        const result = await deleteData(id, tableName)
+        if(result.success){
+            Alert.alert(result.message);
+            setUpdateModalVisible(false)
+        }
+        else{
+            Alert.alert(result.message);
+        }
+    }
 
     return (
         <ScrollView contentContainerStyle={{ paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
@@ -186,7 +200,7 @@ const Nomenklatura = () => {
             <View style={{ ...styles.row, marginHorizontal: 5 }}>
                 {headers.map((header) => (
                     <View style={styles.cell}>
-                        <Text bold center>{header}</Text>
+                        <Text bold center numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{header}</Text>
                     </View>
                 ))}
             </View>
@@ -204,7 +218,7 @@ const Nomenklatura = () => {
                             <Text>{resNomenklatura[rowIndex]?.kind}</Text>
                         </View>
                         <View style={styles.cell}>
-                            <Text>{resNomenklatura[rowIndex]?.category}</Text>
+                            <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{resNomenklatura[rowIndex]?.category}</Text>
                         </View>
                         <View style={styles.cell}>
                             <Text>{resNomenklatura[rowIndex]?.brand}</Text>
@@ -223,7 +237,7 @@ const Nomenklatura = () => {
                     </View>
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
-                            <Text style={{display: 'none'}}>{updateData.id}</Text>
+                            <Text style={{ display: 'none' }}>{updateData.id}</Text>
                             <TextInput
                                 style={styles.input}
                                 placeholder='Malın adı'
@@ -260,14 +274,21 @@ const Nomenklatura = () => {
                                 style={styles.input}
                                 placeholder='Qiymət'
                                 keyboardType="numeric"
-                                value={updateData .price.toString()}
+                                value={updateData.price.toString()}
                                 autoCompleteType="numeric"
                                 onChangeText={(text) => handleInputChange('price', text)}
                             />
-                            <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                                <Pressable style={{ ...styles.button, width: 150 }} onPress={handleUpdate}>
-                                    <Text style={styles.text}>Yenilə</Text>
-                                </Pressable>
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ margin: 10 }}>
+                                    <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
+                                        <Text style={styles.text}>Sil</Text>
+                                    </Pressable>
+                                </View>
+                                <View style={{ margin: 10 }}>
+                                    <Pressable style={{ ...styles.button, width: 150 }} onPress={handleUpdate}>
+                                        <Text style={styles.text}>Yenilə</Text>
+                                    </Pressable>
+                                </View>
                             </View>
                         </View>
                     </View>
@@ -298,7 +319,7 @@ const Nomenklatura = () => {
                 </View>
             </View>
         </ScrollView>
-    )
+    ) 
 }
 
 

@@ -1,5 +1,6 @@
 
 import axios from 'axios';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 const url = 'http://192.168.88.44:3000/api';
 
@@ -37,7 +38,6 @@ export const sendRequest = async (apiUrl, postData) => {
 
 export const editData = async (id, newData) => {
     let endpoint = `${url}/edit/${id}`;
-    console.log(endpoint);
     try {
         const response = await fetch(endpoint, {
             method: 'PUT',
@@ -55,4 +55,27 @@ export const editData = async (id, newData) => {
         return { success: false, message: 'Error occurred during the request.' };
     }
 };
+
+export const deleteData = async (id, tableName) => {
+    let endpoint = `${url}/delete/${id}/${tableName}`;
+    try {
+        const response = await fetch(endpoint, {
+            method: "DELETE",
+            headers: {
+                'Content-Type': 'application/json',
+
+            },
+            body: {},
+        });
+        if (response.status === 200) {
+            return { success: true, message: 'Məlumat silindi' };
+        } else {
+            return { success: false, message: 'Uğursuz cəht!' };
+        }
+
+    } catch (error) {
+        return { success: false, message: 'Error occurred during the request.' };
+
+    }
+}
 

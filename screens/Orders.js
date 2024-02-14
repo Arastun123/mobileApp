@@ -108,6 +108,7 @@ const Orders = ({ navigation }) => {
     const closeModal = () => {
         setModalVisible(false)
         setDate()
+        setRowData([])
     }
 
     return (

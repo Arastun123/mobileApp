@@ -89,6 +89,7 @@ const Invoce = () => {
 
         if (result.success) {
             Alert.alert(result.message);
+            setModalVisible(false);
         } else {
             Alert.alert(result.message);
         }
@@ -108,6 +109,7 @@ const Invoce = () => {
         setCustomer()
         setDate()
         setFormTable([])
+        setRowData([])
     }
 
     return (
