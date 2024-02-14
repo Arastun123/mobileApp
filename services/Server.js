@@ -16,7 +16,7 @@ export const fetchData = async (tableName) => {
 export const sendRequest = async (apiUrl, postData) => {
     let endpoint = `${url}${apiUrl}`;
     try {
-        const response = await fetch(endpoint, { 
+        const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -31,6 +31,27 @@ export const sendRequest = async (apiUrl, postData) => {
         }
     } catch (error) {
         console.error(error);
+        return { success: false, message: 'Error occurred during the request.' };
+    }
+};
+
+export const editData = async (id, newData) => {
+    let endpoint = `${url}/edit/${id}`;
+    console.log(endpoint);
+    try {
+        const response = await fetch(endpoint, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newData),
+        });
+        if (response.status === 200) {
+            return { success: true, message: 'Məlumat yeniləndi' };
+        } else {
+            return { success: false, message: 'Uğursuz cəht!' };
+        }
+    } catch (error) {
         return { success: false, message: 'Error occurred during the request.' };
     }
 };
