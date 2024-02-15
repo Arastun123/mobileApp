@@ -65,8 +65,8 @@ const Contracts = () => {
 
     const handleDate = () => { formatDateString(dateStr) }
 
-    let id = data.map((item) => String(item.id));
-    let lastId = id.pop();
+    let id = data.map((item) => item.id);
+    let lastId = 1 + id.pop();
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, marginHorizontal: 10 }}>
@@ -83,7 +83,7 @@ const Contracts = () => {
                 <View>
                     <UserInput
                         name="№"
-                        value={lastId}
+                        value={String(lastId)}
                         setValue={setNumber}
                         autoCompleteType="text"
                         keyboardType="numeric"

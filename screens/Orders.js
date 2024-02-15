@@ -44,8 +44,8 @@ const Orders = ({ navigation }) => {
     }, []);
     const extractedData = resData.map((item) => [String(item.id), item.date, item.customer, item.product_name, item.price, item.quantity, item.units]);
 
-    let id = resData.map((item) => String(item.id));
-    let lastId = id.pop(); 
+    let id = resData.map((item) => item.id);
+    let lastId = 1 + id.pop(); 
 
     if (!fontsLoad) { return null }
 
@@ -112,6 +112,7 @@ const Orders = ({ navigation }) => {
         setDate(new Date())
         setRowData([])
         setFormTable()
+        // setCustomer()
     }
 
     return (
@@ -156,7 +157,7 @@ const Orders = ({ navigation }) => {
                                 style={{ ...styles.input, width: 50 }}
                                 placeholder="№"
                                 keyboardType="numeric"
-                                value={lastId}
+                                value={String(lastId)}
                                 onChangeText={setNumber}
                             />
                         </View>
