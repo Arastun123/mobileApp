@@ -14,7 +14,7 @@ const Table = ({ headers, data }) => {
         const key = `${header}`;
         setData((prevData) => ({
             ...prevData,
-            [key]: value,
+            [key]: value,  
         }));
     }
 
@@ -29,7 +29,6 @@ const Table = ({ headers, data }) => {
                 </View>
             </View> */}
             <View style={styles.table}>
-
                 <View style={styles.row}>
                     {headers.map((header, index) => (
                         <View style={styles.cell} key={index}>
@@ -41,7 +40,7 @@ const Table = ({ headers, data }) => {
                     <View key={rowIndex} style={styles.row}>
                         {row.map((cell, cellIndex) => (
                             <View style={styles.cell} key={cellIndex}>
-                                <Text style={styles.cellText}>
+                                <Text style={styles.cellText} numberOfLines={2} ellipsizeMode="tail" textBreakStrategy="simple">
                                     {cellIndex === 0 ? count++ : cell}
                                 </Text>
                             </View>

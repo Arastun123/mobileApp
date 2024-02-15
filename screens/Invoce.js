@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, TextInput, StyleSheet, ScrollView, Pressable, Text, Alert, Modal } from 'react-native';
+import { View, TextInput, StyleSheet, ScrollView, Pressable, Text, Alert, Modal, TouchableOpacity } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { fetchData } from '../services/Server';
 import { addRow, formatDateString } from '../services/Functions';
-import { sendRequest } from '../services/Server';
+import { sendRequest, deleteData, editData } from '../services/Server';
 
 const Invoce = () => {
     const [number, setNumber] = useState();
@@ -20,11 +20,22 @@ const Invoce = () => {
     const [totalAmount, setTotalAmount] = useState(0);
     const [edv, setEdv] = useState(0);
     const [wholeAmout, setWholeAmount] = useState(0);
+    const [selectedRow, setSelectedRow] = useState(null);
+    const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
+    const [updateData, setUpdateData] = useState({
+        product_name: '',
+        quantity: '',
+        price: '',
+        units: '',
+        customer: ''
+        // wholeAmout: ''
+    });
+
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
 
     let count = 0;
     let rowCount = 0;
-    const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
+    const headers = ["№", "Malın adı", "Miqdarı", "Ölçü vahidi", "Qiymət", "Məbləğ"];
     const showDatepicker = () => { setShow(true) };
     const handlePress = () => { setModalVisible(true) }
 
@@ -75,7 +86,9 @@ const Invoce = () => {
     };
 
     const handleAddRow = () => { addRow(setRowData) };
-    
+    const handleDate = () => { formatDateString(dateStr) }
+    const closeUpdateModal = () => { setUpdateModalVisible(false) }
+
     const sendData = async () => {
         let apiUrl = '/invoice'
         const postData = {
@@ -90,9 +103,8 @@ const Invoce = () => {
         if (result.success) {
             Alert.alert(result.message);
             setModalVisible(false);
-        } else {
-            Alert.alert(result.message);
         }
+        else Alert.alert(result.message);
     }
 
     const onChange = (event, selectedDate) => {
@@ -100,9 +112,7 @@ const Invoce = () => {
         setShow(Platform.OS === 'ios');
         let formattedDate = `${selectedDate.getDate()}.${selectedDate.getMonth() + 1}.${selectedDate.getFullYear()}`
         setDate(formattedDate)
-    };
-
-    const handleDate = () => { formatDateString(dateStr) }
+    };  
 
     const closeModal = () => {
         setModalVisible(false)
@@ -111,6 +121,49 @@ const Invoce = () => {
         setFormTable([])
         setRowData([])
     }
+
+    const deleteRow = async () => {
+        let id = updateData.id
+        let tableName = 'invoice';
+        const result = await deleteData(id, tableName)
+        if (result.success) {
+            Alert.alert(result.message);
+            setUpdateModalVisible(false)
+        }
+        else Alert.alert(result.message);
+    }
+
+    const handleRowPress = (row) => {
+        setSelectedRow(row);
+        setUpdateData({
+            id: row.id,
+            product_name: row.product_name,
+            quantity: row.quantity,
+            price: row.price.toString(),
+            units: row.units,
+            customer: row.customer,
+        });
+        setUpdateModalVisible(true);
+    };
+
+    const handleUpdate = async () => {
+        let id = updateData.id
+        let tableName = 'invoice'
+
+        const result = await editData(id, updateData, tableName)
+        if (result.success) {
+            Alert.alert(result.message);
+            setUpdateModalVisible(false)
+        }
+        else Alert.alert(result.message);
+    }
+
+    const handleInputChange = (field, value) => {
+        setUpdateData((prevUpdateData) => ({
+            ...prevUpdateData,
+            [field]: value,
+        }));
+    };
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
@@ -181,7 +234,7 @@ const Invoce = () => {
                         ))}
                     </View>
                     {rowData.map((row, rowIndex) => (
-                        <View style={{ ...styles.row, marginHorizontal: 10 }} key={rowIndex}>
+                        <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
                             <View style={styles.cell}>
                                 <Text>{++rowCount}</Text>
                             </View>
@@ -241,52 +294,103 @@ const Invoce = () => {
                     <View style={styles.row}>
                         {headers.map((header) => (
                             <View style={styles.cell}>
-                                <Text bold center>{header}</Text>
+                                <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{header}</Text>
                             </View>
                         ))}
                     </View>
                     <View>
                         {data.map((item, rowIndex) => (
-                            <View style={styles.row} key={rowIndex + 1}>
-                                <View style={styles.cell}>
-                                    <Text>{++count}</Text>
+                            <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(item)}>
+                                <View style={styles.row} key={`row_${rowIndex}`}>
+                                    <View style={styles.cell}>
+                                        <Text>{++count}</Text>
+                                    </View>
+                                    <View style={styles.cell}>
+                                        <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{item.product_name}</Text>
+                                    </View>
+                                    <View style={styles.cell}>
+                                        <Text>{item.quantity}</Text>
+                                    </View>
+                                    <View style={styles.cell}>
+                                        <Text>{item.units}</Text>
+                                    </View>
+                                    <View style={styles.cell}>
+                                        <Text>{item.price}</Text>
+                                    </View>
+                                    <View style={styles.cell}>
+                                        <Text>{item.price * item.quantity}</Text>
+                                    </View>
                                 </View>
-                                <View style={styles.cell}>
-                                    <TextInput
-                                        placeholder={item.product_name}
-                                        keyboardType="text"
-                                        value={item.product_name}
-                                    />
-                                </View>
-                                <View style={styles.cell}>
-                                    <TextInput
-                                        placeholder={String(item.quantity)}
-                                        keyboardType="numeric"
-                                        value={String(item.quantity)}
-                                    />
-                                </View>
-                                <View style={styles.cell}>
-                                    <TextInput
-                                        placeholder={item.units}
-                                        keyboardType="text"
-                                        value={item.units}
-                                    />
-                                </View>
-                                <View style={styles.cell}>
-                                    <TextInput
-                                        placeholder={String(item.price)}
-                                        keyboardType="numeric"
-                                        value={String(item.price)}
-                                    />
-                                </View>
-                                <View style={styles.cell}>
-                                    <Text>{item.price * item.quantity}</Text>
-                                </View>
-                            </View>
+                            </TouchableOpacity>
                         ))}
                     </View>
                 </View>
             </View>
+            <Modal visible={isUpdateModalVisible} animationType="slide">
+                <ScrollView contentContainerStyle={{ margin: 10 }} >
+                    <View style={{ padding: 5 }}>
+                        <Text style={{ textAlign: 'right' }} onPress={closeUpdateModal} ><Ionicons name="close" size={24} color="red" /></Text>
+                    </View>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <Text style={{ display: 'none' }}>{updateData.id}</Text> 
+                            <TextInput
+                                style={styles.input}
+                                placeholder='Malın adı'
+                                keyboardType="text"
+                                value={updateData.product_name}
+                                autoCompleteType="text"
+                                onChangeText={(text) => handleInputChange('product_name', text)}
+                            />
+                            <TextInput
+                                style={styles.input}
+                                placeholder='Müştəri'
+                                keyboardType="text"
+                                value={updateData.customer}
+                                autoCompleteType="text"
+                                onChangeText={(text) => handleInputChange('customer', text)}
+                            />
+                            <TextInput
+                                style={styles.input}
+                                placeholder='Miqdarı'
+                                keyboardType="text"
+                                value={updateData.quantity.toString()}
+                                autoCompleteType="text"
+                                onChangeText={(text) => handleInputChange('quantity', text)}
+                            />
+                            <TextInput
+                                style={styles.input}
+                                placeholder='Ölçü vahidi'
+                                keyboardType="text"
+                                value={updateData.units}
+                                autoCompleteType="text"
+                                onChangeText={(text) => handleInputChange('units', text)}
+                            />
+                            <TextInput
+                                style={styles.input}
+                                placeholder='Qiymət'
+                                keyboardType="numeric"
+                                value={updateData.price}
+                                autoCompleteType="numeric"
+                                onChangeText={(text) => handleInputChange('price', text)}
+                            />
+                            <View style={{ flexDirection: 'row' }}>
+                                <View style={{ margin: 10 }}>
+                                    <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
+                                        <Text style={styles.text}>Sil</Text>
+                                    </Pressable>
+                                </View>
+                                <View style={{ margin: 10 }}>
+                                    <Pressable style={{ ...styles.button, width: 150 }} onPress={handleUpdate}>
+                                        <Text style={styles.text}>Yenilə</Text>
+                                    </Pressable>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </ScrollView>
+            </Modal>
+
             {/* <View style={{ alignItems: 'flex-end', margin: 10 }}>
                 <Text>Məbləğ: <Text>{isNaN(totalSum) ? tableSum : totalSum}</Text></Text>
                 <Text>Ədv:    <Text>{edv}</Text></Text>

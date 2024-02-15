@@ -7,7 +7,7 @@ import { useFonts } from "expo-font";
 import { fetchData } from '../services/Server';
 import { Ionicons } from '@expo/vector-icons';
 import { addRow, formatDateString } from '../services/Functions';
-import { sendRequest } from '../services/Server';
+import { sendRequest, deleteData } from '../services/Server';
 
 
 const Stack = createNativeStackNavigator();
@@ -86,11 +86,9 @@ const Orders = ({ navigation }) => {
         };
         const result = await sendRequest(apiUrl, postData);
 
-        if (result.success) {
-            Alert.alert(result.message);
-        } else {
-            Alert.alert(result.message);
-        }
+        if (result.success) Alert.alert(result.message);
+        else Alert.alert(result.message);
+
     }
 
     const onChange = (event, selectedDate) => {
@@ -173,14 +171,14 @@ const Orders = ({ navigation }) => {
                         </View>
                     </View>
                     <View style={{ ...styles.row, marginHorizontal: 10 }}>
-                        {headers.map((header) => (
-                            <View style={styles.cell}>
+                        {headers.map((header, rowIndex) => (
+                            <View style={styles.cell} key={`row_${rowIndex}`}>
                                 <Text bold center>{header}</Text>
                             </View>
                         ))}
                     </View>
                     {rowData.map((row, rowIndex) => (
-                        <View style={{ ...styles.row, marginHorizontal: 10 }} key={rowIndex}>
+                        <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
                             <View style={styles.cell}>
                                 <Text>{++rowCount}</Text>
                             </View>

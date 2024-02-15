@@ -1,6 +1,5 @@
 
 import axios from 'axios';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 const url = 'http://192.168.88.44:3000/api';
 
@@ -25,19 +24,16 @@ export const sendRequest = async (apiUrl, postData) => {
             body: JSON.stringify(postData),
         });
 
-        if (response.status === 200) {
-            return { success: true, message: 'Məlumatlar göndərildi!' };
-        } else {
-            return { success: false, message: 'Uğursuz cəht!' };
-        }
+        if (response.status === 200) return { success: true, message: 'Məlumatlar göndərildi!' };
+        else return { success: false, message: 'Uğursuz cəht!' };
     } catch (error) {
         console.error(error);
         return { success: false, message: 'Error occurred during the request.' };
     }
 };
 
-export const editData = async (id, newData) => {
-    let endpoint = `${url}/edit/${id}`;
+export const editData = async (id, newData,tableName) => {
+    let endpoint = `${url}/edit/${id}/${tableName}`;
     try {
         const response = await fetch(endpoint, {
             method: 'PUT',
@@ -46,11 +42,8 @@ export const editData = async (id, newData) => {
             },
             body: JSON.stringify(newData),
         });
-        if (response.status === 200) {
-            return { success: true, message: 'Məlumat yeniləndi' };
-        } else {
-            return { success: false, message: 'Uğursuz cəht!' };
-        }
+        if (response.status === 200) return { success: true, message: 'Məlumat yeniləndi' }; 
+        else return { success: false, message: 'Uğursuz cəht!' };
     } catch (error) {
         return { success: false, message: 'Error occurred during the request.' };
     }
@@ -67,15 +60,10 @@ export const deleteData = async (id, tableName) => {
             },
             body: {},
         });
-        if (response.status === 200) {
-            return { success: true, message: 'Məlumat silindi' };
-        } else {
-            return { success: false, message: 'Uğursuz cəht!' };
-        }
-
+        if (response.status === 200) return { success: true, message: 'Məlumat silindi' }; 
+        else return { success: false, message: 'Uğursuz cəht!' };
     } catch (error) {
         return { success: false, message: 'Error occurred during the request.' };
 
     }
 }
-

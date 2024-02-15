@@ -15,9 +15,7 @@ const Kontragent = ({ selectedLocation }) => {
         const fetchDataAsync = async () => {
             try {
                 const result = await fetchData('kontragent');
-                if (result !== null) {
-                    setData(result);
-                }
+                if (result !== null) setData(result);
             } catch (error) {
                 console.error(error);
             }

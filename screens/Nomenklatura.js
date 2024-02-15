@@ -25,6 +25,7 @@ const Nomenklatura = () => {
         category: '',
         brand: '',
         price: '',
+        customer: '',
     });
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
@@ -35,9 +36,7 @@ const Nomenklatura = () => {
         const fetchDataAsync = async () => {
             try {
                 const nomenklatura = await fetchData('nomenklatura');
-                if (nomenklatura !== null) {
-                    setNomenklatura(nomenklatura);
-                }
+                if (nomenklatura !== null) setNomenklatura(nomenklatura);
                 // const optionCategory = await fetchData('category');
                 // if (optionCategory !== null) {
                 //     setCategory(optionCategory);
@@ -86,20 +85,19 @@ const Nomenklatura = () => {
         if (result.success) {
             Alert.alert(result.message);
             setModalVisible(false)
-        } else {
-            Alert.alert(result.message);
-        }
+        } 
+        else Alert.alert(result.message);
     };
 
     const handleUpdate = async () => {
         let id = updateData.id
-        const result = await editData(id, updateData)
+        let tableName = 'nomenklatura'
+        const result = await editData(id, updateData, tableName)
         if (result.success) {
             Alert.alert(result.message);
             setUpdateModalVisible(false)
-        } else {
-            Alert.alert(result.message);
-        }
+        } 
+        else Alert.alert(result.message);
     }
 
     const handleInputChange = (field, value) => {
@@ -118,6 +116,7 @@ const Nomenklatura = () => {
             category: row.category,
             brand: row.brand,
             price: row.price.toString(),
+            customer: row.customer
         });
         setUpdateModalVisible(true);
     };
@@ -130,9 +129,7 @@ const Nomenklatura = () => {
             Alert.alert(result.message);
             setUpdateModalVisible(false)
         }
-        else{
-            Alert.alert(result.message);
-        }
+        else Alert.alert(result.message);
     }
 
     return (
@@ -154,28 +151,24 @@ const Nomenklatura = () => {
                         value={name}
                         setValue={setName}
                         autoCompleteType="text"
-                        keyboardType="text"
                     />
                     <UserInput
                         name="Növ"
                         value={kind}
                         setValue={setKind}
                         autoCompleteType="text"
-                        keyboardType="text"
                     />
                     <UserInput
                         name="Kateqoriya"
                         value={category}
                         setValue={setCategory}
                         autoCompleteType="text"
-                        keyboardType="text"
                     />
                     <UserInput
                         name="Brend"
                         value={brand}
                         setValue={setBrand}
                         autoCompleteType="text"
-                        keyboardType="text"
                     />
                     <UserInput
                         name="Qiymət"
@@ -198,16 +191,16 @@ const Nomenklatura = () => {
             </Modal>
 
             <View style={{ ...styles.row, marginHorizontal: 5 }}>
-                {headers.map((header) => (
-                    <View style={styles.cell}>
-                        <Text bold center numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{header}</Text>
+                {headers.map((header, rowIndex) => (
+                    <View style={styles.cell} key={`row_${rowIndex}`}>
+                        <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{header}</Text>
                     </View>
                 ))}
             </View>
 
             {resNomenklatura.map((row, rowIndex) => (
-                <TouchableOpacity key={rowIndex} onPress={() => handleRowPress(row)}>
-                    <View style={{ ...styles.row, marginHorizontal: 5 }} key={rowIndex}>
+                <TouchableOpacity onPress={() => handleRowPress(row)} key={`row_${rowIndex}`}> 
+                    <View style={{ ...styles.row, marginHorizontal: 5 }}>
                         <View style={styles.cell}>
                             <Text>{++rowCount}</Text>
                         </View>
@@ -241,7 +234,6 @@ const Nomenklatura = () => {
                             <TextInput
                                 style={styles.input}
                                 placeholder='Malın adı'
-                                keyboardType="text"
                                 value={updateData.name}
                                 autoCompleteType="text"
                                 onChangeText={(text) => handleInputChange('name', text)}
@@ -249,7 +241,6 @@ const Nomenklatura = () => {
                             <TextInput
                                 style={styles.input}
                                 placeholder='Brend'
-                                keyboardType="text"
                                 value={updateData.brand}
                                 autoCompleteType="text"
                                 onChangeText={(text) => handleInputChange('brand', text)}
@@ -257,7 +248,6 @@ const Nomenklatura = () => {
                             <TextInput
                                 style={styles.input}
                                 placeholder='Kateqoriya'
-                                keyboardType="text"
                                 value={updateData.category}
                                 autoCompleteType="text"
                                 onChangeText={(text) => handleInputChange('category', text)}
@@ -265,7 +255,6 @@ const Nomenklatura = () => {
                             <TextInput
                                 style={styles.input}
                                 placeholder='Növü'
-                                keyboardType="text"
                                 value={updateData.kind}
                                 autoCompleteType="text"
                                 onChangeText={(text) => handleInputChange('kind', text)}
