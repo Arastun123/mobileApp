@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ScrollView, StyleSheet, Text, View, Pressable, Alert } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import UserInput from "../components/UserInput";
 import { useFonts } from "expo-font";
 import { formatDateString } from '../services/Functions';
-import { sendRequest } from '../services/Server';
+import { sendRequest, fetchData } from '../services/Server';
 
 
 const Contracts = () => {
@@ -16,7 +16,21 @@ const Contracts = () => {
     const [name, setName] = useState()
     const [comment, setComment] = useState()
     const [show, setShow] = useState(false);
+    const [data, setData] = useState([])
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
+
+    useEffect(() => {
+        const fetchDataAsync = async () => {
+            try {
+                const result = await fetchData('contract');
+                if (result !== null) { setData(result) }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchDataAsync();
+    }, []);
 
     const onChange = (event, selectedDate) => {
         let currentDate = selectedDate || date;
@@ -51,6 +65,8 @@ const Contracts = () => {
 
     const handleDate = () => { formatDateString(dateStr) }
 
+    let id = data.map((item) => String(item.id));
+    let lastId = id.pop();
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, marginHorizontal: 10 }}>
@@ -67,7 +83,7 @@ const Contracts = () => {
                 <View>
                     <UserInput
                         name="№"
-                        value={number}
+                        value={lastId}
                         setValue={setNumber}
                         autoCompleteType="text"
                         keyboardType="numeric"

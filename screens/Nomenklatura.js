@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, StyleSheet, Pressable, Text, Modal, Alert, TextInput, TouchableOpacity } from "react-native";
+import { View, ScrollView, StyleSheet, Pressable, Text, Modal, Alert, TouchableOpacity } from "react-native";
 import { useFonts } from "expo-font";
 import { Ionicons } from '@expo/vector-icons';
 import UserInput from "../components/UserInput";
@@ -85,7 +85,7 @@ const Nomenklatura = () => {
         if (result.success) {
             Alert.alert(result.message);
             setModalVisible(false)
-        } 
+        }
         else Alert.alert(result.message);
     };
 
@@ -96,7 +96,7 @@ const Nomenklatura = () => {
         if (result.success) {
             Alert.alert(result.message);
             setUpdateModalVisible(false)
-        } 
+        }
         else Alert.alert(result.message);
     }
 
@@ -125,7 +125,7 @@ const Nomenklatura = () => {
         let id = updateData.id
         let tableName = 'nomenklatura';
         const result = await deleteData(id, tableName)
-        if(result.success){
+        if (result.success) {
             Alert.alert(result.message);
             setUpdateModalVisible(false)
         }
@@ -199,7 +199,7 @@ const Nomenklatura = () => {
             </View>
 
             {resNomenklatura.map((row, rowIndex) => (
-                <TouchableOpacity onPress={() => handleRowPress(row)} key={`row_${rowIndex}`}> 
+                <TouchableOpacity onPress={() => handleRowPress(row)} key={`row_${rowIndex}`}>
                     <View style={{ ...styles.row, marginHorizontal: 5 }}>
                         <View style={styles.cell}>
                             <Text>{++rowCount}</Text>
@@ -231,43 +231,48 @@ const Nomenklatura = () => {
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
                             <Text style={{ display: 'none' }}>{updateData.id}</Text>
-                            <TextInput
+                            <UserInput
+                                name={"Malın adı"}
                                 style={styles.input}
                                 placeholder='Malın adı'
                                 value={updateData.name}
                                 autoCompleteType="text"
-                                onChangeText={(text) => handleInputChange('name', text)}
+                                setValue={(text) => handleInputChange('name', text)}
                             />
-                            <TextInput
+                            <UserInput
+                                name={"Brend"}
                                 style={styles.input}
                                 placeholder='Brend'
                                 value={updateData.brand}
                                 autoCompleteType="text"
-                                onChangeText={(text) => handleInputChange('brand', text)}
+                                setValue={(text) => handleInputChange('brand', text)}
                             />
-                            <TextInput
+                            <UserInput
+                                name={'Kateqoriya'}
                                 style={styles.input}
                                 placeholder='Kateqoriya'
                                 value={updateData.category}
                                 autoCompleteType="text"
-                                onChangeText={(text) => handleInputChange('category', text)}
+                                setValue={(text) => handleInputChange('category', text)}
                             />
-                            <TextInput
+                            <UserInput
+                                name={'Növü'}
                                 style={styles.input}
                                 placeholder='Növü'
                                 value={updateData.kind}
                                 autoCompleteType="text"
-                                onChangeText={(text) => handleInputChange('kind', text)}
+                                setValue={(text) => handleInputChange('kind', text)}
                             />
-                            <TextInput
+                            <UserInput
+                                name={'Qiymət'}
                                 style={styles.input}
                                 placeholder='Qiymət'
                                 keyboardType="numeric"
                                 value={updateData.price.toString()}
                                 autoCompleteType="numeric"
-                                onChangeText={(text) => handleInputChange('price', text)}
+                                setValue={(text) => handleInputChange('price', text)}
                             />
-                            <View style={{ flexDirection: 'row' }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
                                 <View style={{ margin: 10 }}>
                                     <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
                                         <Text style={styles.text}>Sil</Text>
@@ -308,7 +313,7 @@ const Nomenklatura = () => {
                 </View>
             </View>
         </ScrollView>
-    ) 
+    )
 }
 
 

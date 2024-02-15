@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, TextInput, StyleSheet, ScrollView, Pressable, Text, Alert, Modal, TouchableOpacity } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import UserInput from "../components/UserInput";
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { fetchData } from '../services/Server';
@@ -35,7 +36,7 @@ const Invoce = () => {
 
     let count = 0;
     let rowCount = 0;
-    const headers = ["№", "Malın adı", "Miqdarı", "Ölçü vahidi", "Qiymət", "Məbləğ"];
+    const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
     const showDatepicker = () => { setShow(true) };
     const handlePress = () => { setModalVisible(true) }
 
@@ -45,7 +46,6 @@ const Invoce = () => {
                 const result = await fetchData('invoice');
                 setResData(result);
                 setTableData(result);
-
             } catch (error) {
                 console.error(error);
             }
@@ -112,12 +112,12 @@ const Invoce = () => {
         setShow(Platform.OS === 'ios');
         let formattedDate = `${selectedDate.getDate()}.${selectedDate.getMonth() + 1}.${selectedDate.getFullYear()}`
         setDate(formattedDate)
-    };  
+    };
 
     const closeModal = () => {
         setModalVisible(false)
         setCustomer()
-        setDate()
+        setDate(new Date())
         setFormTable([])
         setRowData([])
     }
@@ -164,7 +164,8 @@ const Invoce = () => {
             [field]: value,
         }));
     };
-
+    let id = tableData.map((item) => String(item.id));
+    let lastId = id.pop();
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}>Qaimələr</Text>
@@ -207,7 +208,7 @@ const Invoce = () => {
                                 style={{ ...styles.input, width: 50 }}
                                 placeholder="№"
                                 keyboardType="numeric"
-                                value={number}
+                                value={lastId}
                                 onChangeText={setNumber}
                             />
                         </View>
@@ -272,7 +273,7 @@ const Invoce = () => {
                             </View>
                             <View style={styles.cell}>
                                 <Text>{
-                                    isNaN(!formTable[rowIndex]?.price & formTable[rowIndex]?.quantity) ? '000' : parseFloat(formTable[rowIndex]?.price * formTable[rowIndex]?.quantity)
+                                    isNaN(formTable[rowIndex]?.price && formTable[rowIndex]?.quantity) ? '000' : parseFloat(formTable[rowIndex]?.price * formTable[rowIndex]?.quantity)
                                 }</Text>
                             </View>
                         </View>
@@ -292,8 +293,8 @@ const Invoce = () => {
             <View>
                 <View style={styles.table}>
                     <View style={styles.row}>
-                        {headers.map((header) => (
-                            <View style={styles.cell}>
+                        {headers.map((header, rowIndex) => (
+                            <View style={styles.cell} key={`row_${rowIndex}`}>
                                 <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{header}</Text>
                             </View>
                         ))}
@@ -301,7 +302,7 @@ const Invoce = () => {
                     <View>
                         {data.map((item, rowIndex) => (
                             <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(item)}>
-                                <View style={styles.row} key={`row_${rowIndex}`}>
+                                <View style={styles.row}>
                                     <View style={styles.cell}>
                                         <Text>{++count}</Text>
                                     </View>
@@ -312,10 +313,10 @@ const Invoce = () => {
                                         <Text>{item.quantity}</Text>
                                     </View>
                                     <View style={styles.cell}>
-                                        <Text>{item.units}</Text>
+                                        <Text>{item.price}</Text>
                                     </View>
                                     <View style={styles.cell}>
-                                        <Text>{item.price}</Text>
+                                        <Text>{item.units}</Text>
                                     </View>
                                     <View style={styles.cell}>
                                         <Text>{item.price * item.quantity}</Text>
@@ -333,48 +334,53 @@ const Invoce = () => {
                     </View>
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
-                            <Text style={{ display: 'none' }}>{updateData.id}</Text> 
-                            <TextInput
+                            <Text style={{ display: 'none' }}>{updateData.id}</Text>
+                            <UserInput
+                                name={'Malın adı'}
                                 style={styles.input}
                                 placeholder='Malın adı'
                                 keyboardType="text"
                                 value={updateData.product_name}
                                 autoCompleteType="text"
-                                onChangeText={(text) => handleInputChange('product_name', text)}
+                                setValue={(text) => handleInputChange('product_name', text)}
                             />
-                            <TextInput
+                            <UserInput
+                                name={'Müştəri'}
                                 style={styles.input}
                                 placeholder='Müştəri'
                                 keyboardType="text"
                                 value={updateData.customer}
                                 autoCompleteType="text"
-                                onChangeText={(text) => handleInputChange('customer', text)}
+                                setValue={(text) => handleInputChange('customer', text)}
                             />
-                            <TextInput
+                            <UserInput
+                                name={'Miqdarı'}
                                 style={styles.input}
                                 placeholder='Miqdarı'
                                 keyboardType="text"
                                 value={updateData.quantity.toString()}
                                 autoCompleteType="text"
-                                onChangeText={(text) => handleInputChange('quantity', text)}
+                                setValue={(text) => handleInputChange('quantity', text)}
                             />
-                            <TextInput
+                            <UserInput
+                                name={'Ölçü vahidi'}
                                 style={styles.input}
                                 placeholder='Ölçü vahidi'
                                 keyboardType="text"
                                 value={updateData.units}
                                 autoCompleteType="text"
-                                onChangeText={(text) => handleInputChange('units', text)}
+                                setValue={(text) => handleInputChange('units', text)}
                             />
-                            <TextInput
+                            <UserInput
+                                name={'Qiymət'}
                                 style={styles.input}
                                 placeholder='Qiymət'
                                 keyboardType="numeric"
                                 value={updateData.price}
                                 autoCompleteType="numeric"
-                                onChangeText={(text) => handleInputChange('price', text)}
+                                setValue={(text) => handleInputChange('price', text)}
                             />
-                            <View style={{ flexDirection: 'row' }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                 <View style={{ margin: 10 }}>
                                     <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
                                         <Text style={styles.text}>Sil</Text>

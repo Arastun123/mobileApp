@@ -48,9 +48,9 @@ const Table = ({ headers, data }) => {
                     </View>
                 ))}
                 {rows.map((row, rowIndex) => (
-                    <View key={rowIndex} style={styles.row}>
+                    <View style={styles.row} key={`row_${rowIndex}`}>
                         {row.map((cell, cellIndex) => (
-                            <View style={styles.cell} key={cellIndex}>
+                            <View style={styles.cell} key={`row_${cellIndex}`}>
                                 <TextInput
                                     placeholder={String(headers[cellIndex])}
                                     onChangeText={(text) => handleInputChange(rowIndex, headers[cellIndex], text)}

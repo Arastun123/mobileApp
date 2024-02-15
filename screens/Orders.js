@@ -23,10 +23,11 @@ const Orders = ({ navigation }) => {
     const [totalAmount, setTotalAmount] = useState(0);
     const [edv, setEdv] = useState(0);
     const [wholeAmout, setWholeAmount] = useState(0);
+    const [number, setNumber] = useState();
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
     const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
-    const mainHeaders = ["№","Tarix","Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
+    const mainHeaders = ["№", "Tarix", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
     let rowCount = 0;
 
     useEffect(() => {
@@ -41,7 +42,10 @@ const Orders = ({ navigation }) => {
 
         fetchDataAsync();
     }, []);
-    const extractedData = resData.map((item) => [String(item.id), item.date, item.customer, item. product_name, item.price, item.quantity, item.units]);
+    const extractedData = resData.map((item) => [String(item.id), item.date, item.customer, item.product_name, item.price, item.quantity, item.units]);
+
+    let id = resData.map((item) => String(item.id));
+    let lastId = id.pop(); 
 
     if (!fontsLoad) { return null }
 
@@ -54,7 +58,7 @@ const Orders = ({ navigation }) => {
         updatedFormTable[index] = {
             ...updatedFormTable[index],
             [field]: value,
-            // amount: amount,
+            amount: amount,
         };
 
         setFormTable((prevFormTable) => {
@@ -105,8 +109,9 @@ const Orders = ({ navigation }) => {
 
     const closeModal = () => {
         setModalVisible(false)
-        setDate()
+        setDate(new Date())
         setRowData([])
+        setFormTable()
     }
 
     return (
@@ -151,14 +156,13 @@ const Orders = ({ navigation }) => {
                                 style={{ ...styles.input, width: 50 }}
                                 placeholder="№"
                                 keyboardType="numeric"
-                            // value={number}
-                            // onChangeText={setNumber}
+                                value={lastId}
+                                onChangeText={setNumber}
                             />
                         </View>
                         <TextInput
                             style={{ ...styles.input, }}
                             placeholder="Müştəri"
-                            keyboardType="text"
                             value={customer}
                             onChangeText={(text) => setCustomer(text)}
                         />
@@ -209,14 +213,13 @@ const Orders = ({ navigation }) => {
                             <View style={styles.cell}>
                                 <TextInput
                                     placeholder='Ölçü vahidi'
-                                    keyboardType="text"
                                     value={formTable[rowIndex]?.units}
                                     onChangeText={(text) => handleTableInputChange(rowIndex, 'units', text)}
                                 />
                             </View>
                             <View style={styles.cell}>
                                 <Text>{
-                                    isNaN(!formTable[rowIndex]?.price & formTable[rowIndex]?.quantity) ? '000' : parseFloat(formTable[rowIndex]?.price * formTable[rowIndex]?.quantity)
+                                    isNaN(!formTable[rowIndex]?.price * formTable[rowIndex]?.quantity) ? '000' : parseFloat(formTable[rowIndex]?.price * formTable[rowIndex]?.quantity)
                                 }</Text>
                             </View>
                         </View>
