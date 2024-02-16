@@ -32,7 +32,6 @@ const Invoce = () => {
         price: '',
         units: '',
         customer: ''
-        // wholeAmout: ''
     });
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
@@ -154,15 +153,6 @@ const Invoce = () => {
             setSelectedRows(updatedSelectedRows);
         } else {
             setSelectedRows([...selectedRows, row]);
-        }
-    };
-
-    const updateRow = async (row) => {
-        const result = await editData(row.id, row, 'invoice');
-        if (result.success) {
-            Alert.alert(result.message);
-        } else {
-            Alert.alert(result.message);
         }
     };
 

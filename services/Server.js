@@ -33,7 +33,6 @@ export const sendRequest = async (apiUrl, postData) => {
 };
 
 export const sendEditData = async (id, updatedRows, tableName) => {
-    console.log(updatedRows);
     let endpoint = `${url}/edit/${id}/${tableName}`;
     try {
         const response = await fetch(endpoint, {

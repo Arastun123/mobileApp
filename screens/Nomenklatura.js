@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, StyleSheet, Pressable, Text, Modal, Alert, TouchableOpacity } from "react-native";
+import { View, ScrollView, StyleSheet, Pressable, Text, Modal, Alert, TouchableOpacity, TextInput } from "react-native";
 import { useFonts } from "expo-font";
 import { Ionicons } from '@expo/vector-icons';
 import UserInput from "../components/UserInput";
 import Table from "../components/Table";
 import DropDown from "../components/DropDown";
 import { fetchData } from '../services/Server';
-import { sendRequest, editData, deleteData } from '../services/Server';
+import { sendRequest, sendEditData, deleteData } from '../services/Server';
 
 
 const Nomenklatura = () => {
@@ -18,7 +18,11 @@ const Nomenklatura = () => {
     const [isModalVisible, setModalVisible] = useState(false);
     const [resNomenklatura, setNomenklatura] = useState([]);
     const [selectedRow, setSelectedRow] = useState(null);
+    const [selectedRows, setSelectedRows] = useState([]);
     const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
+    const [editTableAmount, setEditTableAmount] = useState(0);
+    const [editTableEdv, setEditTableEdv] = useState(0);
+    const [editTableAmountAll, setEditTableAmountAll] = useState(0);
     const [updateData, setUpdateData] = useState({
         name: '',
         kind: '',
@@ -68,8 +72,6 @@ const Nomenklatura = () => {
         setKind()
     }
 
-    // let extractedData = resNomenklatura.map((item) => [String(item.id), item.name, item.kind, item.brand, item.category, item.price]);
-
     const sendData = async () => {
         let apiUrl = '/nomenklatura'
         const postData = {
@@ -89,48 +91,77 @@ const Nomenklatura = () => {
         else Alert.alert(result.message);
     };
 
-    const handleUpdate = async () => {
-        let id = updateData.id
-        let tableName = 'nomenklatura'
-        const result = await editData(id, updateData, tableName)
-        if (result.success) {
-            Alert.alert(result.message);
-            setUpdateModalVisible(false)
-        }
-        else Alert.alert(result.message);
-    }
+ 
+    const handleInputChange = (index, field, value) => {
+        let updatedSelectedRows = [...selectedRows];
+        let amount = updatedSelectedRows.map(item => item.price * item.quantity);
+        let edv = (amount * 18) / 100;
+        let allAmoount = +amount + +edv;
 
-    const handleInputChange = (field, value) => {
-        setUpdateData((prevUpdateData) => ({
-            ...prevUpdateData,
-            [field]: value,
-        }));
+        setEditTableAmount(amount);
+        setEditTableEdv(edv);
+        setEditTableAmountAll(allAmoount)
+        
+        updatedSelectedRows = updatedSelectedRows.map((row, rowIndex) => {
+            if (rowIndex === index) {
+                return {
+                    ...row,
+                    [field]: value,
+                };
+            }
+            return row;
+        });
+        setSelectedRows(updatedSelectedRows);
+    };
+
+    const handleEdit = async () => {
+        try {
+            const result = await sendEditData(selectedRows.map(item => item.id), selectedRows, 'nomenklatura');
+            if (result.success) {
+                Alert.alert(result.message);
+                setUpdateModalVisible(false);
+                setSelectedRows([]);
+            } else {
+                Alert.alert(result.message);
+            }
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const handleRowPress = (row) => {
-        setSelectedRow(row);
-        setUpdateData({
-            id: row.id,
-            name: row.name,
-            kind: row.kind,
-            category: row.category,
-            brand: row.brand,
-            price: row.price.toString(),
-            customer: row.customer
-        });
-        setUpdateModalVisible(true);
+        const isSelected = selectedRows.some((selectedRow) => selectedRow.id === row.id);
+
+        if (isSelected) {
+            const updatedSelectedRows = selectedRows.filter((selectedRow) => selectedRow.id !== row.id);
+            setSelectedRows(updatedSelectedRows);
+        } else {
+            setSelectedRows([...selectedRows, row]);
+        }
     };
 
     const deleteRow = async () => {
-        let id = updateData.id
-        let tableName = 'nomenklatura';
-        const result = await deleteData(id, tableName)
-        if (result.success) {
-            Alert.alert(result.message);
+        const idsToDelete = selectedRows.map((row) => row.id);
+        const tableName = 'nomenklatura';
+
+        try {
+            for (const idToDelete of idsToDelete) {
+                const result = await deleteData(idToDelete, tableName);
+                if (!result.success) {
+                    Alert.alert(result.message);
+                    return;
+                }
+            }
+
+            setSelectedRows([]);
+            Alert.alert('Məlumatlar silindi');
             setUpdateModalVisible(false)
+        } catch (error) {
+            console.error(error);
         }
-        else Alert.alert(result.message);
-    }
+    };
+    const handelModalOpen = () => { setUpdateModalVisible(true) }
+
 
     return (
         <ScrollView contentContainerStyle={{ paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
@@ -199,8 +230,11 @@ const Nomenklatura = () => {
             </View>
 
             {resNomenklatura.map((row, rowIndex) => (
-                <TouchableOpacity onPress={() => handleRowPress(row)} key={`row_${rowIndex}`}>
-                    <View style={{ ...styles.row, marginHorizontal: 5 }}>
+                <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(row)}>
+                    <View style={[
+                        styles.row,
+                        selectedRows.some((selectedRow) => selectedRow.id === row.id) && { backgroundColor: 'lightblue' },
+                    ]}>
                         <View style={styles.cell}>
                             <Text>{++rowCount}</Text>
                         </View>
@@ -222,64 +256,82 @@ const Nomenklatura = () => {
                     </View>
                 </TouchableOpacity>
             ))}
+            <View style={{ margin: 10 }}>
+                <Pressable disabled={selectedRows.length === 0} style={{ ...styles.button, width: 150, display: `${selectedRows.length === 0 ? 'none' : 'block'}`, backgroundColor: 'blue' }} onPress={handelModalOpen}>
+                    <Text style={styles.text}>Redaktə et</Text>
+                </Pressable>
+            </View>
 
             <Modal visible={isUpdateModalVisible} animationType="slide">
-                <ScrollView contentContainerStyle={{ margin: 10 }} >
+                <ScrollView contentContainerStyle={{ marginVertical: 10 }} >
                     <View style={{ padding: 5 }}>
                         <Text style={{ textAlign: 'right' }} onPress={closeUpdateModal} ><Ionicons name="close" size={24} color="red" /></Text>
                     </View>
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
                             <Text style={{ display: 'none' }}>{updateData.id}</Text>
-                            <UserInput
-                                name={"Malın adı"}
-                                style={styles.input}
-                                placeholder='Malın adı'
-                                value={updateData.name}
-                                autoCompleteType="text"
-                                setValue={(text) => handleInputChange('name', text)}
-                            />
-                            <UserInput
-                                name={"Brend"}
-                                style={styles.input}
-                                placeholder='Brend'
-                                value={updateData.brand}
-                                autoCompleteType="text"
-                                setValue={(text) => handleInputChange('brand', text)}
-                            />
-                            <UserInput
-                                name={'Kateqoriya'}
-                                style={styles.input}
-                                placeholder='Kateqoriya'
-                                value={updateData.category}
-                                autoCompleteType="text"
-                                setValue={(text) => handleInputChange('category', text)}
-                            />
-                            <UserInput
-                                name={'Növü'}
-                                style={styles.input}
-                                placeholder='Növü'
-                                value={updateData.kind}
-                                autoCompleteType="text"
-                                setValue={(text) => handleInputChange('kind', text)}
-                            />
-                            <UserInput
-                                name={'Qiymət'}
-                                style={styles.input}
-                                placeholder='Qiymət'
-                                keyboardType="numeric"
-                                value={updateData.price.toString()}
-                                autoCompleteType="numeric"
-                                setValue={(text) => handleInputChange('price', text)}
-                            />
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                            <View style={{ ...styles.row, marginHorizontal: 10 }}>
+                                {headers.map((header) => (
+                                    <View style={styles.cell}>
+                                        <Text>{header}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                            {selectedRows.map((row, rowIndex) => (
+                                <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
+                                    <View style={styles.cell}>
+                                        <Text>{++rowCount}</Text>
+                                    </View>
+                                    <View style={styles.cell}>
+                                        <TextInput
+                                            placeholder='Malın adı'
+                                            keyboardType="text"
+                                            value={selectedRows[rowIndex]?.name}
+                                            onChangeText={(text) => handleInputChange(rowIndex, 'name', text)}
+                                        />
+                                    </View>
+                                    <View style={styles.cell}>
+                                        <TextInput
+                                            placeholder='Növ'
+                                            keyboardType="text"
+                                            value={selectedRows[rowIndex]?.kind}
+                                            onChangeText={(text) => handleInputChange(rowIndex, 'kind', text)}
+                                        />
+                                    </View>
+                                    <View style={styles.cell}>
+                                        <TextInput
+                                            placeholder='Kateqoriya'
+                                            keyboardType="text"
+                                            value={String(selectedRows[rowIndex]?.category)}
+                                            onChangeText={(text) => handleInputChange(rowIndex, 'category', text)}
+                                        />
+                                    </View>
+                                    <View style={styles.cell}>
+                                        <TextInput
+                                            placeholder='Brend'
+                                            keyboardType="text"
+                                            value={String(selectedRows[rowIndex]?.brand)}
+                                            onChangeText={(text) => handleInputChange(rowIndex, 'brand', text)}
+                                        />
+                                    </View>
+                                    <View style={styles.cell}>
+                                        <TextInput
+                                            placeholder='Qiymət'
+                                            keyboardType="numeric"
+                                            value={String(selectedRows[rowIndex]?.price)}
+                                            onChangeText={(text) => handleInputChange(rowIndex, 'price', text)}
+                                        />
+                                    </View>
+                                </View>
+                            ))}
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                 <View style={{ margin: 10 }}>
                                     <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
                                         <Text style={styles.text}>Sil</Text>
                                     </Pressable>
                                 </View>
                                 <View style={{ margin: 10 }}>
-                                    <Pressable style={{ ...styles.button, width: 150 }} onPress={handleUpdate}>
+                                    <Pressable style={{ ...styles.button, width: 150 }} onPress={handleEdit}>
                                         <Text style={styles.text}>Yenilə</Text>
                                     </Pressable>
                                 </View>
