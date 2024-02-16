@@ -23,6 +23,9 @@ const Invoce = () => {
     const [wholeAmout, setWholeAmount] = useState(0);
     const [selectedRows, setSelectedRows] = useState([]);
     const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
+    const [editTableAmount, setEditTableAmount] = useState(0);
+    const [editTableEdv, setEditTableEdv] = useState(0);
+    const [editTableAmountAll, setEditTableAmountAll] = useState(0);
     const [updateData, setUpdateData] = useState({
         product_name: '',
         quantity: '',
@@ -36,7 +39,8 @@ const Invoce = () => {
 
     let count = 0;
     let rowCount = 0;
-    const headers = ["№", "Malın adı","Müştəri", "Miqdar", "Qiymət", "Ölçü vahidi", "Məbləğ"];
+    const headers = ["№", "Malın adı", "Miqdar", "Qiymət", "Ölçü vahidi", "Məbləğ"];
+    const editHeaders = ["№", "Malın adı", "Müştəri", "Miqdar", "Qiymət", "Ölçü vahidi", "Məbləğ"];
     const showDatepicker = () => { setShow(true) };
     const handlePress = () => { setModalVisible(true) }
 
@@ -143,23 +147,11 @@ const Invoce = () => {
     };
 
     const handleRowPress = (row) => {
-        // setselectedRows(row);
-        // setUpdateData({
-        //     id: row.id,
-        //     product_name: row.product_name,
-        //     quantity: row.quantity,
-        //     price: row.price.toString(),
-        //     units: row.units,
-        //     customer: row.customer,
-        // });
-        // setUpdateModalVisible(true);
-
         const isSelected = selectedRows.some((selectedRow) => selectedRow.id === row.id);
 
         if (isSelected) {
             const updatedSelectedRows = selectedRows.filter((selectedRow) => selectedRow.id !== row.id);
             setSelectedRows(updatedSelectedRows);
-            // setButtonDisable(false)
         } else {
             setSelectedRows([...selectedRows, row]);
         }
@@ -176,6 +168,14 @@ const Invoce = () => {
 
     const handleInputChange = (index, field, value) => {
         let updatedSelectedRows = [...selectedRows];
+        let amount = updatedSelectedRows.map(item => item.price * item.quantity);
+        let edv = (amount * 18) / 100;
+        let allAmoount = +amount + +edv;
+
+        setEditTableAmount(amount);
+        setEditTableEdv(edv);
+        setEditTableAmountAll(allAmoount)
+        
         updatedSelectedRows = updatedSelectedRows.map((row, rowIndex) => {
             if (rowIndex === index) {
                 return {
@@ -185,7 +185,6 @@ const Invoce = () => {
             }
             return row;
         });
-        // console.log(updatedSelectedRows);
         setSelectedRows(updatedSelectedRows);
         recalculateTotalAmount(updatedSelectedRows);
     };
@@ -196,6 +195,7 @@ const Invoce = () => {
             if (result.success) {
                 Alert.alert(result.message);
                 setUpdateModalVisible(false);
+                setSelectedRows([]);
             } else {
                 Alert.alert(result.message);
             }
@@ -203,7 +203,6 @@ const Invoce = () => {
             console.error(error);
         }
     };
-
 
     const handelModalOpen = () => { setUpdateModalVisible(true) }
     let id = tableData.map((item) => item.id);
@@ -336,7 +335,7 @@ const Invoce = () => {
             <View>
                 <View style={styles.table}>
                     <View style={styles.row}>
-                        {headers.map((header, rowIndex) => (
+                        {editHeaders.map((header, rowIndex) => (
                             <View style={styles.cell} key={`row_${rowIndex}`}>
                                 <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{header}</Text>
                             </View>
@@ -392,7 +391,7 @@ const Invoce = () => {
                         <View style={styles.modalContent}>
                             <Text style={{ display: 'none' }}>{updateData.id}</Text>
                             <View style={{ ...styles.row, marginHorizontal: 10 }}>
-                                {headers.map((header) => (
+                                {editHeaders.map((header) => (
                                     <View style={styles.cell}>
                                         <Text>{header}</Text>
                                     </View>
@@ -451,9 +450,9 @@ const Invoce = () => {
                                 </View>
                             ))}
                             <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                                <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(totalAmount) ? '000' : totalAmount}</Text></Text>
-                                <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(edv) ? '000' : edv}</Text></Text>
-                                <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(wholeAmout) ? '000' : wholeAmout}</Text></Text>
+                                <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(editTableAmount) ? '000' : editTableAmount}</Text></Text>
+                                <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(editTableEdv) ? '000' : editTableEdv}</Text></Text>
+                                <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(editTableAmountAll) ? '000' : editTableAmountAll}</Text></Text>
                             </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                 <View style={{ margin: 10 }}>
