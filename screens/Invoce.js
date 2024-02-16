@@ -122,14 +122,24 @@ const Invoce = () => {
     }
 
     const deleteRow = async () => {
-        let id = updateData.id
-        let tableName = 'invoice';
-        const result = await deleteData(id, tableName)
-        if (result.success) {
-            Alert.alert(result.message);
+        const idsToDelete = selectedRows.map((row) => row.id);
+        const tableName = 'invoice';
+
+        try {
+            for (const idToDelete of idsToDelete) {
+                const result = await deleteData(idToDelete, tableName);
+                if (!result.success) {
+                    Alert.alert(result.message);
+                    return;
+                }
+            }
+
+            setSelectedRows([]);
+            Alert.alert('Məlumatlar silindi');
             setUpdateModalVisible(false)
+        } catch (error) {
+            console.error(error);
         }
-        else Alert.alert(result.message);
     }
 
     const handleRowPress = (row) => {
