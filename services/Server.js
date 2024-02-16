@@ -32,23 +32,24 @@ export const sendRequest = async (apiUrl, postData) => {
     }
 };
 
-export const sendEditData = async (id, newData,tableName) => {
+export const sendEditData = async (id, updatedRows, tableName) => {
+    console.log(updatedRows);
     let endpoint = `${url}/edit/${id}/${tableName}`;
-    // console.log(newData);
     try {
         const response = await fetch(endpoint, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(newData),
+            body: JSON.stringify(updatedRows),
         });
-        if (response.status === 200) return { success: true, message: 'Məlumat yeniləndi' }; 
+        if (response.status === 200) return { success: true, message: 'Məlumat yeniləndi' };
         else return { success: false, message: 'Uğursuz cəht!' };
     } catch (error) {
-        return { success: false, message: 'Error occurred during the request.' };
+        return { success: false, message: 'Xəta!' };
     }
 };
+
 
 export const deleteData = async (id, tableName) => {
     let endpoint = `${url}/delete/${id}/${tableName}`;

@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { fetchData } from '../services/Server';
 import { addRow, formatDateString } from '../services/Functions';
-import { sendRequest, deleteData, editData } from '../services/Server';
+import { sendRequest, deleteData, sendEditData } from '../services/Server';
 
 const Invoce = () => {
     const [number, setNumber] = useState();
@@ -36,7 +36,7 @@ const Invoce = () => {
 
     let count = 0;
     let rowCount = 0;
-    const headers = ["№", "Malın adı", "Miqdar", "Qiymət", "Ölçü vahidi", "Məbləğ"];
+    const headers = ["№", "Malın adı","Müştəri", "Miqdar", "Qiymət", "Ölçü vahidi", "Məbləğ"];
     const showDatepicker = () => { setShow(true) };
     const handlePress = () => { setModalVisible(true) }
 
@@ -104,7 +104,7 @@ const Invoce = () => {
             setModalVisible(false);
         }
         else Alert.alert(result.message);
-    }
+    };
 
     const onChange = (event, selectedDate) => {
         let currentDate = selectedDate || date;
@@ -119,7 +119,7 @@ const Invoce = () => {
         setDate(new Date())
         setFormTable([])
         setRowData([])
-    }
+    };
 
     const deleteRow = async () => {
         const idsToDelete = selectedRows.map((row) => row.id);
@@ -140,7 +140,7 @@ const Invoce = () => {
         } catch (error) {
             console.error(error);
         }
-    }
+    };
 
     const handleRowPress = (row) => {
         // setselectedRows(row);
@@ -165,24 +165,45 @@ const Invoce = () => {
         }
     };
 
-    const handleUpdate = async () => {
-        let id = updateData.id
-        let tableName = 'invoice'
-
-        const result = await editData(id, updateData, tableName)
+    const updateRow = async (row) => {
+        const result = await editData(row.id, row, 'invoice');
         if (result.success) {
             Alert.alert(result.message);
-            setUpdateModalVisible(false)
+        } else {
+            Alert.alert(result.message);
         }
-        else Alert.alert(result.message);
-    }
-
-    const handleInputChange = (field, value) => {
-        setUpdateData((prevUpdateData) => ({
-            ...prevUpdateData,
-            [field]: value,
-        }));
     };
+
+    const handleInputChange = (index, field, value) => {
+        let updatedSelectedRows = [...selectedRows];
+        updatedSelectedRows = updatedSelectedRows.map((row, rowIndex) => {
+            if (rowIndex === index) {
+                return {
+                    ...row,
+                    [field]: value,
+                };
+            }
+            return row;
+        });
+        // console.log(updatedSelectedRows);
+        setSelectedRows(updatedSelectedRows);
+        recalculateTotalAmount(updatedSelectedRows);
+    };
+
+    const handleEdit = async () => {
+        try {
+            const result = await sendEditData(selectedRows.map(item => item.id), selectedRows, 'invoice');
+            if (result.success) {
+                Alert.alert(result.message);
+                setUpdateModalVisible(false);
+            } else {
+                Alert.alert(result.message);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
 
     const handelModalOpen = () => { setUpdateModalVisible(true) }
     let id = tableData.map((item) => item.id);
@@ -337,6 +358,9 @@ const Invoce = () => {
                                         <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{item.product_name}</Text>
                                     </View>
                                     <View style={styles.cell}>
+                                        <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{item.customer}</Text>
+                                    </View>
+                                    <View style={styles.cell}>
                                         <Text>{item.quantity}</Text>
                                     </View>
                                     <View style={styles.cell}>
@@ -367,55 +391,10 @@ const Invoce = () => {
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
                             <Text style={{ display: 'none' }}>{updateData.id}</Text>
-                            {/* <UserInput
-                                name={'Malın adı'}
-                                style={styles.input}
-                                placeholder='Malın adı'
-                                keyboardType="text"
-                                value={updateData.product_name}
-                                autoCompleteType="text"
-                                setValue={(text) => handleInputChange('product_name', text)}
-                            />
-                            <UserInput
-                                name={'Müştəri'}
-                                style={styles.input}
-                                placeholder='Müştəri'
-                                keyboardType="text"
-                                value={updateData.customer}
-                                autoCompleteType="text"
-                                setValue={(text) => handleInputChange('customer', text)}
-                            />
-                            <UserInput
-                                name={'Miqdarı'}
-                                style={styles.input}
-                                placeholder='Miqdarı'
-                                keyboardType="text"
-                                value={updateData.quantity.toString()}
-                                autoCompleteType="text"
-                                setValue={(text) => handleInputChange('quantity', text)}
-                            />
-                            <UserInput
-                                name={'Ölçü vahidi'}
-                                style={styles.input}
-                                placeholder='Ölçü vahidi'
-                                keyboardType="text"
-                                value={updateData.units}
-                                autoCompleteType="text"
-                                setValue={(text) => handleInputChange('units', text)}
-                            />
-                            <UserInput
-                                name={'Qiymət'}
-                                style={styles.input}
-                                placeholder='Qiymət'
-                                keyboardType="numeric"
-                                value={updateData.price}
-                                autoCompleteType="numeric"
-                                setValue={(text) => handleInputChange('price', text)}
-                            /> */}
                             <View style={{ ...styles.row, marginHorizontal: 10 }}>
                                 {headers.map((header) => (
                                     <View style={styles.cell}>
-                                        <Text bold center>{header}</Text>
+                                        <Text>{header}</Text>
                                     </View>
                                 ))}
                             </View>
@@ -429,7 +408,15 @@ const Invoce = () => {
                                             placeholder='Malın adı'
                                             keyboardType="text"
                                             value={selectedRows[rowIndex]?.product_name}
-                                            onChangeText={(text) => handleTableInputChange(rowIndex, 'product_name', text)}
+                                            onChangeText={(text) => handleInputChange(rowIndex, 'product_name', text)}
+                                        />
+                                    </View>
+                                    <View style={styles.cell}>
+                                        <TextInput
+                                            placeholder='Müştəri'
+                                            keyboardType="text"
+                                            value={selectedRows[rowIndex]?.customer}
+                                            onChangeText={(text) => handleInputChange(rowIndex, 'customer', text)}
                                         />
                                     </View>
                                     <View style={styles.cell}>
@@ -437,7 +424,7 @@ const Invoce = () => {
                                             placeholder='Miqdar'
                                             keyboardType="numeric"
                                             value={String(selectedRows[rowIndex]?.quantity)}
-                                            onChangeText={(text) => handleTableInputChange(rowIndex, 'quantity', text)}
+                                            onChangeText={(text) => handleInputChange(rowIndex, 'quantity', text)}
                                         />
                                     </View>
                                     <View style={styles.cell}>
@@ -445,7 +432,7 @@ const Invoce = () => {
                                             placeholder='Qiymət'
                                             keyboardType="numeric"
                                             value={String(selectedRows[rowIndex]?.price)}
-                                            onChangeText={(text) => handleTableInputChange(rowIndex, 'price', text)}
+                                            onChangeText={(text) => handleInputChange(rowIndex, 'price', text)}
                                         />
                                     </View>
                                     <View style={styles.cell}>
@@ -453,7 +440,7 @@ const Invoce = () => {
                                             placeholder='Ölçü vahidi'
                                             keyboardType="text"
                                             value={selectedRows[rowIndex]?.units}
-                                            onChangeText={(text) => handleTableInputChange(rowIndex, 'units', text)}
+                                            onChangeText={(text) => handleInputChange(rowIndex, 'units', text)}
                                         />
                                     </View>
                                     <View style={styles.cell}>
@@ -475,7 +462,7 @@ const Invoce = () => {
                                     </Pressable>
                                 </View>
                                 <View style={{ margin: 10 }}>
-                                    <Pressable style={{ ...styles.button, width: 150 }} onPress={handleUpdate}>
+                                    <Pressable style={{ ...styles.button, width: 150 }} onPress={handleEdit}>
                                         <Text style={styles.text}>Yenilə</Text>
                                     </Pressable>
                                 </View>
@@ -484,17 +471,6 @@ const Invoce = () => {
                     </View>
                 </ScrollView>
             </Modal>
-
-            {/* <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                <Text>Məbləğ: <Text>{isNaN(totalSum) ? tableSum : totalSum}</Text></Text>
-                <Text>Ədv:    <Text>{edv}</Text></Text>
-                <Text>Toplam: <Text>{wholeAmout}</Text></Text>
-            </View> */}
-            {/* <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                <Pressable style={{ ...styles.button, width: 150 }} >
-                    <Text style={styles.text}>Təsdiq et</Text>
-                </Pressable>
-            </View> */}
         </ScrollView>
     );
 }
