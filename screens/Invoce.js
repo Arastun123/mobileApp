@@ -43,19 +43,17 @@ const Invoce = () => {
     const showDatepicker = () => { setShow(true) };
     const handlePress = () => { setModalVisible(true) }
 
-    useEffect(() => {
-        const fetchDataAsync = async () => {
-            try {
-                const result = await fetchData('invoice');
-                setResData(result);
-                setTableData(result);
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
-        fetchDataAsync();
-    }, []);
+    useEffect(() => { fetchDataAsync() }, []);
+    
+    const fetchDataAsync = async () => {
+        try {
+            const result = await fetchData('invoice');
+            setResData(result);
+            setTableData(result);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const handleTableInputChange = (index, field, value) => {
         let updatedFormTable = [...formTable];
@@ -158,14 +156,16 @@ const Invoce = () => {
 
     const handleInputChange = (index, field, value) => {
         let updatedSelectedRows = [...selectedRows];
-        let amount = updatedSelectedRows.map(item => item.price * item.quantity);
-        let edv = (amount * 18) / 100;
-        let allAmoount = +amount + +edv;
+        let sumAmount = updatedSelectedRows.reduce((accumulator, item) => accumulator + item.price * item.quantity, 0);
 
-        setEditTableAmount(amount);
+        let edv = (sumAmount * 18) / 100;
+        let allAmoount = +sumAmount + +edv;
+
+        setEditTableAmount(sumAmount);
         setEditTableEdv(edv);
         setEditTableAmountAll(allAmoount)
         
+        console.log(editTableAmount);
         updatedSelectedRows = updatedSelectedRows.map((row, rowIndex) => {
             if (rowIndex === index) {
                 return {
@@ -194,12 +194,19 @@ const Invoce = () => {
         }
     };
 
+    const handleRefresh = () => { fetchDataAsync() };
+
     const handelModalOpen = () => { setUpdateModalVisible(true) }
     let id = tableData.map((item) => item.id);
     let lastId = 1 + id.pop();
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
+             <TouchableOpacity onPress={handleRefresh}>
+                <View>
+                    <Text style={{ textAlign: "right", fontWeight: "bold" }}> <Ionicons name="reload" size={16} color="#333" />  </Text>
+                </View>
+            </TouchableOpacity>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}>Qaimələr</Text>
             <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
                 <Pressable style={{ ...styles.button, width: 250 }} onPress={handlePress}>

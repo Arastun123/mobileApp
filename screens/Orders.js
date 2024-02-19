@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, Text, Modal, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
+import { View, ScrollView, Text, Modal, TextInput, Pressable, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Table from "../components/Table";
@@ -30,18 +30,15 @@ const Orders = ({ navigation }) => {
     const mainHeaders = ["№", "Tarix", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
     let rowCount = 0;
 
-    useEffect(() => {
-        const fetchDataAsync = async () => {
-            try {
-                const result = await fetchData('orders');
-                if (result !== null) { setData(result) }
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
-        fetchDataAsync();
-    }, []);
+    useEffect(() => { fetchDataAsync() }, []);
+    const fetchDataAsync = async () => {
+        try {
+            const result = await fetchData('orders');
+            if (result !== null) { setData(result) }
+        } catch (error) {
+            console.error(error);
+        }
+    };
     const extractedData = resData.map((item) => [String(item.id), item.date, item.customer, item.product_name, item.price, item.quantity, item.units]);
 
     let id = resData.map((item) => item.id);
@@ -115,9 +112,15 @@ const Orders = ({ navigation }) => {
         // setCustomer()
     }
 
+    const handleRefresh = () => { fetchDataAsync() };
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Sifarişlər </Text>
+            <TouchableOpacity onPress={handleRefresh}>
+                <View>
+                    <Text style={{ textAlign: "right", fontWeight: "bold" }}> <Ionicons name="reload" size={16} color="#333" />  </Text>
+                </View>
+            </TouchableOpacity>
             <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
                 <Pressable style={{ ...styles.button, width: 250 }} onPress={handlePress}>
                     <Text style={styles.text}>Yeni Sifariş yarat</Text>

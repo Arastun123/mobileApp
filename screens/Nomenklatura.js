@@ -36,27 +36,15 @@ const Nomenklatura = () => {
     const headers = ["№", "Ad", "Növ", 'Kateqoriya', 'Brend', 'Qiymət'];
     let rowCount = 0;
 
-    useEffect(() => {
-        const fetchDataAsync = async () => {
-            try {
-                const nomenklatura = await fetchData('nomenklatura');
-                if (nomenklatura !== null) setNomenklatura(nomenklatura);
-                // const optionCategory = await fetchData('category');
-                // if (optionCategory !== null) {
-                //     setCategory(optionCategory);
-                // }
-
-                // const price = await fetchData('price');
-                // if (price !== null) {
-                //     setPrice(price);
-                // }
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
-        fetchDataAsync();
-    }, []);
+    useEffect(() => { fetchDataAsync()  }, []);
+    const fetchDataAsync = async () => {
+        try {
+            const nomenklatura = await fetchData('nomenklatura');
+            if (nomenklatura !== null) setNomenklatura(nomenklatura);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     if (!fontsLoad) { return null }
 
@@ -91,7 +79,6 @@ const Nomenklatura = () => {
         else Alert.alert(result.message);
     };
 
- 
     const handleInputChange = (index, field, value) => {
         let updatedSelectedRows = [...selectedRows];
         let amount = updatedSelectedRows.map(item => item.price * item.quantity);
@@ -101,7 +88,7 @@ const Nomenklatura = () => {
         setEditTableAmount(amount);
         setEditTableEdv(edv);
         setEditTableAmountAll(allAmoount)
-        
+
         updatedSelectedRows = updatedSelectedRows.map((row, rowIndex) => {
             if (rowIndex === index) {
                 return {
@@ -162,10 +149,17 @@ const Nomenklatura = () => {
     };
     const handelModalOpen = () => { setUpdateModalVisible(true) }
 
+    const handleRefresh = () => { fetchDataAsync() };
+
 
     return (
         <ScrollView contentContainerStyle={{ paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
             <Text style={{ marginBottom: 10, textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Nomenklatura </Text>
+            <TouchableOpacity onPress={handleRefresh}>
+                <View>
+                    <Text style={{ textAlign: "right", fontWeight: "bold" }}> <Ionicons name="reload" size={16} color="#333" />  </Text>
+                </View>
+            </TouchableOpacity>
             <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
                 <Pressable style={{ ...styles.button, width: 250 }} onPress={handlePress}>
                     <Text style={styles.text}>Yeni Nomenklatura əlavə et</Text>
