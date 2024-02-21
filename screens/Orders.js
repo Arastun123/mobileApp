@@ -87,7 +87,10 @@ const Orders = ({ navigation }) => {
         };
         const result = await sendRequest(apiUrl, postData);
 
-        if (result.success) Alert.alert(result.message);
+        if (result.success) {
+            Alert.alert(result.message)
+            fetchDataAsync()
+        }
         else Alert.alert(result.message);
 
     }
@@ -109,18 +112,11 @@ const Orders = ({ navigation }) => {
         setDate(new Date())
         setRowData([])
         setFormTable()
-        // setCustomer()
     }
 
-    const handleRefresh = () => { fetchDataAsync() };
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>
-            <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Sifarişlər </Text>
-            <TouchableOpacity onPress={handleRefresh}>
-                <View>
-                    <Text style={{ textAlign: "right", fontWeight: "bold" }}> <Ionicons name="reload" size={16} color="#333" />  </Text>
-                </View>
-            </TouchableOpacity>
+            <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Sifarişlər </Text>            
             <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
                 <Pressable style={{ ...styles.button, width: 250 }} onPress={handlePress}>
                     <Text style={styles.text}>Yeni Sifariş yarat</Text>

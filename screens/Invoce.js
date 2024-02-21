@@ -26,6 +26,7 @@ const Invoce = () => {
     const [editTableAmount, setEditTableAmount] = useState(0);
     const [editTableEdv, setEditTableEdv] = useState(0);
     const [editTableAmountAll, setEditTableAmountAll] = useState(0);
+    const [isChecked, setChecked] = useState(false)
     const [updateData, setUpdateData] = useState({
         product_name: '',
         quantity: '',
@@ -38,13 +39,13 @@ const Invoce = () => {
 
     let count = 0;
     let rowCount = 0;
-    const headers = ["№", "Malın adı", "Miqdar", "Qiymət", "Ölçü vahidi", "Məbləğ"];
-    const editHeaders = ["№", "Malın adı", "Müştəri", "Miqdar", "Qiymət", "Ölçü vahidi", "Məbləğ"];
+    const headers = ["№", "Miqdar", "Məbləğ"];
+    const editHeaders = ["№", "Müştəri", "Miqdar", "Məbləğ"];
     const showDatepicker = () => { setShow(true) };
     const handlePress = () => { setModalVisible(true) }
 
     useEffect(() => { fetchDataAsync() }, []);
-    
+
     const fetchDataAsync = async () => {
         try {
             const result = await fetchData('invoice');
@@ -56,20 +57,20 @@ const Invoce = () => {
     };
 
     const handleTableInputChange = (index, field, value) => {
-        let updatedFormTable = [...formTable];
-        let quantity = parseFloat(updatedFormTable[index]?.quantity) || 0;
-        let price = parseFloat(updatedFormTable[index]?.price) || 0;
+        let newData = [...formTable];
+        let quantity = parseFloat(newData[index]?.quantity) || 0;
+        let price = parseFloat(newData[index]?.price) || 0;
         let amount = (quantity * price).toFixed(2);
-        updatedFormTable[index] = {
-            ...updatedFormTable[index],
+        newData[index] = {
+            ...newData[index],
             [field]: value,
             amount: amount,
         };
 
         setFormTable((prevFormTable) => {
-            return updatedFormTable;
+            return newData;
         });
-        recalculateTotalAmount(updatedFormTable);
+        recalculateTotalAmount(newData);
     };
 
     const recalculateTotalAmount = (table) => {
@@ -99,7 +100,6 @@ const Invoce = () => {
             formTable: formTable,
         };
         const result = await sendRequest(apiUrl, postData);
-
         if (result.success) {
             Alert.alert(result.message);
             setModalVisible(false);
@@ -108,11 +108,13 @@ const Invoce = () => {
     };
 
     const onChange = (event, selectedDate) => {
-        let currentDate = selectedDate || date;
         setShow(Platform.OS === 'ios');
-        let formattedDate = `${selectedDate.getDate()}.${selectedDate.getMonth() + 1}.${selectedDate.getFullYear()}`
-        setDate(formattedDate)
+        if (selectedDate) {
+            let formattedDate = `${selectedDate.getDate()}.${selectedDate.getMonth() + 1}.${selectedDate.getFullYear()}`;
+            setDate(formattedDate);
+        }
     };
+
 
     const closeModal = () => {
         setModalVisible(false)
@@ -145,18 +147,29 @@ const Invoce = () => {
 
     const handleRowPress = (row) => {
         const isSelected = selectedRows.some((selectedRow) => selectedRow.id === row.id);
-
+        setChecked(true);
+    
         if (isSelected) {
             const updatedSelectedRows = selectedRows.filter((selectedRow) => selectedRow.id !== row.id);
             setSelectedRows(updatedSelectedRows);
+            setChecked(false);
         } else {
-            setSelectedRows([...selectedRows, row]);
+            const { customer, date, number, ...restRow } = row;
+            const dateObject = new Date(date);
+
+            setCustomer(customer || '');
+            setDate(dateObject || new Date());
+            setNumber(number || '');    
+            const selectedRowWithoutDate = { ...restRow };
+            const dateToSend = dateObject.toISOString(); 
+    
+            setSelectedRows([selectedRowWithoutDate]);
         }
     };
 
     const handleInputChange = (index, field, value) => {
-        let updatedSelectedRows = [...selectedRows];
-        let sumAmount = updatedSelectedRows.reduce((accumulator, item) => accumulator + item.price * item.quantity, 0);
+        let newRowData = [...selectedRows];
+        let sumAmount = newRowData.reduce((accumulator, item) => accumulator + item.price * item.quantity, 0);
 
         let edv = (sumAmount * 18) / 100;
         let allAmoount = +sumAmount + +edv;
@@ -164,9 +177,8 @@ const Invoce = () => {
         setEditTableAmount(sumAmount);
         setEditTableEdv(edv);
         setEditTableAmountAll(allAmoount)
-        
-        console.log(editTableAmount);
-        updatedSelectedRows = updatedSelectedRows.map((row, rowIndex) => {
+
+        newRowData = newRowData.map((row, rowIndex) => {
             if (rowIndex === index) {
                 return {
                     ...row,
@@ -175,13 +187,20 @@ const Invoce = () => {
             }
             return row;
         });
-        setSelectedRows(updatedSelectedRows);
-        recalculateTotalAmount(updatedSelectedRows);
+        setSelectedRows(newRowData);
+        recalculateTotalAmount(newRowData);
     };
 
     const handleEdit = async () => {
         try {
-            const result = await sendEditData(selectedRows.map(item => item.id), selectedRows, 'invoice');
+            const dateObject = new Date(date);
+            
+            const updatedRows = selectedRows.map(item => {
+                const { id, date, ...rest } = item;
+                return { ...rest, };
+            });
+
+            const result = await sendEditData(selectedRows.map(item => item.id), updatedRows, dateObject, customer, number, 'invoice');
             if (result.success) {
                 Alert.alert(result.message);
                 setUpdateModalVisible(false);
@@ -191,25 +210,19 @@ const Invoce = () => {
             }
         } catch (error) {
             console.error(error);
+            Alert.alert('Error occurred during update');
         }
     };
-
-    const handleRefresh = () => { fetchDataAsync() };
-
-    const handelModalOpen = () => { setUpdateModalVisible(true) }
+    
+    const handleModalOpen = () => { setUpdateModalVisible(true) }
     let id = tableData.map((item) => item.id);
     let lastId = 1 + id.pop();
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
-             <TouchableOpacity onPress={handleRefresh}>
-                <View>
-                    <Text style={{ textAlign: "right", fontWeight: "bold" }}> <Ionicons name="reload" size={16} color="#333" />  </Text>
-                </View>
-            </TouchableOpacity>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}>Qaimələr</Text>
             <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
-                <Pressable style={{ ...styles.button, width: 250 }} onPress={handlePress}>
+                <Pressable style={{ ...styles.button, width: 250, display: `${selectedRows.length === 0 ? 'block' : 'none'}` }} onPress={handlePress}>
                     <Text style={styles.text}>Yeni Qaimə əlavə et</Text>
                 </Pressable>
             </View>
@@ -280,14 +293,6 @@ const Invoce = () => {
                             </View>
                             <View style={styles.cell}>
                                 <TextInput
-                                    placeholder='Malın adı'
-                                    keyboardType="text"
-                                    value={formTable[rowIndex]?.product_name}
-                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'product_name', text)}
-                                />
-                            </View>
-                            <View style={styles.cell}>
-                                <TextInput
                                     placeholder='Miqdar'
                                     keyboardType="numeric"
                                     value={formTable[rowIndex]?.quantity}
@@ -302,14 +307,14 @@ const Invoce = () => {
                                     onChangeText={(text) => handleTableInputChange(rowIndex, 'price', text)}
                                 />
                             </View>
-                            <View style={styles.cell}>
+                            {/* <View style={styles.cell}>
                                 <TextInput
                                     placeholder='Ölçü vahidi'
                                     keyboardType="text"
                                     value={formTable[rowIndex]?.units}
                                     onChangeText={(text) => handleTableInputChange(rowIndex, 'units', text)}
                                 />
-                            </View>
+                            </View> */}
                             <View style={styles.cell}>
                                 <Text>{
                                     isNaN(formTable[rowIndex]?.price && formTable[rowIndex]?.quantity) ? '000' : parseFloat(formTable[rowIndex]?.price * formTable[rowIndex]?.quantity)
@@ -350,23 +355,23 @@ const Invoce = () => {
                                     <View style={styles.cell}>
                                         <Text>{++count}</Text>
                                     </View>
-                                    <View style={styles.cell}>
+                                    {/* <View style={styles.cell}>
                                         <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{item.product_name}</Text>
-                                    </View>
+                                    </View> */}
                                     <View style={styles.cell}>
                                         <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{item.customer}</Text>
                                     </View>
                                     <View style={styles.cell}>
                                         <Text>{item.quantity}</Text>
                                     </View>
-                                    <View style={styles.cell}>
+                                    {/* <View style={styles.cell}>
                                         <Text>{item.price}</Text>
                                     </View>
                                     <View style={styles.cell}>
                                         <Text>{item.units}</Text>
-                                    </View>
+                                    </View> */}
                                     <View style={styles.cell}>
-                                        <Text>{item.price * item.quantity}</Text>
+                                        <Text>{item.total * item.quantity}</Text>
                                     </View>
                                 </View>
                             </TouchableOpacity>
@@ -374,7 +379,7 @@ const Invoce = () => {
                     </View>
                 </View>
                 <View style={{ margin: 10 }}>
-                    <Pressable disabled={selectedRows.length === 0} style={{ ...styles.button, width: 150, display: `${selectedRows.length === 0 ? 'none' : 'block'}`, backgroundColor: 'blue' }} onPress={handelModalOpen}>
+                    <Pressable disabled={selectedRows.length === 0} style={{ ...styles.button, width: 150, display: `${selectedRows.length === 0 ? 'none' : 'block'}`, backgroundColor: 'blue' }} onPress={handleModalOpen}>
                         <Text style={styles.text}>Redaktə et</Text>
                     </Pressable>
                 </View>
@@ -386,66 +391,99 @@ const Invoce = () => {
                     </View>
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <TextInput
+                                        style={{ ...styles.input, width: 100 }}
+                                        placeholder="Gün-Ay-İl"
+                                        keyboardType="numeric"
+                                        value={date}
+                                        onChangeText={setDate}
+                                    />
+                                    <Pressable onPress={showDatepicker}>
+                                        <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
+                                    </Pressable>
+                                    {show && (
+                                        <DateTimePicker
+                                            testID="datePicker"
+                                            value={date}
+                                            mode="date"
+                                            is24Hour={true}
+                                            display="default"
+                                            // display="spinner"
+                                            onChange={onChange}
+                                        />
+                                    )}
+                                </View>
+                                <TextInput
+                                    style={{ ...styles.input, width: 50 }}
+                                    placeholder="№"
+                                    keyboardType="numeric"
+                                    value={number}
+                                    onChangeText={setNumber}
+                                />
+                            </View>
+                            <TextInput
+                                style={{ ...styles.input, }}
+                                placeholder="Müştəri"
+                                keyboardType="text"
+                                value={customer}
+                                onChangeText={setCustomer}
+                            />
                             <Text style={{ display: 'none' }}>{updateData.id}</Text>
-                            <View style={{ ...styles.row, marginHorizontal: 10 }}>
-                                {editHeaders.map((header) => (
-                                    <View style={styles.cell}>
-                                        <Text>{header}</Text>
+                            <View style={{ marginVertical: 10 }}>
+                                <View style={{ ...styles.row, marginHorizontal: 10 }}>
+                                    {headers.map((header) => (
+                                        <View style={styles.cell}>
+                                            <Text>{header}</Text>
+                                        </View>
+                                    ))}
+                                </View>
+                                {selectedRows.map((row, rowIndex) => (
+                                    <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
+                                        <View style={styles.cell}>
+                                            <Text>{++rowCount}</Text>
+                                        </View>
+                                        {/* <View style={styles.cell}>
+                                            <TextInput
+                                                placeholder='Malın adı'
+                                                keyboardType="text"
+                                                value={selectedRows[rowIndex]?.product_name}
+                                                onChangeText={(text) => handleInputChange(rowIndex, 'product_name', text)}
+                                            />
+                                        </View> */}
+                                        <View style={styles.cell}>
+                                            <TextInput
+                                                placeholder='Miqdar'
+                                                keyboardType="numeric"
+                                                value={String(selectedRows[rowIndex]?.quantity)}
+                                                onChangeText={(text) => handleInputChange(rowIndex, 'quantity', text)}
+                                            />
+                                        </View>
+                                        {/* <View style={styles.cell}>
+                                            <TextInput
+                                                placeholder='Qiymət'
+                                                keyboardType="numeric"
+                                                value={String(selectedRows[rowIndex]?.price)}
+                                                onChangeText={(text) => handleInputChange(rowIndex, 'price', text)}
+                                            />
+                                        </View> */}
+                                        {/* <View style={styles.cell}>
+                                            <TextInput
+                                                placeholder='Ölçü vahidi'
+                                                keyboardType="text"
+                                                value={selectedRows[rowIndex]?.units}
+                                                onChangeText={(text) => handleInputChange(rowIndex, 'units', text)}
+                                            />
+                                        </View> */}
+                                        <View style={styles.cell}>
+                                            <Text>{
+                                                isNaN(selectedRows[rowIndex]?.price && selectedRows[rowIndex]?.quantity) ? '000' : parseFloat(selectedRows[rowIndex]?.price * selectedRows[rowIndex]?.quantity)
+                                            }</Text>
+                                        </View>
                                     </View>
                                 ))}
                             </View>
-                            {selectedRows.map((row, rowIndex) => (
-                                <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
-                                    <View style={styles.cell}>
-                                        <Text>{++rowCount}</Text>
-                                    </View>
-                                    <View style={styles.cell}>
-                                        <TextInput
-                                            placeholder='Malın adı'
-                                            keyboardType="text"
-                                            value={selectedRows[rowIndex]?.product_name}
-                                            onChangeText={(text) => handleInputChange(rowIndex, 'product_name', text)}
-                                        />
-                                    </View>
-                                    <View style={styles.cell}>
-                                        <TextInput
-                                            placeholder='Müştəri'
-                                            keyboardType="text"
-                                            value={selectedRows[rowIndex]?.customer}
-                                            onChangeText={(text) => handleInputChange(rowIndex, 'customer', text)}
-                                        />
-                                    </View>
-                                    <View style={styles.cell}>
-                                        <TextInput
-                                            placeholder='Miqdar'
-                                            keyboardType="numeric"
-                                            value={String(selectedRows[rowIndex]?.quantity)}
-                                            onChangeText={(text) => handleInputChange(rowIndex, 'quantity', text)}
-                                        />
-                                    </View>
-                                    <View style={styles.cell}>
-                                        <TextInput
-                                            placeholder='Qiymət'
-                                            keyboardType="numeric"
-                                            value={String(selectedRows[rowIndex]?.price)}
-                                            onChangeText={(text) => handleInputChange(rowIndex, 'price', text)}
-                                        />
-                                    </View>
-                                    <View style={styles.cell}>
-                                        <TextInput
-                                            placeholder='Ölçü vahidi'
-                                            keyboardType="text"
-                                            value={selectedRows[rowIndex]?.units}
-                                            onChangeText={(text) => handleInputChange(rowIndex, 'units', text)}
-                                        />
-                                    </View>
-                                    <View style={styles.cell}>
-                                        <Text>{
-                                            isNaN(selectedRows[rowIndex]?.price && selectedRows[rowIndex]?.quantity) ? '000' : parseFloat(selectedRows[rowIndex]?.price * selectedRows[rowIndex]?.quantity)
-                                        }</Text>
-                                    </View>
-                                </View>
-                            ))}
                             <View style={{ alignItems: 'flex-end', margin: 10 }}>
                                 <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(editTableAmount) ? '000' : editTableAmount}</Text></Text>
                                 <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(editTableEdv) ? '000' : editTableEdv}</Text></Text>

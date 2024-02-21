@@ -25,6 +25,7 @@ export const sendRequest = async (apiUrl, postData) => {
         });
 
         if (response.status === 200) return { success: true, message: 'Məlumatlar göndərildi!' };
+        else if (response.status === 400) return { success: true, message: 'Məlumat bazada möcuddur!' };
         else return { success: false, message: 'Uğursuz cəht!' };
     } catch (error) {
         console.error(error);
@@ -32,7 +33,7 @@ export const sendRequest = async (apiUrl, postData) => {
     }
 };
 
-export const sendEditData = async (id, updatedRows, tableName) => {
+export const sendEditData = async (id, updatedRows, date, customer, number, tableName) => {
     let endpoint = `${url}/edit/${id}/${tableName}`;
     try {
         const response = await fetch(endpoint, {
@@ -40,7 +41,12 @@ export const sendEditData = async (id, updatedRows, tableName) => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(updatedRows),
+            body: JSON.stringify({
+                updatedRows: updatedRows,
+                date: date,
+                customer: customer,
+                number: number,
+            }),
         });
         if (response.status === 200) return { success: true, message: 'Məlumat yeniləndi' };
         else return { success: false, message: 'Uğursuz cəht!' };
@@ -49,9 +55,9 @@ export const sendEditData = async (id, updatedRows, tableName) => {
     }
 };
 
-
 export const deleteData = async (id, tableName) => {
     let endpoint = `${url}/delete/${id}/${tableName}`;
+    console.log(endpoint);
     try {
         const response = await fetch(endpoint, {
             method: "DELETE",
@@ -61,7 +67,7 @@ export const deleteData = async (id, tableName) => {
             },
             body: {},
         });
-        if (response.status === 200) return { success: true, message: 'Məlumat silindi' }; 
+        if (response.status === 200) return { success: true, message: 'Məlumat silindi' };
         else return { success: false, message: 'Uğursuz cəht!' };
     } catch (error) {
         return { success: false, message: 'Error occurred during the request.' };

@@ -7,10 +7,11 @@ import Table from "../components/Table";
 import DropDown from "../components/DropDown";
 import { fetchData } from '../services/Server';
 import { sendRequest, sendEditData, deleteData } from '../services/Server';
+import axios from 'axios';
 
 
 const Nomenklatura = () => {
-    const [name, setName] = useState();
+    const [name, setName] = useState('');
     const [kind, setKind] = useState();
     const [category, setCategory] = useState([]);
     const [brand, setBrand] = useState();
@@ -23,6 +24,7 @@ const Nomenklatura = () => {
     const [editTableAmount, setEditTableAmount] = useState(0);
     const [editTableEdv, setEditTableEdv] = useState(0);
     const [editTableAmountAll, setEditTableAmountAll] = useState(0);
+    const [searchResults, setSearchResults] = useState([]);
     const [updateData, setUpdateData] = useState({
         name: '',
         kind: '',
@@ -36,7 +38,14 @@ const Nomenklatura = () => {
     const headers = ["№", "Ad", "Növ", 'Kateqoriya', 'Brend', 'Qiymət'];
     let rowCount = 0;
 
-    useEffect(() => { fetchDataAsync()  }, []);
+    useEffect(() => { fetchDataAsync() }, []);
+    useEffect(() => {
+        if (name.length > 0) {
+
+            searchProduct(name);
+        }
+    }, [name]);
+
     const fetchDataAsync = async () => {
         try {
             const nomenklatura = await fetchData('nomenklatura');
@@ -51,13 +60,23 @@ const Nomenklatura = () => {
     const handlePress = () => { setModalVisible(true) }
     const closeUpdateModal = () => { setUpdateModalVisible(false) }
 
+    const searchProduct = async (query) => {
+        try {
+            const response = await axios.get(`http://192.168.88.44:3000/endpoint/autoProducts?query=${query}`);
+            setSearchResults(response.data);
+        } catch (error) {
+            console.error('Error searching products:', error);
+        }
+    };
+
     const closeModal = () => {
         setModalVisible(false)
-        setName()
+        setName('')
         setCategory()
         setBrand()
         setPrice()
         setKind()
+        setSearchResults([])
     }
 
     const sendData = async () => {
@@ -75,6 +94,7 @@ const Nomenklatura = () => {
         if (result.success) {
             Alert.alert(result.message);
             setModalVisible(false)
+            fetchDataAsync()
         }
         else Alert.alert(result.message);
     };
@@ -102,6 +122,7 @@ const Nomenklatura = () => {
     };
 
     const handleEdit = async () => {
+        console.log(selectedRows);
         try {
             const result = await sendEditData(selectedRows.map(item => item.id), selectedRows, 'nomenklatura');
             if (result.success) {
@@ -118,7 +139,6 @@ const Nomenklatura = () => {
 
     const handleRowPress = (row) => {
         const isSelected = selectedRows.some((selectedRow) => selectedRow.id === row.id);
-
         if (isSelected) {
             const updatedSelectedRows = selectedRows.filter((selectedRow) => selectedRow.id !== row.id);
             setSelectedRows(updatedSelectedRows);
@@ -143,23 +163,16 @@ const Nomenklatura = () => {
             setSelectedRows([]);
             Alert.alert('Məlumatlar silindi');
             setUpdateModalVisible(false)
+            fetchDataAsync()
         } catch (error) {
             console.error(error);
         }
     };
     const handelModalOpen = () => { setUpdateModalVisible(true) }
 
-    const handleRefresh = () => { fetchDataAsync() };
-
-
     return (
         <ScrollView contentContainerStyle={{ paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
             <Text style={{ marginBottom: 10, textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Nomenklatura </Text>
-            <TouchableOpacity onPress={handleRefresh}>
-                <View>
-                    <Text style={{ textAlign: "right", fontWeight: "bold" }}> <Ionicons name="reload" size={16} color="#333" />  </Text>
-                </View>
-            </TouchableOpacity>
             <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
                 <Pressable style={{ ...styles.button, width: 250 }} onPress={handlePress}>
                     <Text style={styles.text}>Yeni Nomenklatura əlavə et</Text>
@@ -177,6 +190,13 @@ const Nomenklatura = () => {
                         setValue={setName}
                         autoCompleteType="text"
                     />
+                    <View style={{ padding: 15 }}>
+                        {searchResults.map((result) => (
+                            <Text key={result.id} style={{ padding: 3 }} onPress={() => setName(result.name)}>
+                                {result.name}
+                            </Text>
+                        ))}
+                    </View>
                     <UserInput
                         name="Növ"
                         value={kind}
@@ -265,8 +285,8 @@ const Nomenklatura = () => {
                         <View style={styles.modalContent}>
                             <Text style={{ display: 'none' }}>{updateData.id}</Text>
                             <View style={{ ...styles.row, marginHorizontal: 10 }}>
-                                {headers.map((header) => (
-                                    <View style={styles.cell}>
+                                {headers.map((header, rowIndex) => (
+                                    <View style={styles.cell} key={`row_${rowIndex}`}>
                                         <Text>{header}</Text>
                                     </View>
                                 ))}
@@ -334,7 +354,6 @@ const Nomenklatura = () => {
                     </View>
                 </ScrollView>
             </Modal>
-
             <View style={styles.table}>
                 <View style={styles.row}>
                     <View style={styles.cell}>

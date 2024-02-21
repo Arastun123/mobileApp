@@ -45,6 +45,8 @@ const CassaOrders = () => {
 
             if (response.status === 200) Alert.alert('Məlumatlar göndərildi!');
             else Alert.alert('Uğursuz cəht!');
+            fetchDataAsync();
+            
         } catch (error) {
             console.error(error);
         }
