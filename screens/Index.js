@@ -48,6 +48,9 @@ const Index = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
                     <TouchableOpacity style={styles.buttonContainer}>
+                            <Text onPress={() => navigation.navigate('Goods')} style={styles.buttonText}> Mallar</Text>
+                        </TouchableOpacity>
+                    <TouchableOpacity style={styles.buttonContainer}>
                         <Text onPress={() => navigation.navigate('Settings')} style={styles.buttonText}>  <Ionicons name="settings" size={16} color="white" />  </Text>
                     </TouchableOpacity>
                 </View>

@@ -5,8 +5,9 @@ import UserInput from "../components/UserInput";
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { fetchData } from '../services/Server';
-import { addRow, formatDateString } from '../services/Functions';
-import { sendRequest, deleteData, sendEditData } from '../services/Server';
+import { addRow, formatDateString, removeLastRow } from '../services/Functions';
+import { sendRequest, deleteData, sendEditData, } from '../services/Server';
+import { all } from 'axios';
 
 const Invoce = () => {
     const [number, setNumber] = useState();
@@ -27,11 +28,10 @@ const Invoce = () => {
     const [editTableEdv, setEditTableEdv] = useState(0);
     const [editTableAmountAll, setEditTableAmountAll] = useState(0);
     const [isChecked, setChecked] = useState(false)
+    const [rowsSameCustomer, setRowsSameCustomer] = useState([])
     const [updateData, setUpdateData] = useState({
-        product_name: '',
         quantity: '',
-        price: '',
-        units: '',
+        total: '',
         customer: ''
     });
 
@@ -39,8 +39,9 @@ const Invoce = () => {
 
     let count = 0;
     let rowCount = 0;
-    const headers = ["№", "Miqdar", "Məbləğ"];
-    const editHeaders = ["№", "Müştəri", "Miqdar", "Məbləğ"];
+    const headers = ["№", "Müştəri", "Miqdar", "Məbləğ"];
+    const editHeaders = ["№", "Miqdar", "Məbləğ", 'Malın adı'];
+    const createHeaders = ["№", 'Qiymət', "Miqdar", 'Malın adı', "Məbləğ"];
     const showDatepicker = () => { setShow(true) };
     const handlePress = () => { setModalVisible(true) }
 
@@ -57,54 +58,62 @@ const Invoce = () => {
     };
 
     const handleTableInputChange = (index, field, value) => {
-        let newData = [...formTable];
-        let quantity = parseFloat(newData[index]?.quantity) || 0;
-        let price = parseFloat(newData[index]?.price) || 0;
-        let amount = (quantity * price).toFixed(2);
-        newData[index] = {
-            ...newData[index],
-            [field]: value,
-            amount: amount,
-        };
-
         setFormTable((prevFormTable) => {
+            const newData = [...prevFormTable];
+            const quantity = parseFloat(newData[index]?.quantity) || 0;
+            const price = parseFloat(newData[index]?.price) || 0;
+
+            const inputValue = parseFloat(value) || 0;
+
+            let total = (price * quantity).toFixed(2);
+
+            let sumAmount = newData.reduce((accumulator, item) => accumulator + (+item.price || 0) * (+item.quantity || 0), 0);
+
+            let edv = (sumAmount * 18) / 100;
+            let allAmount = sumAmount + edv;
+
+            setEditTableAmount(sumAmount);
+            setEditTableEdv(edv);
+            setEditTableAmountAll(allAmount);
+
+            newData[index] = {
+                ...newData[index],
+                [field]: inputValue,
+                total: total,
+            };
             return newData;
         });
-        recalculateTotalAmount(newData);
-    };
-
-    const recalculateTotalAmount = (table) => {
-        let totalAmount = table.reduce((sum, row) => {
-            let rowAmount = parseFloat(row.amount) || 0;
-            return sum + rowAmount;
-        }, 0);
-
-        let edv = (totalAmount * 18) / 100;
-        let wholeAmount = edv + totalAmount;
-
-        setTotalAmount(totalAmount.toFixed(2));
-        setEdv(edv.toFixed(2));
-        setWholeAmount(wholeAmount.toFixed(2));
     };
 
     const handleAddRow = () => { addRow(setRowData) };
+    const handleRemoveRow = () => { removeLastRow(setRowData) };
     const handleDate = () => { formatDateString(dateStr) }
     const closeUpdateModal = () => { setUpdateModalVisible(false) }
 
     const sendData = async () => {
-        let apiUrl = '/invoice'
+        let apiUrl = '/invoice';
+
+        const cleanedFormTable = formTable.map(item => {
+            const { price, ...itemWithoutPrice } = item;
+            return itemWithoutPrice;
+        });
+
         const postData = {
             date: formatDateString(date),
             number: lastId,
             customer: customer,
-            formTable: formTable,
+            formTable: cleanedFormTable,
         };
+        console.log(postData);
         const result = await sendRequest(apiUrl, postData);
+
         if (result.success) {
             Alert.alert(result.message);
             setModalVisible(false);
+            fetchDataAsync()
+        } else {
+            Alert.alert(result.message);
         }
-        else Alert.alert(result.message);
     };
 
     const onChange = (event, selectedDate) => {
@@ -114,7 +123,6 @@ const Invoce = () => {
             setDate(formattedDate);
         }
     };
-
 
     const closeModal = () => {
         setModalVisible(false)
@@ -140,6 +148,7 @@ const Invoce = () => {
             setSelectedRows([]);
             Alert.alert('Məlumatlar silindi');
             setUpdateModalVisible(false)
+            fetchDataAsync()
         } catch (error) {
             console.error(error);
         }
@@ -148,7 +157,7 @@ const Invoce = () => {
     const handleRowPress = (row) => {
         const isSelected = selectedRows.some((selectedRow) => selectedRow.id === row.id);
         setChecked(true);
-    
+
         if (isSelected) {
             const updatedSelectedRows = selectedRows.filter((selectedRow) => selectedRow.id !== row.id);
             setSelectedRows(updatedSelectedRows);
@@ -159,62 +168,84 @@ const Invoce = () => {
 
             setCustomer(customer || '');
             setDate(dateObject || new Date());
-            setNumber(number || '');    
+            setNumber(number || '');
             const selectedRowWithoutDate = { ...restRow };
-            const dateToSend = dateObject.toISOString(); 
-    
+            const dateToSend = dateObject.toISOString();
+            const rowsWithSameCustomer = data.filter((rowData) => rowData.customer === customer);
             setSelectedRows([selectedRowWithoutDate]);
+            setRowsSameCustomer(rowsWithSameCustomer);
+            // console.log(rowsWithSameCustomer);
         }
     };
 
     const handleInputChange = (index, field, value) => {
-        let newRowData = [...selectedRows];
-        let sumAmount = newRowData.reduce((accumulator, item) => accumulator + item.price * item.quantity, 0);
+        let newRowData = [...rowsSameCustomer];
+
+        newRowData[index] = {
+            ...newRowData[index],
+            [field]: value,
+        };
+
+        let sumAmount = newRowData.reduce((accumulator, item) => accumulator + (+item.total || 0), 0);
 
         let edv = (sumAmount * 18) / 100;
-        let allAmoount = +sumAmount + +edv;
+        let allAmount = sumAmount + edv;
 
         setEditTableAmount(sumAmount);
         setEditTableEdv(edv);
-        setEditTableAmountAll(allAmoount)
+        setEditTableAmountAll(allAmount);
 
-        newRowData = newRowData.map((row, rowIndex) => {
-            if (rowIndex === index) {
-                return {
-                    ...row,
-                    [field]: value,
-                };
-            }
-            return row;
-        });
-        setSelectedRows(newRowData);
-        recalculateTotalAmount(newRowData);
+        setRowsSameCustomer(newRowData);
     };
 
     const handleEdit = async () => {
         try {
             const dateObject = new Date(date);
-            
+
             const updatedRows = selectedRows.map(item => {
-                const { id, date, ...rest } = item;
-                return { ...rest, };
+                return {
+                    id: item.id,
+                    quantity: item.quantity,
+                    total: item.total,
+                };
             });
 
-            const result = await sendEditData(selectedRows.map(item => item.id), updatedRows, dateObject, customer, number, 'invoice');
-            if (result.success) {
-                Alert.alert(result.message);
+            const endpoint = `http://192.168.88.44:3000/api/invoice/${updatedRows[0].id}`;
+
+            const result = await fetch(endpoint, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ updatedRows, date: dateObject.toISOString(), customer, number }),
+            });
+
+            const resultJson = await result.json();
+
+            if (resultJson.success) {
+                Alert.alert(resultJson.message);
                 setUpdateModalVisible(false);
                 setSelectedRows([]);
+                fetchDataAsync();
             } else {
-                Alert.alert(result.message);
+                Alert.alert(resultJson.message);
             }
         } catch (error) {
             console.error(error);
             Alert.alert('Error occurred during update');
         }
     };
-    
-    const handleModalOpen = () => { setUpdateModalVisible(true) }
+
+    const handleModalOpen = () => {
+        setUpdateModalVisible(true)
+        let sumAmount = rowsSameCustomer.reduce((accumulator, item) => accumulator + (+item.total || 0), 0);
+        let edv = (sumAmount * 18) / 100;
+        let allAmount = sumAmount + edv;
+
+        setEditTableAmount(sumAmount);
+        setEditTableEdv(edv);
+        setEditTableAmountAll(allAmount);
+    }
     let id = tableData.map((item) => item.id);
     let lastId = 1 + id.pop();
 
@@ -272,15 +303,20 @@ const Invoce = () => {
                             onChangeText={(text) => setCustomer(text)}
                         />
                     </View>
-                    <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
+                    <View style={{ marginVertical: 20, marginHorizontal: 10, flexDirection: 'row' }}>
                         <View>
-                            <Pressable style={styles.button} onPress={handleAddRow}>
+                            <Pressable style={{ ...styles.button, marginHorizontal: 5 }} onPress={handleAddRow}>
                                 <Text style={styles.text}>+</Text>
+                            </Pressable>
+                        </View>
+                        <View>
+                            <Pressable style={styles.button} onPress={handleRemoveRow}>
+                                <Text style={styles.text}>-</Text>
                             </Pressable>
                         </View>
                     </View>
                     <View style={{ ...styles.row, marginHorizontal: 10 }}>
-                        {headers.map((header) => (
+                        {createHeaders.map((header) => (
                             <View style={styles.cell}>
                                 <Text bold center>{header}</Text>
                             </View>
@@ -293,6 +329,14 @@ const Invoce = () => {
                             </View>
                             <View style={styles.cell}>
                                 <TextInput
+                                    placeholder='Qiymət'
+                                    keyboardType="numeric"
+                                    value={formTable[rowIndex]?.price}
+                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'price', text)}
+                                />
+                            </View>
+                            <View style={styles.cell}>
+                                <TextInput
                                     placeholder='Miqdar'
                                     keyboardType="numeric"
                                     value={formTable[rowIndex]?.quantity}
@@ -301,20 +345,12 @@ const Invoce = () => {
                             </View>
                             <View style={styles.cell}>
                                 <TextInput
-                                    placeholder='Qiymət'
-                                    keyboardType="numeric"
-                                    value={formTable[rowIndex]?.price}
-                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'price', text)}
+                                    placeholder='Malın adı'
+                                    keyboardType="text"
+                                    value={formTable[rowIndex]?.product_name}
+                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'product_name', text)}
                                 />
                             </View>
-                            {/* <View style={styles.cell}>
-                                <TextInput
-                                    placeholder='Ölçü vahidi'
-                                    keyboardType="text"
-                                    value={formTable[rowIndex]?.units}
-                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'units', text)}
-                                />
-                            </View> */}
                             <View style={styles.cell}>
                                 <Text>{
                                     isNaN(formTable[rowIndex]?.price && formTable[rowIndex]?.quantity) ? '000' : parseFloat(formTable[rowIndex]?.price * formTable[rowIndex]?.quantity)
@@ -323,9 +359,9 @@ const Invoce = () => {
                         </View>
                     ))}
                     <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                        <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(totalAmount) ? '000' : totalAmount}</Text></Text>
-                        <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(edv) ? '000' : edv}</Text></Text>
-                        <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(wholeAmout) ? '000' : wholeAmout}</Text></Text>
+                        <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(editTableAmount) ? '000' : editTableAmount}</Text></Text>
+                        <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(editTableEdv) ? '000' : editTableEdv}</Text></Text>
+                        <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(editTableAmountAll) ? '000' : editTableAmountAll}</Text></Text>
                     </View>
                     <View style={{ alignItems: 'flex-end', margin: 10 }}>
                         <Pressable style={{ ...styles.button, width: 150 }} onPress={sendData}>
@@ -337,7 +373,7 @@ const Invoce = () => {
             <View>
                 <View style={styles.table}>
                     <View style={styles.row}>
-                        {editHeaders.map((header, rowIndex) => (
+                        {headers.map((header, rowIndex) => (
                             <View style={styles.cell} key={`row_${rowIndex}`}>
                                 <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{header}</Text>
                             </View>
@@ -355,33 +391,32 @@ const Invoce = () => {
                                     <View style={styles.cell}>
                                         <Text>{++count}</Text>
                                     </View>
-                                    {/* <View style={styles.cell}>
-                                        <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{item.product_name}</Text>
-                                    </View> */}
                                     <View style={styles.cell}>
                                         <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{item.customer}</Text>
                                     </View>
                                     <View style={styles.cell}>
                                         <Text>{item.quantity}</Text>
                                     </View>
-                                    {/* <View style={styles.cell}>
-                                        <Text>{item.price}</Text>
-                                    </View>
                                     <View style={styles.cell}>
-                                        <Text>{item.units}</Text>
-                                    </View> */}
-                                    <View style={styles.cell}>
-                                        <Text>{item.total * item.quantity}</Text>
+                                        <Text>{item.total}</Text>
                                     </View>
                                 </View>
                             </TouchableOpacity>
                         ))}
                     </View>
                 </View>
-                <View style={{ margin: 10 }}>
-                    <Pressable disabled={selectedRows.length === 0} style={{ ...styles.button, width: 150, display: `${selectedRows.length === 0 ? 'none' : 'block'}`, backgroundColor: 'blue' }} onPress={handleModalOpen}>
-                        <Text style={styles.text}>Redaktə et</Text>
-                    </Pressable>
+                <View style={{ margin: 10, display: `${selectedRows.length === 0 ? 'none' : 'block'}`, flexDirection: 'row' }}>
+                    <View style={{ margin: 10 }}>
+                        <Pressable disabled={selectedRows.length === 0} style={{ ...styles.button, width: 150, backgroundColor: 'blue' }} onPress={handleModalOpen}>
+                            <Text style={styles.text}>Redaktə et</Text>
+                        </Pressable>
+                    </View>
+
+                    <View style={{ margin: 10 }}>
+                        <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
+                            <Text style={styles.text}>Sil</Text>
+                        </Pressable>
+                    </View>
                 </View>
             </View>
             <Modal visible={isUpdateModalVisible} animationType="slide">
@@ -430,56 +465,42 @@ const Invoce = () => {
                                 value={customer}
                                 onChangeText={setCustomer}
                             />
-                            <Text style={{ display: 'none' }}>{updateData.id}</Text>
                             <View style={{ marginVertical: 10 }}>
                                 <View style={{ ...styles.row, marginHorizontal: 10 }}>
-                                    {headers.map((header) => (
+                                    {editHeaders.map((header) => (
                                         <View style={styles.cell}>
                                             <Text>{header}</Text>
                                         </View>
                                     ))}
                                 </View>
-                                {selectedRows.map((row, rowIndex) => (
+                                {rowsSameCustomer.map((row, rowIndex) => (
                                     <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
                                         <View style={styles.cell}>
                                             <Text>{++rowCount}</Text>
                                         </View>
-                                        {/* <View style={styles.cell}>
-                                            <TextInput
-                                                placeholder='Malın adı'
-                                                keyboardType="text"
-                                                value={selectedRows[rowIndex]?.product_name}
-                                                onChangeText={(text) => handleInputChange(rowIndex, 'product_name', text)}
-                                            />
-                                        </View> */}
                                         <View style={styles.cell}>
                                             <TextInput
                                                 placeholder='Miqdar'
                                                 keyboardType="numeric"
-                                                value={String(selectedRows[rowIndex]?.quantity)}
+                                                value={String(rowsSameCustomer[rowIndex]?.quantity)}
                                                 onChangeText={(text) => handleInputChange(rowIndex, 'quantity', text)}
                                             />
                                         </View>
-                                        {/* <View style={styles.cell}>
-                                            <TextInput
-                                                placeholder='Qiymət'
-                                                keyboardType="numeric"
-                                                value={String(selectedRows[rowIndex]?.price)}
-                                                onChangeText={(text) => handleInputChange(rowIndex, 'price', text)}
-                                            />
-                                        </View> */}
-                                        {/* <View style={styles.cell}>
-                                            <TextInput
-                                                placeholder='Ölçü vahidi'
-                                                keyboardType="text"
-                                                value={selectedRows[rowIndex]?.units}
-                                                onChangeText={(text) => handleInputChange(rowIndex, 'units', text)}
-                                            />
-                                        </View> */}
                                         <View style={styles.cell}>
-                                            <Text>{
-                                                isNaN(selectedRows[rowIndex]?.price && selectedRows[rowIndex]?.quantity) ? '000' : parseFloat(selectedRows[rowIndex]?.price * selectedRows[rowIndex]?.quantity)
-                                            }</Text>
+                                            <TextInput
+                                                placeholder='Məbləğ'
+                                                keyboardType="numeric"
+                                                value={String(rowsSameCustomer[rowIndex]?.total)}
+                                                onChangeText={(text) => handleInputChange(rowIndex, 'total', text)}
+                                            />
+                                        </View>
+                                        <View style={styles.cell}>
+                                            <TextInput
+                                                placeholder='Malın adı'
+                                                keyboardType="text"
+                                                value={String(rowsSameCustomer[rowIndex]?.product_name)}
+                                                onChangeText={(text) => handleInputChange(rowIndex, 'product_name', text)}
+                                            />
                                         </View>
                                     </View>
                                 ))}
@@ -490,11 +511,7 @@ const Invoce = () => {
                                 <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(editTableAmountAll) ? '000' : editTableAmountAll}</Text></Text>
                             </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <View style={{ margin: 10 }}>
-                                    <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
-                                        <Text style={styles.text}>Sil</Text>
-                                    </Pressable>
-                                </View>
+
                                 <View style={{ margin: 10 }}>
                                     <Pressable style={{ ...styles.button, width: 150 }} onPress={handleEdit}>
                                         <Text style={styles.text}>Yenilə</Text>

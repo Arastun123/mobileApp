@@ -33,8 +33,8 @@ export const sendRequest = async (apiUrl, postData) => {
     }
 };
 
-export const sendEditData = async (id, updatedRows, date, customer, number, tableName) => {
-    let endpoint = `${url}/edit/${id}/${tableName}`;
+export const sendEditData = async (updatedRows, tableName) => {
+    let endpoint = `${url}/edit/${tableName}`;
     try {
         const response = await fetch(endpoint, {
             method: 'PUT',
@@ -43,9 +43,6 @@ export const sendEditData = async (id, updatedRows, date, customer, number, tabl
             },
             body: JSON.stringify({
                 updatedRows: updatedRows,
-                date: date,
-                customer: customer,
-                number: number,
             }),
         });
         if (response.status === 200) return { success: true, message: 'Məlumat yeniləndi' };
@@ -57,7 +54,6 @@ export const sendEditData = async (id, updatedRows, date, customer, number, tabl
 
 export const deleteData = async (id, tableName) => {
     let endpoint = `${url}/delete/${id}/${tableName}`;
-    console.log(endpoint);
     try {
         const response = await fetch(endpoint, {
             method: "DELETE",

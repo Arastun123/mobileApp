@@ -122,14 +122,16 @@ const Nomenklatura = () => {
     };
 
     const handleEdit = async () => {
-        console.log(selectedRows);
+        let tableName = 'nomenklatura';
         try {
-            const result = await sendEditData(selectedRows.map(item => item.id), selectedRows, 'nomenklatura');
+            const result = await sendEditData(selectedRows, tableName);
             if (result.success) {
                 Alert.alert(result.message);
                 setUpdateModalVisible(false);
                 setSelectedRows([]);
+                fetchDataAsync();
             } else {
+                setSelectedRows([]);
                 Alert.alert(result.message);
             }
         } catch (error) {
@@ -145,6 +147,7 @@ const Nomenklatura = () => {
         } else {
             setSelectedRows([...selectedRows, row]);
         }
+
     };
 
     const deleteRow = async () => {
@@ -235,7 +238,7 @@ const Nomenklatura = () => {
                 </View>
             </Modal>
 
-            <View style={{ ...styles.row, marginHorizontal: 5 }}>
+            <View style={{ ...styles.row }}>
                 {headers.map((header, rowIndex) => (
                     <View style={styles.cell} key={`row_${rowIndex}`}>
                         <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{header}</Text>

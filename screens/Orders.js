@@ -6,7 +6,7 @@ import Table from "../components/Table";
 import { useFonts } from "expo-font";
 import { fetchData } from '../services/Server';
 import { Ionicons } from '@expo/vector-icons';
-import { addRow, formatDateString } from '../services/Functions';
+import { addRow, formatDateString, removeLastRow } from '../services/Functions';
 import { sendRequest, deleteData } from '../services/Server';
 
 
@@ -106,6 +106,7 @@ const Orders = ({ navigation }) => {
     const handlePress = () => { setModalVisible(true) }
     const showDatepicker = () => { setShow(true) };
     const handleAddRow = () => { addRow(setRowData) };
+    const handleRemoveRow = () => { removeLastRow(setRowData) };
 
     const closeModal = () => {
         setModalVisible(false)
@@ -167,10 +168,15 @@ const Orders = ({ navigation }) => {
                             onChangeText={(text) => setCustomer(text)}
                         />
                     </View>
-                    <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
+                    <View style={{ marginVertical: 20, marginHorizontal: 10, flexDirection: 'row' }}>
                         <View>
-                            <Pressable style={styles.button} onPress={handleAddRow}>
+                            <Pressable style={{ ...styles.button, marginHorizontal: 5 }} onPress={handleAddRow}>
                                 <Text style={styles.text}>+</Text>
+                            </Pressable>
+                        </View>
+                        <View>
+                            <Pressable style={styles.button} onPress={handleRemoveRow}>
+                                <Text style={styles.text}>-</Text>
                             </Pressable>
                         </View>
                     </View>
