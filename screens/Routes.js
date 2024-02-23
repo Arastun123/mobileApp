@@ -15,7 +15,7 @@ const Routes = ({ navigation }) => {
     useEffect(() => {
         const fetchDataAsync = async () => {
             try {
-                const result = await fetchData('routes');
+                const result = await fetchData('routes', 'true');
                 if (result !== null) {
                     setData(result);
                 }

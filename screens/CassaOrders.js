@@ -11,7 +11,7 @@ const CassaOrders = () => {
     useEffect(() => {
         const fetchDataAsync = async () => {
             try {
-                const result = await fetchData('casse_orders');
+                const result = await fetchData('casse_orders','true');
                 if (result !== null) {
                     setData(result)
                 }

@@ -7,33 +7,33 @@ import { useFonts } from 'expo-font';
 import { fetchData } from '../services/Server';
 import { addRow, formatDateString, removeLastRow } from '../services/Functions';
 import { sendRequest, deleteData, sendEditData, } from '../services/Server';
-import { all } from 'axios';
 
 const Invoce = () => {
     const [number, setNumber] = useState();
     const [data, setResData] = useState([]);
-    const [show, setShow] = useState(false);
+    // const [show, setShow] = useState(false);
     const [customer, setCustomer] = useState();
     const [rowData, setRowData] = useState([]);
     const [date, setDate] = useState(new Date());
     const [tableData, setTableData] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [formTable, setFormTable] = useState([]);
-    const [totalAmount, setTotalAmount] = useState(0);
-    const [edv, setEdv] = useState(0);
-    const [wholeAmout, setWholeAmount] = useState(0);
+    // const [totalAmount, setTotalAmount] = useState(0);
+    // const [edv, setEdv] = useState(0);
+    // const [wholeAmout, setWholeAmount] = useState(0);
     const [selectedRows, setSelectedRows] = useState([]);
     const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
     const [editTableAmount, setEditTableAmount] = useState(0);
     const [editTableEdv, setEditTableEdv] = useState(0);
     const [editTableAmountAll, setEditTableAmountAll] = useState(0);
     const [isChecked, setChecked] = useState(false)
-    const [rowsSameCustomer, setRowsSameCustomer] = useState([])
-    const [updateData, setUpdateData] = useState({
-        quantity: '',
-        total: '',
-        customer: ''
-    });
+    const [rowsSameCustomer, setRowsSameCustomer] = useState([]);
+    const [showDatepicker, setShowDatepicker] = useState(false);
+    // const [updateData, setUpdateData] = useState({
+    //     quantity: '',
+    //     total: '',
+    //     customer: ''
+    // });
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
 
@@ -42,7 +42,8 @@ const Invoce = () => {
     const headers = ["№", "Müştəri", "Miqdar", "Məbləğ"];
     const editHeaders = ["№", "Miqdar", "Məbləğ", 'Malın adı'];
     const createHeaders = ["№", 'Qiymət', "Miqdar", 'Malın adı', "Məbləğ"];
-    const showDatepicker = () => { setShow(true) };
+    const handleDateShow = () => { setShowDatepicker(true) };
+
     const handlePress = () => { setModalVisible(true) }
 
     useEffect(() => { fetchDataAsync() }, []);
@@ -59,11 +60,10 @@ const Invoce = () => {
 
     const handleTableInputChange = (index, field, value) => {
         setFormTable((prevFormTable) => {
+
             const newData = [...prevFormTable];
             const quantity = parseFloat(newData[index]?.quantity) || 0;
             const price = parseFloat(newData[index]?.price) || 0;
-
-            const inputValue = parseFloat(value) || 0;
 
             let total = (price * quantity).toFixed(2);
 
@@ -78,8 +78,8 @@ const Invoce = () => {
 
             newData[index] = {
                 ...newData[index],
-                [field]: inputValue,
-                total: total,
+                [field]: value,
+                // total: total,
             };
             return newData;
         });
@@ -93,33 +93,26 @@ const Invoce = () => {
     const sendData = async () => {
         let apiUrl = '/invoice';
 
-        const cleanedFormTable = formTable.map(item => {
-            const { price, ...itemWithoutPrice } = item;
-            return itemWithoutPrice;
-        });
-
         const postData = {
-            date: formatDateString(date),
-            number: lastId,
+            date: date,
+            number: isNaN(lastId) ? '1' : lastId,
             customer: customer,
-            formTable: cleanedFormTable,
+            formTable: formTable,
         };
-        console.log(postData);
         const result = await sendRequest(apiUrl, postData);
 
         if (result.success) {
             Alert.alert(result.message);
-            setModalVisible(false);
-            fetchDataAsync()
+            closeModal()
         } else {
             Alert.alert(result.message);
         }
     };
 
     const onChange = (event, selectedDate) => {
-        setShow(Platform.OS === 'ios');
+        setShowDatepicker(Platform.OS === 'ios');
         if (selectedDate) {
-            let formattedDate = `${selectedDate.getDate()}.${selectedDate.getMonth() + 1}.${selectedDate.getFullYear()}`;
+            let formattedDate = selectedDate.toISOString().split('T')[0];
             setDate(formattedDate);
         }
     };
@@ -130,6 +123,7 @@ const Invoce = () => {
         setDate(new Date())
         setFormTable([])
         setRowData([])
+        fetchDataAsync()
     };
 
     const deleteRow = async () => {
@@ -186,7 +180,7 @@ const Invoce = () => {
             [field]: value,
         };
 
-        let sumAmount = newRowData.reduce((accumulator, item) => accumulator + (+item.total || 0), 0);
+        let sumAmount = newRowData.reduce((accumulator, item) => accumulator + ((+item.price || 0) * (+item.quantity || 0)), 0);
 
         let edv = (sumAmount * 18) / 100;
         let allAmount = sumAmount + edv;
@@ -201,27 +195,33 @@ const Invoce = () => {
     const handleEdit = async () => {
         try {
             const dateObject = new Date(date);
-
-            const updatedRows = selectedRows.map(item => {
+    
+            const updatedRows = rowsSameCustomer.map(item => {
                 return {
                     id: item.id,
-                    quantity: item.quantity,
-                    total: item.total,
+                    quantity: item.quantity || 0,
+                    price: item.price || 0,
+                    product_name: item.product_name || '',
                 };
             });
-
-            const endpoint = `http://192.168.88.44:3000/api/invoice/${updatedRows[0].id}`;
-
+    
+            const endpoint = `http://192.168.88.44:3000/api/invoice`;
+    
             const result = await fetch(endpoint, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ updatedRows, date: dateObject.toISOString(), customer, number }),
+                body: JSON.stringify({
+                    newRows: updatedRows,  
+                    date: dateObject.toISOString(),
+                    customer,
+                    number,
+                }),
             });
-
+    
             const resultJson = await result.json();
-
+    
             if (resultJson.success) {
                 Alert.alert(resultJson.message);
                 setUpdateModalVisible(false);
@@ -235,10 +235,11 @@ const Invoce = () => {
             Alert.alert('Error occurred during update');
         }
     };
+    
 
     const handleModalOpen = () => {
         setUpdateModalVisible(true)
-        let sumAmount = rowsSameCustomer.reduce((accumulator, item) => accumulator + (+item.total || 0), 0);
+        let sumAmount = rowsSameCustomer.reduce((accumulator, item) => accumulator + ((+item.price || 0) * (+item.quantity || 0)), 0);
         let edv = (sumAmount * 18) / 100;
         let allAmount = sumAmount + edv;
 
@@ -272,17 +273,16 @@ const Invoce = () => {
                                     value={date}
                                     onChangeText={setDate}
                                 />
-                                <Pressable onPress={showDatepicker}>
+                                <Pressable onPress={handleDateShow}>
                                     <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
                                 </Pressable>
-                                {show && (
+                                {showDatepicker && (
                                     <DateTimePicker
                                         testID="datePicker"
-                                        value={date}
+                                        value={new Date(date)}
                                         mode="date"
                                         is24Hour={true}
                                         display="default"
-                                        // display="spinner"
                                         onChange={onChange}
                                     />
                                 )}
@@ -291,7 +291,7 @@ const Invoce = () => {
                                 style={{ ...styles.input, width: 50 }}
                                 placeholder="№"
                                 keyboardType="numeric"
-                                value={String(lastId)}
+                                value={isNaN(lastId) ? '1' : String(lastId)}
                                 onChangeText={setNumber}
                             />
                         </View>
@@ -398,7 +398,7 @@ const Invoce = () => {
                                         <Text>{item.quantity}</Text>
                                     </View>
                                     <View style={styles.cell}>
-                                        <Text>{item.total}</Text>
+                                        <Text>{item.price * item.quantity}</Text>
                                     </View>
                                 </View>
                             </TouchableOpacity>
@@ -435,17 +435,16 @@ const Invoce = () => {
                                         value={date}
                                         onChangeText={setDate}
                                     />
-                                    <Pressable onPress={showDatepicker}>
+                                    <Pressable onPress={handleDateShow}>
                                         <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
                                     </Pressable>
-                                    {show && (
+                                    {showDatepicker && (
                                         <DateTimePicker
                                             testID="datePicker"
-                                            value={date}
+                                            value={new Date(date)}
                                             mode="date"
                                             is24Hour={true}
                                             display="default"
-                                            // display="spinner"
                                             onChange={onChange}
                                         />
                                     )}
@@ -467,7 +466,7 @@ const Invoce = () => {
                             />
                             <View style={{ marginVertical: 10 }}>
                                 <View style={{ ...styles.row, marginHorizontal: 10 }}>
-                                    {editHeaders.map((header) => (
+                                    {createHeaders.map((header) => (
                                         <View style={styles.cell}>
                                             <Text>{header}</Text>
                                         </View>
@@ -480,18 +479,18 @@ const Invoce = () => {
                                         </View>
                                         <View style={styles.cell}>
                                             <TextInput
-                                                placeholder='Miqdar'
+                                                placeholder='Qiymət'
                                                 keyboardType="numeric"
-                                                value={String(rowsSameCustomer[rowIndex]?.quantity)}
-                                                onChangeText={(text) => handleInputChange(rowIndex, 'quantity', text)}
+                                                value={String(rowsSameCustomer[rowIndex]?.price)}
+                                                onChangeText={(text) => handleInputChange(rowIndex, 'price', text)}
                                             />
                                         </View>
                                         <View style={styles.cell}>
                                             <TextInput
-                                                placeholder='Məbləğ'
+                                                placeholder='Miqdar'
                                                 keyboardType="numeric"
-                                                value={String(rowsSameCustomer[rowIndex]?.total)}
-                                                onChangeText={(text) => handleInputChange(rowIndex, 'total', text)}
+                                                value={String(rowsSameCustomer[rowIndex]?.quantity)}
+                                                onChangeText={(text) => handleInputChange(rowIndex, 'quantity', text)}
                                             />
                                         </View>
                                         <View style={styles.cell}>
@@ -501,6 +500,13 @@ const Invoce = () => {
                                                 value={String(rowsSameCustomer[rowIndex]?.product_name)}
                                                 onChangeText={(text) => handleInputChange(rowIndex, 'product_name', text)}
                                             />
+                                        </View>
+                                        <View style={styles.cell}>
+                                            <Text>
+                                                {
+                                                    isNaN(rowsSameCustomer[rowIndex]?.price && rowsSameCustomer[rowIndex]?.quantity) ? '000' : rowsSameCustomer[rowIndex]?.price * rowsSameCustomer[rowIndex]?.quantity
+                                                }
+                                            </Text>
                                         </View>
                                     </View>
                                 ))}

@@ -55,7 +55,7 @@ const Nomenklatura = () => {
         }
     };
 
-    if (!fontsLoad) { return null }
+    if (!fontsLoad) return null
 
     const handlePress = () => { setModalVisible(true) }
     const closeUpdateModal = () => { setUpdateModalVisible(false) }
@@ -77,6 +77,7 @@ const Nomenklatura = () => {
         setPrice()
         setKind()
         setSearchResults([])
+
     }
 
     const sendData = async () => {
@@ -130,6 +131,7 @@ const Nomenklatura = () => {
                 setUpdateModalVisible(false);
                 setSelectedRows([]);
                 fetchDataAsync();
+                closeModal()
             } else {
                 setSelectedRows([]);
                 Alert.alert(result.message);

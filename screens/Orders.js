@@ -1,39 +1,39 @@
 import React, { useEffect, useState } from "react";
 import { View, ScrollView, Text, Modal, TextInput, Pressable, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Table from "../components/Table";
 import { useFonts } from "expo-font";
 import { fetchData } from '../services/Server';
 import { Ionicons } from '@expo/vector-icons';
 import { addRow, formatDateString, removeLastRow } from '../services/Functions';
-import { sendRequest, deleteData } from '../services/Server';
+import { sendRequest, deleteData, sendEditData } from '../services/Server';
 
 
-const Stack = createNativeStackNavigator();
-
-const Orders = ({ navigation }) => {
+const Orders = () => {
     const [resData, setData] = useState([]);
     const [show, setShow] = useState(false);
     const [rowData, setRowData] = useState([]);
+    const [selectedRows, setSelectedRows] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [date, setDate] = useState(new Date());
-    const [customer, setCustomer] = useState()
+    const [customer, setCustomer] = useState();
     const [formTable, setFormTable] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
     const [edv, setEdv] = useState(0);
     const [wholeAmout, setWholeAmount] = useState(0);
     const [number, setNumber] = useState();
+    const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
+    const [showDatepicker, setShowDatepicker] = useState(false);
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
     const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
-    const mainHeaders = ["№", "Tarix", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
+    const mainHeaders = ["№", "Malın adı", "Miqdarı", "Məbləğ"];
+    const editHeaders = ["№", "Qiymət", "Miqdarı", "Malın adı", "Ölçü vahidi", "Məbləğ"];
     let rowCount = 0;
 
     useEffect(() => { fetchDataAsync() }, []);
     const fetchDataAsync = async () => {
         try {
-            const result = await fetchData('orders');
+            const result = await fetchData('orders','true');
             if (result !== null) { setData(result) }
         } catch (error) {
             console.error(error);
@@ -42,7 +42,7 @@ const Orders = ({ navigation }) => {
     const extractedData = resData.map((item) => [String(item.id), item.date, item.customer, item.product_name, item.price, item.quantity, item.units]);
 
     let id = resData.map((item) => item.id);
-    let lastId = 1 + id.pop(); 
+    let lastId = 1 + id.pop();
 
     if (!fontsLoad) { return null }
 
@@ -89,35 +89,109 @@ const Orders = ({ navigation }) => {
 
         if (result.success) {
             Alert.alert(result.message)
-            fetchDataAsync()
+            closeModal()
         }
         else Alert.alert(result.message);
 
     }
 
     const onChange = (event, selectedDate) => {
-        let currentDate = selectedDate || date;
-        setShow(Platform.OS === 'ios');
-        let formattedDate = `${selectedDate.getDate()}.${selectedDate.getMonth() + 1}.${selectedDate.getFullYear()}`
-        setDate(formattedDate)
+        setShowDatepicker(Platform.OS === 'ios');
+        if (selectedDate) {
+            let formattedDate = selectedDate.toISOString().split('T')[0];
+            setDate(formattedDate);
+            console.log(formattedDate);
+        }
     };
+
+
 
     const handleDate = () => { formatDateString(dateStr) }
     const handlePress = () => { setModalVisible(true) }
-    const showDatepicker = () => { setShow(true) };
+    const handleDateShow = () => { setShowDatepicker(true) };
     const handleAddRow = () => { addRow(setRowData) };
     const handleRemoveRow = () => { removeLastRow(setRowData) };
+    const closeUpdateModal = () => { setUpdateModalVisible(false) }
 
     const closeModal = () => {
         setModalVisible(false)
         setDate(new Date())
         setRowData([])
         setFormTable()
+        fetchDataAsync()
     }
+
+    const handleInputChange = (index, field, value) => {
+        let updatedSelectedRows = [...selectedRows];
+
+        updatedSelectedRows = updatedSelectedRows.map((row, rowIndex) => {
+            if (rowIndex === index) {
+                return {
+                    ...row,
+                    [field]: value,
+                };
+            }
+            return row;
+        });
+        setSelectedRows(updatedSelectedRows);
+    };
+
+    const handleEdit = async () => {
+        let tableName = 'orders';
+        try {
+            const result = await sendEditData(selectedRows, tableName);
+            if (result.success) {
+                Alert.alert(result.message);
+                setUpdateModalVisible(false);
+                setSelectedRows([]);
+                fetchDataAsync();
+            } else {
+                setSelectedRows([]);
+                Alert.alert(result.message);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleRowPress = (row) => {
+        const isSelected = selectedRows.some((selectedRow) => selectedRow.id === row.id);
+        if (isSelected) {
+            const updatedSelectedRows = selectedRows.filter((selectedRow) => selectedRow.id !== row.id);
+            setSelectedRows(updatedSelectedRows);
+        } else {
+            setSelectedRows([...selectedRows, row]);
+        }
+
+    };
+
+    const deleteRow = async () => {
+        const idsToDelete = selectedRows.map((row) => row.id);
+        const tableName = 'orders';
+
+        try {
+            for (const idToDelete of idsToDelete) {
+                const result = await deleteData(idToDelete, tableName);
+                if (!result.success) {
+                    Alert.alert(result.message);
+                    return;
+                }
+            }
+
+            setSelectedRows([]);
+            Alert.alert('Məlumatlar silindi');
+            setUpdateModalVisible(false)
+            fetchDataAsync()
+        } catch (error) {
+            console.error(error);
+        }
+    };
+    const handelModalOpen = () => { setUpdateModalVisible(true) }
+
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>
-            <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Sifarişlər </Text>            
+            <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Sifarişlər </Text>
             <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
                 <Pressable style={{ ...styles.button, width: 250 }} onPress={handlePress}>
                     <Text style={styles.text}>Yeni Sifariş yarat</Text>
@@ -138,17 +212,16 @@ const Orders = ({ navigation }) => {
                                     value={date}
                                     onChangeText={setDate}
                                 />
-                                <Pressable onPress={showDatepicker}>
+                                <Pressable onPress={handleDateShow}>
                                     <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
                                 </Pressable>
-                                {show && (
+                                {showDatepicker && (
                                     <DateTimePicker
                                         testID="datePicker"
-                                        value={date}
+                                        value={new Date(date)}
                                         mode="date"
                                         is24Hour={true}
                                         display="default"
-                                        // display="spinner"
                                         onChange={onChange}
                                     />
                                 )}
@@ -157,7 +230,7 @@ const Orders = ({ navigation }) => {
                                 style={{ ...styles.input, width: 50 }}
                                 placeholder="№"
                                 keyboardType="numeric"
-                                value={String(lastId)}
+                                value={isNaN(lastId) ? '1' : String(lastId)}
                                 onChangeText={setNumber}
                             />
                         </View>
@@ -242,7 +315,168 @@ const Orders = ({ navigation }) => {
                     </View>
                 </ScrollView>
             </Modal>
-            <Table headers={mainHeaders} data={extractedData} />
+            <View style={{ ...styles.row }}>
+                {mainHeaders.map((header, rowIndex) => (
+                    <View style={styles.cell} key={`row_${rowIndex}`}>
+                        <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{header}</Text>
+                    </View>
+                ))}
+            </View>
+
+            {resData.map((row, rowIndex) => (
+                <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(row)}>
+                    <View style={[
+                        styles.row,
+                        selectedRows.some((selectedRow) => selectedRow.id === row.id) && { backgroundColor: 'lightblue' },
+                    ]}>
+                        <View style={styles.cell}>
+                            <Text>{++rowCount}</Text>
+                        </View>
+                        {/* <View style={styles.cell}>
+                            <Text> {resData[rowIndex]?.date}</Text>
+                        </View> */}
+                        <View style={styles.cell}>
+                            <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{resData[rowIndex]?.product_name}</Text>
+                        </View>
+                        <View style={styles.cell}>
+                            <Text>{resData[rowIndex]?.quantity}</Text>
+                        </View>
+                        {/* <View style={styles.cell}>
+                            <Text>{resData[rowIndex]?.units}</Text>
+                        </View> */}
+                        <View style={styles.cell}>
+                            <Text>{resData[rowIndex]?.price * resData[rowIndex]?.quantity}</Text>
+                        </View>
+                    </View>
+                </TouchableOpacity>
+            ))}
+            <View style={{ margin: 10 }}>
+                <Pressable disabled={selectedRows.length === 0} style={{ ...styles.button, width: 150, display: `${selectedRows.length === 0 ? 'none' : 'block'}`, backgroundColor: 'blue' }} onPress={handelModalOpen}>
+                    <Text style={styles.text}>Redaktə et</Text>
+                </Pressable>
+            </View>
+
+            <Modal visible={isUpdateModalVisible} animationType="slide">
+                <ScrollView contentContainerStyle={{ marginVertical: 10 }} >
+                    <View style={{ padding: 5 }}>
+                        <Text style={{ textAlign: 'right' }} onPress={closeUpdateModal} ><Ionicons name="close" size={24} color="red" /></Text>
+                    </View>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <TextInput
+                                    style={{ ...styles.input, width: 100 }}
+                                    placeholder="Gün-Ay-İl"
+                                    keyboardType="numeric"
+                                    value={date}
+                                    onChangeText={setDate}
+                                />
+                                <Pressable onPress={handleDateShow}>
+                                    <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
+                                </Pressable>
+                                {showDatepicker && (
+                                    <DateTimePicker
+                                        testID="datePicker"
+                                        value={new Date(date)} 
+                                        mode="date"
+                                        is24Hour={true}
+                                        display="default"
+                                        onChange={onChange}
+                                    />
+                                )}
+                            </View>
+                                <TextInput
+                                    style={{ ...styles.input, width: 50 }}
+                                    placeholder="№"
+                                    keyboardType="numeric"
+                                    value={number}
+                                    onChangeText={setNumber}
+                                />
+                            </View>
+                            <TextInput
+                                style={{ ...styles.input, }}
+                                placeholder="Müştəri"
+                                keyboardType="text"
+                                value={customer}
+                                onChangeText={setCustomer}
+                            /> */}
+                            <View style={{ marginVertical: 10 }}>
+                                <View style={{ ...styles.row, marginHorizontal: 10 }}>
+                                    {editHeaders.map((header) => (
+                                        <View style={styles.cell}>
+                                            <Text>{header}</Text>
+                                        </View>
+                                    ))}
+                                </View>
+                                {selectedRows.map((row, rowIndex) => (
+                                    <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
+                                        <View style={styles.cell}>
+                                            <Text>{++rowCount}</Text>
+                                        </View>
+                                        <View style={styles.cell}>
+                                            <TextInput
+                                                placeholder='Qiymət'
+                                                keyboardType="numeric"
+                                                value={String(selectedRows[rowIndex]?.price)}
+                                                onChangeText={(text) => handleInputChange(rowIndex, 'price', text)}
+                                            />
+                                        </View>
+                                        <View style={styles.cell}>
+                                            <TextInput
+                                                placeholder='Miqdar'
+                                                keyboardType="numeric"
+                                                value={String(selectedRows[rowIndex]?.quantity)}
+                                                onChangeText={(text) => handleInputChange(rowIndex, 'quantity', text)}
+                                            />
+                                        </View>
+                                        <View style={styles.cell}>
+                                            <TextInput
+                                                placeholder='Malın adı'
+                                                keyboardType="text"
+                                                value={String(selectedRows[rowIndex]?.product_name)}
+                                                onChangeText={(text) => handleInputChange(rowIndex, 'product_name', text)}
+                                            />
+                                        </View>
+                                        <View style={styles.cell}>
+                                            <TextInput
+                                                placeholder='Ölçü vahidi'
+                                                keyboardType="text"
+                                                value={String(selectedRows[rowIndex]?.units)}
+                                                onChangeText={(text) => handleInputChange(rowIndex, 'units', text)}
+                                            />
+                                        </View>
+                                        <View style={styles.cell}>
+                                            <Text>
+                                                {
+                                                    isNaN(selectedRows[rowIndex]?.price && selectedRows[rowIndex]?.quantity) ? '000' : selectedRows[rowIndex]?.price * selectedRows[rowIndex]?.quantity
+                                                }
+                                            </Text>
+                                        </View>
+                                    </View>
+                                ))}
+                            </View>
+                            <View style={{ alignItems: 'flex-end', margin: 10 }}>
+                                {/* <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(editTableAmount) ? '000' : editTableAmount}</Text></Text>
+                                <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(editTableEdv) ? '000' : editTableEdv}</Text></Text>
+                                <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(editTableAmountAll) ? '000' : editTableAmountAll}</Text></Text> */}
+                            </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <View style={{ margin: 10 }}>
+                                    <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
+                                        <Text style={styles.text}>Sil</Text>
+                                    </Pressable>
+                                </View>
+                                <View style={{ margin: 10 }}>
+                                    <Pressable style={{ ...styles.button, width: 150 }} onPress={handleEdit}>
+                                        <Text style={styles.text}>Yenilə</Text>
+                                    </Pressable>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </ScrollView>
+            </Modal>
         </ScrollView >
     )
 

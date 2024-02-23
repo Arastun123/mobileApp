@@ -3,9 +3,9 @@ import axios from 'axios';
 
 const url = 'http://192.168.88.44:3000/api';
 
-export const fetchData = async (tableName) => {
+export const fetchData = async (tableName, formatDate) => {
     try {
-        const response = await axios.get(`${url}/${tableName}`);
+        const response = await axios.get(`${url}/${tableName}/${formatDate ? 'true' : ''}`);
         return response.data;
     } catch (error) {
         console.error('Request Error:', error);
