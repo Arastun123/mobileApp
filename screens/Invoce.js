@@ -18,9 +18,6 @@ const Invoce = () => {
     const [tableData, setTableData] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [formTable, setFormTable] = useState([]);
-    // const [totalAmount, setTotalAmount] = useState(0);
-    // const [edv, setEdv] = useState(0);
-    // const [wholeAmout, setWholeAmount] = useState(0);
     const [selectedRows, setSelectedRows] = useState([]);
     const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
     const [editTableAmount, setEditTableAmount] = useState(0);
@@ -29,11 +26,6 @@ const Invoce = () => {
     const [isChecked, setChecked] = useState(false)
     const [rowsSameCustomer, setRowsSameCustomer] = useState([]);
     const [showDatepicker, setShowDatepicker] = useState(false);
-    // const [updateData, setUpdateData] = useState({
-    //     quantity: '',
-    //     total: '',
-    //     customer: ''
-    // });
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
 
@@ -88,7 +80,13 @@ const Invoce = () => {
     const handleAddRow = () => { addRow(setRowData) };
     const handleRemoveRow = () => { removeLastRow(setRowData) };
     const handleDate = () => { formatDateString(dateStr) }
-    const closeUpdateModal = () => { setUpdateModalVisible(false) }
+    const closeUpdateModal = () => { 
+        setUpdateModalVisible(false)
+        setCustomer()
+        setDate(new Date())
+        setSelectedRows([])
+        fetchDataAsync()
+    }
 
     const sendData = async () => {
         let apiUrl = '/invoice';
@@ -214,7 +212,7 @@ const Invoce = () => {
                 },
                 body: JSON.stringify({
                     newRows: updatedRows,  
-                    date: dateObject.toISOString(),
+                    date: dateObject.toISOString().split('T')[0],
                     customer,
                     number,
                 }),
@@ -235,7 +233,6 @@ const Invoce = () => {
             Alert.alert('Error occurred during update');
         }
     };
-    
 
     const handleModalOpen = () => {
         setUpdateModalVisible(true)

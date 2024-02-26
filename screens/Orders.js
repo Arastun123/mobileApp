@@ -81,7 +81,7 @@ const Orders = () => {
     const sendData = async () => {
         let apiUrl = '/orders'
         const postData = {
-            date: formatDateString(date),
+            date: date,
             customer: customer,
             formTable: formTable,
         };
@@ -105,14 +105,35 @@ const Orders = () => {
     };
 
 
-
     const handleDate = () => { formatDateString(dateStr) }
     const handlePress = () => { setModalVisible(true) }
     const handleDateShow = () => { setShowDatepicker(true) };
     const handleAddRow = () => { addRow(setRowData) };
     const handleRemoveRow = () => { removeLastRow(setRowData) };
     const closeUpdateModal = () => { setUpdateModalVisible(false) }
+    const handelModalOpen = () => { setUpdateModalVisible(true); }
+  
+    const deleteRow = async () => {
+        const idsToDelete = selectedRows.map((row) => row.id);
+        const tableName = 'orders';
 
+        try {
+            for (const idToDelete of idsToDelete) {
+                const result = await deleteData(idToDelete, tableName);
+                if (!result.success) {
+                    Alert.alert(result.message);
+                    return;
+                }
+            }
+
+            setSelectedRows([]);
+            Alert.alert('Məlumatlar silindi');
+            setUpdateModalVisible(false)
+            fetchDataAsync()
+        } catch (error) {
+            console.error(error);
+        }
+    };
     const closeModal = () => {
         setModalVisible(false)
         setDate(new Date())
@@ -164,30 +185,6 @@ const Orders = () => {
         }
 
     };
-
-    const deleteRow = async () => {
-        const idsToDelete = selectedRows.map((row) => row.id);
-        const tableName = 'orders';
-
-        try {
-            for (const idToDelete of idsToDelete) {
-                const result = await deleteData(idToDelete, tableName);
-                if (!result.success) {
-                    Alert.alert(result.message);
-                    return;
-                }
-            }
-
-            setSelectedRows([]);
-            Alert.alert('Məlumatlar silindi');
-            setUpdateModalVisible(false)
-            fetchDataAsync()
-        } catch (error) {
-            console.error(error);
-        }
-    };
-    const handelModalOpen = () => { setUpdateModalVisible(true) }
-
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>
@@ -363,7 +360,7 @@ const Orders = () => {
                     </View>
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
-                            {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <TextInput
                                     style={{ ...styles.input, width: 100 }}
@@ -400,7 +397,7 @@ const Orders = () => {
                                 keyboardType="text"
                                 value={customer}
                                 onChangeText={setCustomer}
-                            /> */}
+                            /> 
                             <View style={{ marginVertical: 10 }}>
                                 <View style={{ ...styles.row, marginHorizontal: 10 }}>
                                     {editHeaders.map((header) => (
