@@ -96,13 +96,7 @@ const Goods = () => {
     };
 
     const handleEdit = async () => {
-        let selectedRowData = selectedRows.map((item) => ({ id: item.id, name: item.name }));
-
-        if (selectedRowData.length === 0) {
-            Alert.alert('Please select at least one row to edit.');
-            return;
-        }
-
+        let selectedRowData = selectedRows.map((item) => ({ id: item.id, name: item.name }))
         try {
             const apiUrl = 'http://192.168.88.44:3000/api/products';
 

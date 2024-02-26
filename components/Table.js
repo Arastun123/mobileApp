@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Pressable, TextInput, Text } from "react-native";
+import { View, StyleSheet, TextInput, Text } from "react-native";
 import { useFonts } from "expo-font";
 
 const Table = ({ headers, data }) => {

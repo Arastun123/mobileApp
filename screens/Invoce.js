@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, TextInput, StyleSheet, ScrollView, Pressable, Text, Alert, Modal, TouchableOpacity, LogBox } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import UserInput from "../components/UserInput";
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { fetchData } from '../services/Server';
 import { addRow, formatDateString, removeLastRow } from '../services/Functions';
-import { sendRequest, deleteData, sendEditData, } from '../services/Server';
+import { sendRequest, deleteData, } from '../services/Server';
 
 const Invoce = () => {
     const [number, setNumber] = useState();
@@ -33,7 +32,7 @@ const Invoce = () => {
     let rowCount = 0;
     const headers = ["№", "Müştəri", "Miqdar", "Məbləğ"];
     const editHeaders = ["№", "Miqdar", "Məbləğ", 'Malın adı'];
-    const createHeaders = ["№", 'Qiymət', "Miqdar", 'Malın adı', "Məbləğ"];
+    const createHeaders = ["№", 'Malın adı', 'Qiymət',"Miqdar", "Məbləğ"];
     const handleDateShow = () => { setShowDatepicker(true) };
 
     const handlePress = () => { setModalVisible(true); handleAddRow() }
@@ -475,6 +474,13 @@ const Invoce = () => {
                                         </View>
                                         <View style={styles.cell}>
                                             <TextInput
+                                                placeholder='Malın adı'
+                                                value={String(rowsSameCustomer[rowIndex]?.product_name)}
+                                                onChangeText={(text) => handleInputChange(rowIndex, 'product_name', text)}
+                                            />
+                                        </View>
+                                        <View style={styles.cell}>
+                                            <TextInput
                                                 placeholder='Qiymət'
                                                 keyboardType="numeric"
                                                 value={String(rowsSameCustomer[rowIndex]?.price)}
@@ -487,13 +493,6 @@ const Invoce = () => {
                                                 keyboardType="numeric"
                                                 value={String(rowsSameCustomer[rowIndex]?.quantity)}
                                                 onChangeText={(text) => handleInputChange(rowIndex, 'quantity', text)}
-                                            />
-                                        </View>
-                                        <View style={styles.cell}>
-                                            <TextInput
-                                                placeholder='Malın adı'
-                                                value={String(rowsSameCustomer[rowIndex]?.product_name)}
-                                                onChangeText={(text) => handleInputChange(rowIndex, 'product_name', text)}
                                             />
                                         </View>
                                         <View style={styles.cell}>

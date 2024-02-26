@@ -4,7 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFonts } from "expo-font";
 import { fetchData } from '../services/Server';
 import { Ionicons } from '@expo/vector-icons';
-import { addRow, formatDateString, removeLastRow } from '../services/Functions';
+import { addRow, removeLastRow } from '../services/Functions';
 import { sendRequest, deleteData, sendEditData } from '../services/Server';
 
 
@@ -44,7 +44,7 @@ const Orders = () => {
     let lastId = 1 + id.pop();
 
     if (!fontsLoad) { return null }
-    const handleDate = () => { formatDateString(dateStr) }
+    // const handleDate = () => { formatDateString(dateStr) }
     const handlePress = () => { setModalVisible(true); handleAddRow() }
     const handleDateShow = () => { setShowDatepicker(true) };
     const handleAddRow = () => { addRow(setRowData) };

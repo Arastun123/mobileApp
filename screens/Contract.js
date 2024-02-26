@@ -15,7 +15,6 @@ const Contracts = () => {
     const [type, setType] = useState()
     const [name, setName] = useState()
     const [comment, setComment] = useState()
-    const [show, setShow] = useState(false);
     const [data, setData] = useState([]);
     const [showDatepicker, setShowDatepicker] = useState(false);
 
@@ -36,6 +35,9 @@ const Contracts = () => {
 
     LogBox.ignoreLogs(['Warning: Failed prop type: Invalid prop `value` of type `date` supplied to `TextInput`, expected `string`'])
 
+    const handleDateShow = () => {  setShowDatepicker(true) };
+
+    if (!fontsLoad) { return null }
     const onChange = (event, selectedDate) => {
         setShowDatepicker(Platform.OS === 'ios');
         if (selectedDate) {
@@ -43,13 +45,6 @@ const Contracts = () => {
             setDate(formattedDate);
         }
     };
-
-    const handleDateShow = () => { 
-        setShowDatepicker(true) 
-    
-    };
-
-    if (!fontsLoad) { return null }
 
     const sendData = async () => {
         let apiUrl = '/contract'

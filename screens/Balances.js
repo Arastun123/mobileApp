@@ -1,6 +1,5 @@
 import React from "react";
 import { ScrollView, Text } from "react-native";
-import Table from "../components/Table";
 import { useFonts } from "expo-font";
 
 

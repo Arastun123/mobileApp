@@ -3,7 +3,6 @@ import { View, ScrollView, StyleSheet, Pressable, Text, Modal, Alert, TouchableO
 import { useFonts } from "expo-font";
 import { Ionicons } from '@expo/vector-icons';
 import UserInput from "../components/UserInput";
-import Table from "../components/Table";
 import DropDown from "../components/DropDown";
 import { fetchData } from '../services/Server';
 import { sendRequest, sendEditData, deleteData } from '../services/Server';

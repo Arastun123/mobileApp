@@ -2,7 +2,7 @@ import React from "react";
 import { Ionicons } from '@expo/vector-icons';
 import SearchBar from "../components/SearchBar";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, StyleSheet, TouchableOpacity, ScrollView, Text, DevSettings  } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, Text  } from 'react-native';
 import { useFonts } from 'expo-font';
 
 const Stack = createNativeStackNavigator();

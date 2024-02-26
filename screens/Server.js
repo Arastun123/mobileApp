@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Ionicons } from '@expo/vector-icons';
 import { View, StyleSheet, Pressable, ScrollView, Text, TextInput } from 'react-native';
 import { useFonts } from 'expo-font';
 
