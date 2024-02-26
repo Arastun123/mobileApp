@@ -32,7 +32,7 @@ const Table = ({ headers, data }) => {
                 <View style={styles.row}>
                     {headers.map((header, index) => (
                         <View style={styles.cell} key={index}>
-                            <Text style={styles.cellText}>{header}</Text>
+                            <Text style={{...styles.cellText, fontWeight: 600}}>{header}</Text>
                         </View>
                     ))}
                 </View>
@@ -56,7 +56,7 @@ const Table = ({ headers, data }) => {
                                     onChangeText={(text) => handleInputChange(rowIndex, headers[cellIndex], text)}
                                     value={inputData[`${rowIndex}_${headers[cellIndex]}`]}
                                     style={{ textAlign: 'center' }}
-                                    keyboardType={String(headers[cellIndex]) == "Məbləğ" | "Miqdar" ? 'numeric' : 'text'}
+                                    keyboardType={String(headers[cellIndex]) == "Məbləğ" | "Miqdar" ? 'numeric' : ''}
                                 />
                             </View>
                         ))}

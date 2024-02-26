@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, StyleSheet, Text, View, Pressable, Alert } from "react-native";
+import { ScrollView, StyleSheet, Text, View, Pressable, Alert, LogBox } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import UserInput from "../components/UserInput";
@@ -16,7 +16,9 @@ const Contracts = () => {
     const [name, setName] = useState()
     const [comment, setComment] = useState()
     const [show, setShow] = useState(false);
-    const [data, setData] = useState([])
+    const [data, setData] = useState([]);
+    const [showDatepicker, setShowDatepicker] = useState(false);
+
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
 
     useEffect(() => {
@@ -32,14 +34,20 @@ const Contracts = () => {
         fetchDataAsync();
     }, []);
 
+    LogBox.ignoreLogs(['Warning: Failed prop type: Invalid prop `value` of type `date` supplied to `TextInput`, expected `string`'])
+
     const onChange = (event, selectedDate) => {
-        let currentDate = selectedDate || date;
-        setShow(Platform.OS === 'ios');
-        let formattedDate = `${selectedDate.getDate()}.${selectedDate.getMonth() + 1}.${selectedDate.getFullYear()}`
-        setDate(formattedDate)
+        setShowDatepicker(Platform.OS === 'ios');
+        if (selectedDate) {
+            let formattedDate = selectedDate.toISOString().split('T')[0];
+            setDate(formattedDate);
+        }
     };
 
-    const showDatepicker = () => { setShow(true) };
+    const handleDateShow = () => { 
+        setShowDatepicker(true) 
+    
+    };
 
     if (!fontsLoad) { return null }
 
@@ -63,8 +71,6 @@ const Contracts = () => {
         }
     };
 
-    const handleDate = () => { formatDateString(dateStr) }
-
     let id = data.map((item) => item.id);
     let lastId = 1 + id.pop();
 
@@ -76,7 +82,6 @@ const Contracts = () => {
                 value={companyName}
                 setValue={setCompanyName}
                 autoCompleteType="text"
-                keyboardType="text"
                 onChangeText={(text) => setCompanyName(text)}
             />
             <View style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
@@ -99,13 +104,13 @@ const Contracts = () => {
                         keyboardType="numeric"
                         onChangeText={(text) => setDate(text)}
                     />
-                    <Pressable onPress={showDatepicker}>
+                    <Pressable onPress={handleDateShow}>
                         <Text> <Ionicons name="calendar" size={20} color="#333" /></Text>
                     </Pressable>
-                    {show && (
+                    {showDatepicker && (
                         <DateTimePicker
                             testID="datePicker"
-                            value={date}
+                            value={new Date(date)}
                             mode="date"
                             is24Hour={true}
                             display="default"
@@ -120,7 +125,6 @@ const Contracts = () => {
                 value={type}
                 setValue={setType}
                 autoCompleteType="text"
-                keyboardType="text"
                 onChangeText={(text) => setType(text)}
             />
             <UserInput
@@ -128,7 +132,6 @@ const Contracts = () => {
                 value={name}
                 setValue={setName}
                 autoCompleteType="text"
-                keyboardType="text"
                 onChangeText={(text) => setName(text)}
             />
             <UserInput
@@ -136,7 +139,6 @@ const Contracts = () => {
                 value={comment}
                 setValue={setComment}
                 autoCompleteType="text"
-                keyboardType="text"
                 multiline
                 onChangeText={(text) => setComment(text)}
             />

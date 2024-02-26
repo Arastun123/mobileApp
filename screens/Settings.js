@@ -18,9 +18,6 @@ const Settings = ({navigation}) => {
                         <TouchableOpacity style={styles.buttonContainer}>
                             <Text onPress={() => navigation.navigate('Server')} style={styles.buttonText}> Server</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.buttonContainer}>
-                            <Text onPress={() => navigation.navigate('Goods')} style={styles.buttonText}> Mallar</Text>
-                        </TouchableOpacity>
                     </View>
                 </View>
             </ScrollView>

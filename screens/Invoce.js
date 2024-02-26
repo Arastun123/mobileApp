@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, TextInput, StyleSheet, ScrollView, Pressable, Text, Alert, Modal, TouchableOpacity } from 'react-native';
+import { View, TextInput, StyleSheet, ScrollView, Pressable, Text, Alert, Modal, TouchableOpacity, LogBox } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import UserInput from "../components/UserInput";
 import { Ionicons } from '@expo/vector-icons';
@@ -36,7 +36,9 @@ const Invoce = () => {
     const createHeaders = ["№", 'Qiymət', "Miqdar", 'Malın adı', "Məbləğ"];
     const handleDateShow = () => { setShowDatepicker(true) };
 
-    const handlePress = () => { setModalVisible(true) }
+    const handlePress = () => { setModalVisible(true); handleAddRow() }
+
+    LogBox.ignoreLogs(['Warning: Failed prop type: Invalid prop `value` of type `date` supplied to `TextInput`, expected `string`'])
 
     useEffect(() => { fetchDataAsync() }, []);
 
@@ -80,7 +82,7 @@ const Invoce = () => {
     const handleAddRow = () => { addRow(setRowData) };
     const handleRemoveRow = () => { removeLastRow(setRowData) };
     const handleDate = () => { formatDateString(dateStr) }
-    const closeUpdateModal = () => { 
+    const closeUpdateModal = () => {
         setUpdateModalVisible(false)
         setCustomer()
         setDate(new Date())
@@ -193,7 +195,7 @@ const Invoce = () => {
     const handleEdit = async () => {
         try {
             const dateObject = new Date(date);
-    
+
             const updatedRows = rowsSameCustomer.map(item => {
                 return {
                     id: item.id,
@@ -202,24 +204,24 @@ const Invoce = () => {
                     product_name: item.product_name || '',
                 };
             });
-    
+
             const endpoint = `http://192.168.88.44:3000/api/invoice`;
-    
+
             const result = await fetch(endpoint, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    newRows: updatedRows,  
+                    newRows: updatedRows,
                     date: dateObject.toISOString().split('T')[0],
                     customer,
                     number,
                 }),
             });
-    
+
             const resultJson = await result.json();
-    
+
             if (resultJson.success) {
                 Alert.alert(resultJson.message);
                 setUpdateModalVisible(false);
@@ -295,7 +297,6 @@ const Invoce = () => {
                         <TextInput
                             style={{ ...styles.input, }}
                             placeholder="Müştəri"
-                            keyboardType="text"
                             value={customer}
                             onChangeText={(text) => setCustomer(text)}
                         />
@@ -313,9 +314,9 @@ const Invoce = () => {
                         </View>
                     </View>
                     <View style={{ ...styles.row, marginHorizontal: 10 }}>
-                        {createHeaders.map((header) => (
-                            <View style={styles.cell}>
-                                <Text bold center>{header}</Text>
+                        {createHeaders.map((header, rowIndex) => (
+                            <View style={styles.cell} key={`key_${rowIndex}`}>
+                                <Text style={{ fontWeight: 600 }}>{header}</Text>
                             </View>
                         ))}
                     </View>
@@ -343,7 +344,6 @@ const Invoce = () => {
                             <View style={styles.cell}>
                                 <TextInput
                                     placeholder='Malın adı'
-                                    keyboardType="text"
                                     value={formTable[rowIndex]?.product_name}
                                     onChangeText={(text) => handleTableInputChange(rowIndex, 'product_name', text)}
                                 />
@@ -372,7 +372,7 @@ const Invoce = () => {
                     <View style={styles.row}>
                         {headers.map((header, rowIndex) => (
                             <View style={styles.cell} key={`row_${rowIndex}`}>
-                                <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{header}</Text>
+                                <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple" style={{ fontWeight: 600 }}>{header}</Text>
                             </View>
                         ))}
                     </View>
@@ -457,14 +457,13 @@ const Invoce = () => {
                             <TextInput
                                 style={{ ...styles.input, }}
                                 placeholder="Müştəri"
-                                keyboardType="text"
                                 value={customer}
                                 onChangeText={setCustomer}
                             />
                             <View style={{ marginVertical: 10 }}>
                                 <View style={{ ...styles.row, marginHorizontal: 10 }}>
-                                    {createHeaders.map((header) => (
-                                        <View style={styles.cell}>
+                                    {createHeaders.map((header, rowIndex) => (
+                                        <View style={styles.cell} key={`row_${rowIndex}`}>
                                             <Text>{header}</Text>
                                         </View>
                                     ))}
@@ -493,7 +492,6 @@ const Invoce = () => {
                                         <View style={styles.cell}>
                                             <TextInput
                                                 placeholder='Malın adı'
-                                                keyboardType="text"
                                                 value={String(rowsSameCustomer[rowIndex]?.product_name)}
                                                 onChangeText={(text) => handleInputChange(rowIndex, 'product_name', text)}
                                             />

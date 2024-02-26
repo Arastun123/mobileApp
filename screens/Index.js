@@ -2,7 +2,7 @@ import React from "react";
 import { Ionicons } from '@expo/vector-icons';
 import SearchBar from "../components/SearchBar";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, StyleSheet, TouchableOpacity, ScrollView, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, Text, DevSettings  } from 'react-native';
 import { useFonts } from 'expo-font';
 
 const Stack = createNativeStackNavigator();
@@ -11,11 +11,12 @@ const Index = ({ navigation }) => {
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
 
     if (!fontsLoad) { return null; }
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15 }}>
             <View>
-                <SearchBar setCLicked={true} />
-                <View style={{ marginTop: 10 }}>
+                {/* <SearchBar setCLicked={true} /> */}
+                <View style={{ marginTop: 50 }}>
                     <TouchableOpacity style={styles.buttonContainer}>
                         <Text onPress={() => navigation.navigate('Routes')} style={styles.buttonText}> Marşurutlar </Text>
                     </TouchableOpacity>
@@ -48,7 +49,7 @@ const Index = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
                     <TouchableOpacity style={styles.buttonContainer}>
-                            <Text onPress={() => navigation.navigate('Goods')} style={styles.buttonText}> Mallar</Text>
+                            <Text onPress={() => navigation.navigate('Goods')} style={styles.buttonText}>Məhsullar</Text>
                         </TouchableOpacity>
                     <TouchableOpacity style={styles.buttonContainer}>
                         <Text onPress={() => navigation.navigate('Settings')} style={styles.buttonText}>  <Ionicons name="settings" size={16} color="white" />  </Text>

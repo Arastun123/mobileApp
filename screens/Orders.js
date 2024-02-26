@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, Text, Modal, TextInput, Pressable, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { View, ScrollView, Text, Modal, TextInput, Pressable, StyleSheet, Alert, TouchableOpacity, DevSettings, LogBox } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFonts } from "expo-font";
 import { fetchData } from '../services/Server';
@@ -10,7 +10,6 @@ import { sendRequest, deleteData, sendEditData } from '../services/Server';
 
 const Orders = () => {
     const [resData, setData] = useState([]);
-    const [show, setShow] = useState(false);
     const [rowData, setRowData] = useState([]);
     const [selectedRows, setSelectedRows] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
@@ -29,22 +28,29 @@ const Orders = () => {
     const mainHeaders = ["№", "Malın adı", "Miqdarı", "Məbləğ"];
     const editHeaders = ["№", "Qiymət", "Miqdarı", "Malın adı", "Ölçü vahidi", "Məbləğ"];
     let rowCount = 0;
+    LogBox.ignoreLogs(['Warning: Failed prop type: Invalid prop `value` of type `date` supplied to `TextInput`, expected `string`'])
 
     useEffect(() => { fetchDataAsync() }, []);
     const fetchDataAsync = async () => {
         try {
-            const result = await fetchData('orders','true');
+            const result = await fetchData('orders', 'true');
             if (result !== null) { setData(result) }
         } catch (error) {
             console.error(error);
         }
     };
-    const extractedData = resData.map((item) => [String(item.id), item.date, item.customer, item.product_name, item.price, item.quantity, item.units]);
 
     let id = resData.map((item) => item.id);
     let lastId = 1 + id.pop();
 
     if (!fontsLoad) { return null }
+    const handleDate = () => { formatDateString(dateStr) }
+    const handlePress = () => { setModalVisible(true); handleAddRow() }
+    const handleDateShow = () => { setShowDatepicker(true) };
+    const handleAddRow = () => { addRow(setRowData) };
+    const handleRemoveRow = () => { removeLastRow(setRowData) };
+    const closeUpdateModal = () => { setUpdateModalVisible(false) }
+    const handelModalOpen = () => { setUpdateModalVisible(true); }
 
     const handleTableInputChange = (index, field, value) => {
         let updatedFormTable = [...formTable];
@@ -100,19 +106,9 @@ const Orders = () => {
         if (selectedDate) {
             let formattedDate = selectedDate.toISOString().split('T')[0];
             setDate(formattedDate);
-            console.log(formattedDate);
         }
     };
 
-
-    const handleDate = () => { formatDateString(dateStr) }
-    const handlePress = () => { setModalVisible(true) }
-    const handleDateShow = () => { setShowDatepicker(true) };
-    const handleAddRow = () => { addRow(setRowData) };
-    const handleRemoveRow = () => { removeLastRow(setRowData) };
-    const closeUpdateModal = () => { setUpdateModalVisible(false) }
-    const handelModalOpen = () => { setUpdateModalVisible(true); }
-  
     const deleteRow = async () => {
         const idsToDelete = selectedRows.map((row) => row.id);
         const tableName = 'orders';
@@ -134,6 +130,7 @@ const Orders = () => {
             console.error(error);
         }
     };
+
     const closeModal = () => {
         setModalVisible(false)
         setDate(new Date())
@@ -185,6 +182,7 @@ const Orders = () => {
         }
 
     };
+    DevSettings.disableYellowBox = true;
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>
@@ -265,7 +263,6 @@ const Orders = () => {
                             <View style={styles.cell}>
                                 <TextInput
                                     placeholder='Malın adı'
-                                    keyboardType="text"
                                     value={formTable[rowIndex]?.product_name}
                                     onChangeText={(text) => handleTableInputChange(rowIndex, 'product_name', text)}
                                 />
@@ -315,7 +312,7 @@ const Orders = () => {
             <View style={{ ...styles.row }}>
                 {mainHeaders.map((header, rowIndex) => (
                     <View style={styles.cell} key={`row_${rowIndex}`}>
-                        <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{header}</Text>
+                        <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple" style={{ fontWeight: 600 }}>{header}</Text>
                     </View>
                 ))}
             </View>
@@ -329,18 +326,12 @@ const Orders = () => {
                         <View style={styles.cell}>
                             <Text>{++rowCount}</Text>
                         </View>
-                        {/* <View style={styles.cell}>
-                            <Text> {resData[rowIndex]?.date}</Text>
-                        </View> */}
                         <View style={styles.cell}>
                             <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{resData[rowIndex]?.product_name}</Text>
                         </View>
                         <View style={styles.cell}>
                             <Text>{resData[rowIndex]?.quantity}</Text>
                         </View>
-                        {/* <View style={styles.cell}>
-                            <Text>{resData[rowIndex]?.units}</Text>
-                        </View> */}
                         <View style={styles.cell}>
                             <Text>{resData[rowIndex]?.price * resData[rowIndex]?.quantity}</Text>
                         </View>
@@ -361,28 +352,28 @@ const Orders = () => {
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <TextInput
-                                    style={{ ...styles.input, width: 100 }}
-                                    placeholder="Gün-Ay-İl"
-                                    keyboardType="numeric"
-                                    value={date}
-                                    onChangeText={setDate}
-                                />
-                                <Pressable onPress={handleDateShow}>
-                                    <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
-                                </Pressable>
-                                {showDatepicker && (
-                                    <DateTimePicker
-                                        testID="datePicker"
-                                        value={new Date(date)} 
-                                        mode="date"
-                                        is24Hour={true}
-                                        display="default"
-                                        onChange={onChange}
+                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <TextInput
+                                        style={{ ...styles.input, width: 100 }}
+                                        placeholder="Gün-Ay-İl"
+                                        keyboardType="numeric"
+                                        value={new Date(date)}
+                                        onChangeText={setDate}
                                     />
-                                )}
-                            </View>
+                                    <Pressable onPress={handleDateShow}>
+                                        <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
+                                    </Pressable>
+                                    {showDatepicker && (
+                                        <DateTimePicker
+                                            testID="datePicker"
+                                            value={new Date(date)}
+                                            mode="date"
+                                            is24Hour={true}
+                                            display="default"
+                                            onChange={onChange}
+                                        />
+                                    )}
+                                </View>
                                 <TextInput
                                     style={{ ...styles.input, width: 50 }}
                                     placeholder="№"
@@ -394,14 +385,13 @@ const Orders = () => {
                             <TextInput
                                 style={{ ...styles.input, }}
                                 placeholder="Müştəri"
-                                keyboardType="text"
                                 value={customer}
                                 onChangeText={setCustomer}
-                            /> 
+                            />
                             <View style={{ marginVertical: 10 }}>
                                 <View style={{ ...styles.row, marginHorizontal: 10 }}>
-                                    {editHeaders.map((header) => (
-                                        <View style={styles.cell}>
+                                    {editHeaders.map((header, rowIndex) => (
+                                        <View style={styles.cell} key={`row_${rowIndex}`}>
                                             <Text>{header}</Text>
                                         </View>
                                     ))}
@@ -430,7 +420,6 @@ const Orders = () => {
                                         <View style={styles.cell}>
                                             <TextInput
                                                 placeholder='Malın adı'
-                                                keyboardType="text"
                                                 value={String(selectedRows[rowIndex]?.product_name)}
                                                 onChangeText={(text) => handleInputChange(rowIndex, 'product_name', text)}
                                             />
@@ -438,7 +427,6 @@ const Orders = () => {
                                         <View style={styles.cell}>
                                             <TextInput
                                                 placeholder='Ölçü vahidi'
-                                                keyboardType="text"
                                                 value={String(selectedRows[rowIndex]?.units)}
                                                 onChangeText={(text) => handleInputChange(rowIndex, 'units', text)}
                                             />
@@ -452,11 +440,6 @@ const Orders = () => {
                                         </View>
                                     </View>
                                 ))}
-                            </View>
-                            <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                                {/* <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(editTableAmount) ? '000' : editTableAmount}</Text></Text>
-                                <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(editTableEdv) ? '000' : editTableEdv}</Text></Text>
-                                <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(editTableAmountAll) ? '000' : editTableAmountAll}</Text></Text> */}
                             </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                 <View style={{ margin: 10 }}>

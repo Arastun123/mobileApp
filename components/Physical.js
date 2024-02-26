@@ -7,7 +7,7 @@ import { useFonts } from "expo-font";
 import { sendRequest } from '../services/Server';
 
 
-const Physical = ({ selectedLocation }) => {
+const Physical = () => {
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
@@ -21,7 +21,7 @@ const Physical = ({ selectedLocation }) => {
     const onDataReceived = (data) => { setAddress(data) }
 
     const sendData = async () => {
-        let apiUrl = '/legal'
+        let apiUrl = '/kontragent'
         const postData = {
             name: name,
             phone_number: phone,
@@ -47,7 +47,6 @@ const Physical = ({ selectedLocation }) => {
                     value={name}
                     setValue={setName}
                     autoCompleteType="text"
-                    keyboardType="text"
                     onChangeText={(text) => setName(text)}
                 />
                 <UserInput
@@ -63,7 +62,6 @@ const Physical = ({ selectedLocation }) => {
                     value={tin}
                     setValue={setTin}
                     autoCompleteType="text"
-                    keyboardType="text"
                     onChangeText={(text) => setTin(text)}
                 />
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -73,7 +71,6 @@ const Physical = ({ selectedLocation }) => {
                             value={address}
                             setValue={setAddress}
                             autoCompleteType="text"
-                            keyboardType="text"
                             onChangeText={(text => (setAddress(text)))}
                         />
                     </View>

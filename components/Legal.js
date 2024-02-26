@@ -47,7 +47,6 @@ const Legal = ({ selectedLocation }) => {
                     value={name}
                     setValue={setName}
                     autoCompleteType="text"
-                    keyboardType="text"
                     onChangeText={(text) => setName(text)}
                 />
                 <UserInput
@@ -63,7 +62,6 @@ const Legal = ({ selectedLocation }) => {
                     value={tin}
                     setValue={setTin}
                     autoCompleteType="text"
-                    keyboardType="text"
                     onChangeText={(text) => setTin(text)}
                 />
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -73,7 +71,6 @@ const Legal = ({ selectedLocation }) => {
                             value={address}
                             setValue={setAddress}
                             autoCompleteType="text"
-                            keyboardType="text"
                             onChangeText={(text => (setAddress(text)))}
                         />
                     </View>

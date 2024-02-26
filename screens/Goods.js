@@ -3,29 +3,27 @@ import { View, TextInput, StyleSheet, ScrollView, Pressable, Text, Alert, Modal,
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { fetchData } from '../services/Server';
-import { addRow, formatDateString } from '../services/Functions';
+import { addRow, removeLastRow } from '../services/Functions';
 import { sendRequest, deleteData, } from '../services/Server';
 
-const Goods = ({ navigation }) => {
+const Goods = () => {
     const [isModalVisible, setModalVisible] = useState(false);
     const [selectedRows, setSelectedRows] = useState([]);
     const [resData, setResData] = useState([]);
     const [rowData, setRowData] = useState([]);
     const [formTable, setFormTable] = useState([]);
-    const [isChecked, setChecked] = useState(false)
     const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
     let count = 0;
     let rowCount = 0;
-    const headers = ["№", "Malın adı"];
-    const handlePress = () => { setModalVisible(true) }
+    const headers = ["№", "Məhsulun adı"];
+    const handlePress = () => { setModalVisible(true); handleAddRow() }
     const handleAddRow = () => { addRow(setRowData) };
-    const handleModalOpen = () => { setUpdateModalVisible(true) }
+    const handleModalOpen = () => { setUpdateModalVisible(true); }
     const closeUpdateModal = () => { setUpdateModalVisible(false) }
-    const [updateData, setUpdateData] = useState({
-        name: '',
-    });
+    const handleRemoveRow = () => { removeLastRow(setRowData) };
+
     useEffect(() => { fetchDataAsync() }, []);
 
     const fetchDataAsync = async () => {
@@ -79,16 +77,16 @@ const Goods = ({ navigation }) => {
         }
         else Alert.alert(result.message);
     };
+
     const closeModal = () => {
-        setModalVisible(false)
-        setRowData([])
-        setFormTable([])
-        console.log(formTable);
+        setModalVisible(false);
+        setRowData([]);
+        setFormTable([]);
     };
 
     const handleRowPress = (row) => {
         const isSelected = selectedRows.some((selectedRow) => selectedRow.id === row.id);
-    
+
         if (isSelected) {
             const updatedSelectedRows = selectedRows.filter((selectedRow) => selectedRow.id !== row.id);
             setSelectedRows(updatedSelectedRows);
@@ -96,18 +94,18 @@ const Goods = ({ navigation }) => {
             setSelectedRows([...selectedRows, row]);
         }
     };
-    
+
     const handleEdit = async () => {
         let selectedRowData = selectedRows.map((item) => ({ id: item.id, name: item.name }));
-        
+
         if (selectedRowData.length === 0) {
             Alert.alert('Please select at least one row to edit.');
             return;
         }
-    
+
         try {
             const apiUrl = 'http://192.168.88.44:3000/api/products';
-    
+
             const response = await fetch(apiUrl, {
                 method: 'PUT',
                 headers: {
@@ -115,7 +113,7 @@ const Goods = ({ navigation }) => {
                 },
                 body: JSON.stringify(selectedRowData),
             });
-    
+
             if (response.status === 200) {
                 const result = await response.json();
                 Alert.alert(result.message);
@@ -129,7 +127,6 @@ const Goods = ({ navigation }) => {
             console.error(error);
         }
     };
-    
 
     const deleteRow = async () => {
         const idsToDelete = selectedRows.map((row) => row.id);
@@ -152,13 +149,13 @@ const Goods = ({ navigation }) => {
             console.error(error);
         }
     };
-    
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
-            <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}>Mallar</Text>
+            <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}>Məhsullar</Text>
             <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
                 <Pressable style={{ ...styles.button, width: 250, display: `${selectedRows.length === 0 ? 'block' : 'none'}` }} onPress={handlePress}>
-                    <Text style={styles.text}>Yeni Mal əlavə et</Text>
+                    <Text style={styles.text}>Yeni Məhsul əlavə et</Text>
                 </Pressable>
             </View>
             <Modal visible={isModalVisible} animationType="slide">
@@ -168,17 +165,22 @@ const Goods = ({ navigation }) => {
                             <Text style={{ textAlign: 'right' }} onPress={closeModal} ><Ionicons name="close" size={24} color="red" /></Text>
                         </View>
                     </View>
-                    <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
+                    <View style={{ marginVertical: 20, marginHorizontal: 10, flexDirection: 'row' }}>
                         <View>
                             <Pressable style={styles.button} onPress={handleAddRow}>
                                 <Text style={styles.text}>+</Text>
                             </Pressable>
                         </View>
+                        <View style={{ marginHorizontal:10 }} >
+                            <Pressable style={styles.button} onPress={handleRemoveRow}>
+                                <Text style={styles.text}>-</Text>
+                            </Pressable>
+                        </View>
                     </View>
                     <View style={{ ...styles.row, marginHorizontal: 10 }}>
-                        {headers.map((header) => (
-                            <View style={styles.cell}>
-                                <Text bold center>{header}</Text>
+                        {headers.map((header, rowIndex) => (
+                            <View style={styles.cell} key={`row_${rowIndex}`}>
+                                <Text>{header}</Text>
                             </View>
                         ))}
                     </View>
@@ -189,8 +191,7 @@ const Goods = ({ navigation }) => {
                             </View>
                             <View style={styles.cell}>
                                 <TextInput
-                                    placeholder='Malın adı'
-                                    keyboardType="text"
+                                    placeholder='Məhsulun adı'
                                     value={formTable[rowIndex]?.name}
                                     onChangeText={(text) => handleTableInputChange(rowIndex, 'name', text)}
                                 />
@@ -209,7 +210,7 @@ const Goods = ({ navigation }) => {
                     <View style={styles.row}>
                         {headers.map((header, rowIndex) => (
                             <View style={styles.cell} key={`row_${rowIndex}`}>
-                                <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{header}</Text>
+                                <Text style={{ fontWeight: 600, textAlign: 'center', }}>{header}</Text>
                             </View>
                         ))}
                     </View>
@@ -247,7 +248,6 @@ const Goods = ({ navigation }) => {
                     </View>
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
-                            <Text style={{ display: 'block', color:'#333' }}>{updateData.id}</Text> 
                             <View style={{ ...styles.row, marginHorizontal: 10 }}>
                                 {headers.map((header, rowIndex) => (
                                     <View style={styles.cell} key={`row_${rowIndex}`}>
@@ -262,8 +262,7 @@ const Goods = ({ navigation }) => {
                                     </View>
                                     <View style={styles.cell}>
                                         <TextInput
-                                            placeholder='Malın adı'
-                                            keyboardType="text"
+                                            placeholder='Məhsulun adı'
                                             value={selectedRows[rowIndex]?.name}
                                             onChangeText={(text) => handleInputChange(rowIndex, 'name', text)}
                                         />

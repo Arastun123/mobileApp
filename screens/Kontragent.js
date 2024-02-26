@@ -8,26 +8,25 @@ import { fetchData, deleteData, sendEditData } from '../services/Server';
 
 const Kontragent = ({ selectedLocation }) => {
     const [selectedType, setSelectedType] = useState(null);
-    const [resData, setData] = useState([]);
+    const [data, setData] = useState([]);
     const [selectedRows, setSelectedRows] = useState([]);
     const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
 
-    let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
 
     useEffect(() => { fetchDataAsync() }, []);
+    let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
 
     const fetchDataAsync = async () => {
         try {
             const result = await fetchData('kontragent');
             if (result !== null) setData(result);
+            else console.log("error");
         } catch (error) {
             console.error(error);
         }
     };
-    fetchDataAsync();
 
     const handlePress = (type) => { setSelectedType(type) };
-    const handleRefresh = () => { fetchDataAsync() };
     const closeUpdateModal = () => { setUpdateModalVisible(false) }
 
     const headers = ["№", "Adı", "Əlaqə nömrəsi", "Vöen", "Ünvan", "Növü"];
@@ -58,13 +57,6 @@ const Kontragent = ({ selectedLocation }) => {
             console.error(error);
         }
     };
-    const closeModal = () => {
-        setModalVisible(false)
-        setDate(new Date())
-        setRowData([])
-        setFormTable()
-        fetchDataAsync()
-    }
 
     const handleInputChange = (index, field, value) => {
         let updatedSelectedRows = [...selectedRows];
@@ -114,12 +106,6 @@ const Kontragent = ({ selectedLocation }) => {
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
             <Text style={{ marginBottom: 10, textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}>Kontragent</Text>
-            <TouchableOpacity onPress={handleRefresh}>
-                <View>
-                    <Text style={{ textAlign: "right", fontWeight: "bold" }}> <Ionicons name="reload" size={16} color="#333" />  </Text>
-                </View>
-            </TouchableOpacity>
-
             <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 10 }}>
                 <Pressable style={{ ...styles.button, width: 150 }} onPress={() => handlePress('fiziki')}>
                     <Text style={styles.text}>Fiziki şəxs</Text>
@@ -138,38 +124,40 @@ const Kontragent = ({ selectedLocation }) => {
                 <View style={{ ...styles.row }}>
                     {headers.map((header, rowIndex) => (
                         <View style={styles.cell} key={`row_${rowIndex}`}>
-                            <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{header}</Text>
+                            <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple" style={{ fontWeight: 600 }}>{header}</Text>
                         </View>
                     ))}
                 </View>
 
-                {resData.map((row, rowIndex) => (
-                    <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(row)}>
-                        <View style={[
-                            styles.row,
-                            selectedRows.some((selectedRow) => selectedRow.id === row.id) && { backgroundColor: 'lightblue' },
-                        ]}>
-                            <View style={styles.cell}>
-                                <Text>{++rowCount}</Text>
+                {
+                    data.map((row, rowIndex) => (
+                        <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(row)}>
+                            <View style={[
+                                styles.row,
+                                selectedRows.some((selectedRow) => selectedRow.id === row.id) && { backgroundColor: 'lightblue' },
+                            ]}>
+                                <View style={styles.cell}>
+                                    <Text>{++rowCount}</Text>
+                                </View>
+                                <View style={styles.cell}>
+                                    <Text> {data[rowIndex]?.name}</Text>
+                                </View>
+                                <View style={styles.cell}>
+                                    <Text>{data[rowIndex]?.phone_number}</Text>
+                                </View>
+                                <View style={styles.cell}>
+                                    <Text>{data[rowIndex]?.tin}</Text>
+                                </View>
+                                <View style={styles.cell}>
+                                    <Text>{data[rowIndex]?.address}</Text>
+                                </View>
+                                <View style={styles.cell}>
+                                    <Text>{data[rowIndex]?.type}</Text>
+                                </View>
                             </View>
-                            <View style={styles.cell}>
-                                <Text> {resData[rowIndex]?.name}</Text>
-                            </View>
-                            <View style={styles.cell}>
-                                <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{resData[rowIndex]?.phone_number}</Text>
-                            </View>
-                            <View style={styles.cell}>
-                                <Text>{resData[rowIndex]?.tin}</Text>
-                            </View>
-                            <View style={styles.cell}>
-                                <Text>{resData[rowIndex]?.address}</Text>
-                            </View>
-                            <View style={styles.cell}>
-                                <Text>{resData[rowIndex]?.type}</Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-                ))}
+                        </TouchableOpacity>
+                    ))
+                }
                 <View style={{ margin: 10 }}>
                     <Pressable disabled={selectedRows.length === 0} style={{ ...styles.button, width: 150, display: `${selectedRows.length === 0 ? 'none' : 'block'}`, backgroundColor: 'blue' }} onPress={handelModalOpen}>
                         <Text style={styles.text}>Redaktə et</Text>
@@ -183,26 +171,10 @@ const Kontragent = ({ selectedLocation }) => {
                         </View>
                         <View style={styles.modalContainer}>
                             <View style={styles.modalContent}>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                    {/* <TextInput
-                                        style={{ ...styles.input, width: 50 }}
-                                        placeholder="№"
-                                        keyboardType="numeric"
-                                        value={number}
-                                        onChangeText={setNumber}
-                                    /> */}
-                                </View>
-                                {/* <TextInput
-                                    style={{ ...styles.input, }}
-                                    placeholder="Müştəri"
-                                    keyboardType="text"
-                                    value={customer}
-                                    onChangeText={setCustomer}
-                                /> */}
                                 <View style={{ marginVertical: 10 }}>
                                     <View style={{ ...styles.row, marginHorizontal: 10 }}>
-                                        {headers.map((header) => (
-                                            <View style={styles.cell}>
+                                        {headers.map((header, rowIndex) => (
+                                            <View style={styles.cell} key={`row_${rowIndex}`}>
                                                 <Text>{header}</Text>
                                             </View>
                                         ))}
@@ -215,7 +187,6 @@ const Kontragent = ({ selectedLocation }) => {
                                             <View style={styles.cell}>
                                                 <TextInput
                                                     placeholder='Ad'
-                                                    keyboardType="text"
                                                     value={String(selectedRows[rowIndex]?.name)}
                                                     onChangeText={(text) => handleInputChange(rowIndex, 'name', text)}
                                                 />
@@ -231,7 +202,6 @@ const Kontragent = ({ selectedLocation }) => {
                                             <View style={styles.cell}>
                                                 <TextInput
                                                     placeholder='Vöen'
-                                                    keyboardType="text"
                                                     value={String(selectedRows[rowIndex]?.tin)}
                                                     onChangeText={(text) => handleInputChange(rowIndex, 'tin', text)}
                                                 />
@@ -239,7 +209,6 @@ const Kontragent = ({ selectedLocation }) => {
                                             <View style={styles.cell}>
                                                 <TextInput
                                                     placeholder='Ünvan'
-                                                    keyboardType="text"
                                                     value={String(selectedRows[rowIndex]?.address)}
                                                     onChangeText={(text) => handleInputChange(rowIndex, 'address', text)}
                                                 />
@@ -247,7 +216,6 @@ const Kontragent = ({ selectedLocation }) => {
                                             <View style={styles.cell}>
                                                 <TextInput
                                                     placeholder='Növü'
-                                                    keyboardType="text"
                                                     value={String(selectedRows[rowIndex]?.type)}
                                                     onChangeText={(text) => handleInputChange(rowIndex, 'type', text)}
                                                 />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, StyleSheet, Pressable, Text, Modal, Alert, TouchableOpacity, TextInput } from "react-native";
+import { View, ScrollView, StyleSheet, Pressable, Text, Modal, Alert, TouchableOpacity, TextInput, LogBox } from "react-native";
 import { useFonts } from "expo-font";
 import { Ionicons } from '@expo/vector-icons';
 import UserInput from "../components/UserInput";
@@ -37,6 +37,7 @@ const Nomenklatura = () => {
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
     const headers = ["№", "Ad", "Növ", 'Kateqoriya', 'Brend', 'Qiymət'];
     let rowCount = 0;
+    LogBox.ignoreAllLogs()
 
     useEffect(() => { fetchDataAsync() }, []);
     useEffect(() => {
@@ -57,7 +58,7 @@ const Nomenklatura = () => {
 
     if (!fontsLoad) return null
 
-    const handlePress = () => { setModalVisible(true) }
+    const handlePress = () => { setModalVisible(true); }
     const closeUpdateModal = () => { setUpdateModalVisible(false) }
 
     const searchProduct = async (query) => {
@@ -243,7 +244,7 @@ const Nomenklatura = () => {
             <View style={{ ...styles.row }}>
                 {headers.map((header, rowIndex) => (
                     <View style={styles.cell} key={`row_${rowIndex}`}>
-                        <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{header}</Text>
+                        <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple" style={{fontWeight:600}}>{header}</Text>
                     </View>
                 ))}
             </View>
@@ -304,7 +305,6 @@ const Nomenklatura = () => {
                                     <View style={styles.cell}>
                                         <TextInput
                                             placeholder='Malın adı'
-                                            keyboardType="text"
                                             value={selectedRows[rowIndex]?.name}
                                             onChangeText={(text) => handleInputChange(rowIndex, 'name', text)}
                                         />
@@ -312,7 +312,6 @@ const Nomenklatura = () => {
                                     <View style={styles.cell}>
                                         <TextInput
                                             placeholder='Növ'
-                                            keyboardType="text"
                                             value={selectedRows[rowIndex]?.kind}
                                             onChangeText={(text) => handleInputChange(rowIndex, 'kind', text)}
                                         />
@@ -320,7 +319,6 @@ const Nomenklatura = () => {
                                     <View style={styles.cell}>
                                         <TextInput
                                             placeholder='Kateqoriya'
-                                            keyboardType="text"
                                             value={String(selectedRows[rowIndex]?.category)}
                                             onChangeText={(text) => handleInputChange(rowIndex, 'category', text)}
                                         />
@@ -328,7 +326,6 @@ const Nomenklatura = () => {
                                     <View style={styles.cell}>
                                         <TextInput
                                             placeholder='Brend'
-                                            keyboardType="text"
                                             value={String(selectedRows[rowIndex]?.brand)}
                                             onChangeText={(text) => handleInputChange(rowIndex, 'brand', text)}
                                         />
