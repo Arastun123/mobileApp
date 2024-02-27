@@ -70,7 +70,6 @@ const Kontragent = ({ selectedLocation }) => {
             }
             return row;
         });
-        // console.log(updatedSelectedRows);
         setSelectedRows(updatedSelectedRows);
     };
 
@@ -120,7 +119,7 @@ const Kontragent = ({ selectedLocation }) => {
             {selectedType === 'huquqi' && <Legal selectedLocation={selectedLocation} />}
 
             <View style={{ marginVertical: 10 }}>
-                <Text style={{ marginBottom: 10, textAlign: 'center', fontSize: 24 }}>Müqavilələr</Text>
+                <Text style={{ marginBottom: 10, textAlign: 'center', fontSize: 24 }}>Kontragentlər</Text>
                 <View style={{ ...styles.row }}>
                     {headers.map((header, rowIndex) => (
                         <View style={styles.cell} key={`row_${rowIndex}`}>

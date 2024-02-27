@@ -30,9 +30,9 @@ const Invoce = () => {
 
     let count = 0;
     let rowCount = 0;
-    const headers = ["№", "Müştəri", "Miqdar", "Məbləğ"];
+    const headers = ["№", "Müştəri", "Məhsulun adı", "Məbləğ"];
     const editHeaders = ["№", "Miqdar", "Məbləğ", 'Malın adı'];
-    const createHeaders = ["№", 'Malın adı', 'Qiymət',"Miqdar", "Məbləğ"];
+    const createHeaders = ["№", 'Malın adı', 'Qiymət', "Miqdar", "Məbləğ"];
     const handleDateShow = () => { setShowDatepicker(true) };
 
     const handlePress = () => { setModalVisible(true); handleAddRow() }
@@ -90,7 +90,7 @@ const Invoce = () => {
     }
 
     const sendData = async () => {
-        let apiUrl = '/invoice';
+        let apiUrl = '/invoices';
 
         const postData = {
             date: date,
@@ -248,11 +248,12 @@ const Invoce = () => {
     let id = tableData.map((item) => item.id);
     let lastId = 1 + id.pop();
 
+   
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}>Qaimələr</Text>
             <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
-                <Pressable style={{ ...styles.button, width: 250, display: `${selectedRows.length === 0 ? 'block' : 'none'}` }} onPress={handlePress}>
+                <Pressable style={{ ...styles.button, width: 250, }} onPress={handlePress}>
                     <Text style={styles.text}>Yeni Qaimə əlavə et</Text>
                 </Pressable>
             </View>
@@ -326,6 +327,13 @@ const Invoce = () => {
                             </View>
                             <View style={styles.cell}>
                                 <TextInput
+                                    placeholder='Malın adı'
+                                    value={formTable[rowIndex]?.product_name}
+                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'product_name', text)}
+                                />
+                            </View>
+                            <View style={styles.cell}>
+                                <TextInput
                                     placeholder='Qiymət'
                                     keyboardType="numeric"
                                     value={formTable[rowIndex]?.price}
@@ -338,13 +346,6 @@ const Invoce = () => {
                                     keyboardType="numeric"
                                     value={formTable[rowIndex]?.quantity}
                                     onChangeText={(text) => handleTableInputChange(rowIndex, 'quantity', text)}
-                                />
-                            </View>
-                            <View style={styles.cell}>
-                                <TextInput
-                                    placeholder='Malın adı'
-                                    value={formTable[rowIndex]?.product_name}
-                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'product_name', text)}
                                 />
                             </View>
                             <View style={styles.cell}>
@@ -377,6 +378,7 @@ const Invoce = () => {
                     </View>
                     <View>
                         {data.map((item, rowIndex) => (
+                            
                             <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(item)}>
                                 <View
                                     style={[
@@ -391,7 +393,7 @@ const Invoce = () => {
                                         <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{item.customer}</Text>
                                     </View>
                                     <View style={styles.cell}>
-                                        <Text>{item.quantity}</Text>
+                                        <Text>{item.product_name}</Text>
                                     </View>
                                     <View style={styles.cell}>
                                         <Text>{item.price * item.quantity}</Text>

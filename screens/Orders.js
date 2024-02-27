@@ -221,13 +221,13 @@ const Orders = () => {
                                     />
                                 )}
                             </View>
-                            <TextInput
+                            {/* <TextInput
                                 style={{ ...styles.input, width: 50 }}
                                 placeholder="№"
                                 keyboardType="numeric"
                                 value={isNaN(lastId) ? '1' : String(lastId)}
                                 onChangeText={setNumber}
-                            />
+                            /> */}
                         </View>
                         <TextInput
                             style={{ ...styles.input, }}

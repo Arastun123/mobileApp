@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { fetchData } from '../services/Server';
 import { addRow, removeLastRow } from '../services/Functions';
-import { sendRequest, deleteData, } from '../services/Server';
+import { sendRequest, deleteData, sendEditData } from '../services/Server';
 
 const Goods = () => {
     const [isModalVisible, setModalVisible] = useState(false);
@@ -97,24 +97,17 @@ const Goods = () => {
 
     const handleEdit = async () => {
         let selectedRowData = selectedRows.map((item) => ({ id: item.id, name: item.name }))
+        let tableName = 'products';
         try {
-            const apiUrl = 'http://192.168.88.44:3000/api/products';
-
-            const response = await fetch(apiUrl, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(selectedRowData),
-            });
-
-            if (response.status === 200) {
-                const result = await response.json();
+            const result = await sendEditData(selectedRowData, tableName);
+            if (result.success) {
                 Alert.alert(result.message);
-                fetchDataAsync();
                 setUpdateModalVisible(false);
+                setSelectedRows([]);
+                fetchDataAsync();
+                closeModal()
             } else {
-                const result = await response.json();
+                setSelectedRows([]);
                 Alert.alert(result.message);
             }
         } catch (error) {

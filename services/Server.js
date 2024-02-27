@@ -35,7 +35,7 @@ export const sendRequest = async (apiUrl, postData) => {
 
 export const sendEditData = async (updatedRows, tableName) => {
     let endpoint = `${url}/edit/${tableName}`;
-    try {
+     try {
         const response = await fetch(endpoint, {
             method: 'PUT',
             headers: {
