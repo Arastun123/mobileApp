@@ -15,8 +15,7 @@ const Goods = () => {
     const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
-    let count = 0;
-    let rowCount = 0;
+
     const headers = ["№", "Məhsulun adı"];
     const handlePress = () => { setModalVisible(true); handleAddRow() }
     const handleAddRow = () => { addRow(setRowData) };
@@ -174,7 +173,7 @@ const Goods = () => {
                     {rowData.map((row, rowIndex) => (
                         <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
                             <View style={styles.cell}>
-                                <Text>{++rowCount}</Text>
+                                <Text>{++rowIndex}</Text>
                             </View>
                             <View style={styles.cell}>
                                 <TextInput
@@ -211,7 +210,7 @@ const Goods = () => {
                                     ]}
                                 >
                                     <View style={styles.cell}>
-                                        <Text>{++count}</Text>
+                                        <Text>{++rowIndex}</Text>
                                     </View>
 
                                     <View style={styles.cell}>
@@ -245,7 +244,7 @@ const Goods = () => {
                             {selectedRows.map((row, rowIndex) => (
                                 <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
                                     <View style={styles.cell}>
-                                        <Text>{++rowCount}</Text>
+                                        <Text>{++rowIndex}</Text>
                                     </View>
                                     <View style={styles.cell}>
                                         <TextInput

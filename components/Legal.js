@@ -27,7 +27,7 @@ const Legal = ({ selectedLocation }) => {
             phone_number: phone,
             tin: tin,
             address: address,
-            type: 'hüquqi'
+            type: 'Hüquqi'
         };
         const result = await sendRequest(apiUrl, postData);
 

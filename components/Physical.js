@@ -27,7 +27,7 @@ const Physical = () => {
             phone_number: phone,
             tin: tin,
             address: address,
-            type: 'fiziki'
+            type: 'Fiziki'
         };
         const result = await sendRequest(apiUrl, postData);
 

@@ -30,7 +30,7 @@ const Invoce = () => {
 
     let count = 0;
     let rowCount = 0;
-    const headers = ["№", "Müştəri", "Məhsulun adı", "Məbləğ"];
+    const headers = ["№", "Məhsulun adı", "Məbləğ"];
     const editHeaders = ["№", "Miqdar", "Məbləğ", 'Malın adı'];
     const createHeaders = ["№", 'Malın adı', 'Qiymət', "Miqdar", "Məbləğ"];
     const handleDateShow = () => { setShowDatepicker(true) };
@@ -90,7 +90,7 @@ const Invoce = () => {
     }
 
     const sendData = async () => {
-        let apiUrl = '/invoices';
+        let apiUrl = '/invoice';
 
         const postData = {
             date: date,
@@ -149,12 +149,10 @@ const Invoce = () => {
 
     const handleRowPress = (row) => {
         const isSelected = selectedRows.some((selectedRow) => selectedRow.id === row.id);
-        setChecked(true);
 
         if (isSelected) {
             const updatedSelectedRows = selectedRows.filter((selectedRow) => selectedRow.id !== row.id);
             setSelectedRows(updatedSelectedRows);
-            setChecked(false);
         } else {
             const { customer, date, number, ...restRow } = row;
             const dateObject = new Date(date);
@@ -164,10 +162,9 @@ const Invoce = () => {
             setNumber(number || '');
             const selectedRowWithoutDate = { ...restRow };
             const dateToSend = dateObject.toISOString();
-            const rowsWithSameCustomer = data.filter((rowData) => rowData.customer === customer);
-            setSelectedRows([selectedRowWithoutDate]);
+            const rowsWithSameCustomer = data.filter((rowData) => rowData.number === number);
+            setSelectedRows((prevSelectedRows) => [...prevSelectedRows, selectedRowWithoutDate]);
             setRowsSameCustomer(rowsWithSameCustomer);
-            // console.log(rowsWithSameCustomer);
         }
     };
 
@@ -248,9 +245,17 @@ const Invoce = () => {
     let id = tableData.map((item) => item.id);
     let lastId = 1 + id.pop();
 
-   
+    const groupedRows = {};
+
+    data.forEach((item) => {
+        const number = item.number;
+
+        if (!groupedRows[number]) groupedRows[number] = { customer: item.customer, sum: 0, rows: [] };
+        groupedRows[number].sum += item.price * item.quantity;
+        groupedRows[number].rows.push(item);
+    });
     return (
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 10 }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}>Qaimələr</Text>
             <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
                 <Pressable style={{ ...styles.button, width: 250, }} onPress={handlePress}>
@@ -377,40 +382,44 @@ const Invoce = () => {
                         ))}
                     </View>
                     <View>
-                        {data.map((item, rowIndex) => (
-                            
-                            <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(item)}>
-                                <View
-                                    style={[
-                                        styles.row,
-                                        selectedRows.some((selectedRow) => selectedRow.id === item.id) && { backgroundColor: 'lightblue' },
-                                    ]}
-                                >
-                                    <View style={styles.cell}>
-                                        <Text>{++count}</Text>
-                                    </View>
-                                    <View style={styles.cell}>
-                                        <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{item.customer}</Text>
-                                    </View>
-                                    <View style={styles.cell}>
-                                        <Text>{item.product_name}</Text>
-                                    </View>
-                                    <View style={styles.cell}>
-                                        <Text>{item.price * item.quantity}</Text>
-                                    </View>
-                                </View>
-                            </TouchableOpacity>
+                        {Object.keys(groupedRows).map((number, index) => (
+                            <View key={`group_${index}`}>
+                                <Text style={{ margin: 10 }}><Text style={{ fontWeight: 600 }}>Müştəri: </Text> {groupedRows[number].customer}</Text>
+                                {groupedRows[number].rows.map((item, rowIndex) => (
+                                    <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(item)}>
+                                        <View
+                                            style={[
+                                                styles.row,
+                                                selectedRows.some((selectedRow) => selectedRow.id === item.id) && { backgroundColor: 'lightblue' },
+                                            ]}
+                                        >
+                                            <View style={styles.cell}>
+                                                <Text>{++rowIndex}</Text>
+                                            </View>
+                                            <View style={styles.cell}>
+                                                <Text>{item.product_name}</Text>
+                                            </View>
+                                            <View style={styles.cell}>
+                                                <Text>{item.price * item.quantity}</Text>
+                                            </View>
+                                        </View>
+                                    </TouchableOpacity>
+                                ))}
+                                <Text style={{ textAlign: 'right', paddingHorizontal: 10 }}>
+                                    <Text style={{ fontWeight: 600 }}>Cəmi: </Text> {groupedRows[number].sum}
+                                </Text>
+                            </View>
                         ))}
                     </View>
                 </View>
                 <View style={{ margin: 10, display: `${selectedRows.length === 0 ? 'none' : 'block'}`, flexDirection: 'row' }}>
                     <View style={{ margin: 10 }}>
-                        <Pressable disabled={selectedRows.length === 0} style={{ ...styles.button, width: 150, backgroundColor: 'blue' }} onPress={handleModalOpen}>
+                        <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'blue', display: `${selectedRows.length === 1 ? 'block' : 'none'}` }} onPress={handleModalOpen}>
                             <Text style={styles.text}>Redaktə et</Text>
                         </Pressable>
                     </View>
 
-                    <View style={{ margin: 10 }}>
+                    <View style={{ margin: 10, textAlign: 'right' }}>
                         <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
                             <Text style={styles.text}>Sil</Text>
                         </Pressable>
@@ -535,15 +544,10 @@ const styles = StyleSheet.create({
         height: 48,
         borderBottomColor: '#8e93a1',
     },
-    table: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        margin: 5,
-    },
+    table: { margin: 5, },
     row: {
         flexDirection: 'row',
-        borderBottomWidth: 1,
-        borderBottomWidth: 1,
+        borderWidth: 1,
         borderColor: '#ddd',
     },
     cell: {
