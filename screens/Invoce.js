@@ -37,7 +37,7 @@ const Invoce = () => {
 
     const handlePress = () => { setModalVisible(true); handleAddRow() }
 
-    LogBox.ignoreLogs(['Warning: Failed prop type: Invalid prop `value` of type `date` supplied to `TextInput`, expected `string`'])
+    // LogBox.ignoreAllLogs()
 
     useEffect(() => { fetchDataAsync() }, []);
 
@@ -131,15 +131,18 @@ const Invoce = () => {
         if (check === true) {
             try {
                 const result = await deleteData(id, tableName);
-                if (!result.success) {
-                    Alert.alert(result.message);
-                    return;
-                }
+                // if (!result.success) {
+                //     Alert.alert(result.message);
+                //     return;
+                // }
                 const updatedSelectedRows = rowsSameCustomer.filter((selectedRow) => selectedRow.id !== id);
                 setRowsSameCustomer(updatedSelectedRows);
                 fetchDataAsync();
-                Alert.alert('Məlumatlar silindi');
-                return;
+                if(updatedSelectedRows.length === 0) {
+                    Alert.alert('Məlumatlar silindi');
+                    setUpdateModalVisible(false)
+                    setSelectedRows([])
+                }
             } catch (error) {
                 console.error(error);
             }
@@ -437,12 +440,6 @@ const Invoce = () => {
                             <Text style={styles.text}>Redaktə et</Text>
                         </Pressable>
                     </View>
-
-                    {/* <View style={{ margin: 10, textAlign: 'right' }}>
-                        <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
-                            <Text style={styles.text}>Sil</Text>
-                        </Pressable>
-                    </View> */}
                 </View>
             </View>
             <Modal visible={isUpdateModalVisible} animationType="slide">
