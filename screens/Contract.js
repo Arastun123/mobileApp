@@ -19,6 +19,7 @@ const Contracts = () => {
     const [showDatepicker, setShowDatepicker] = useState(false);
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
+    let rowCount = 0;
     useEffect(() => { fetchDataAsync(); }, []);
     const fetchDataAsync = async () => {
         try {
@@ -157,7 +158,7 @@ const Contracts = () => {
                                 // selectedRows.some((selectedRow) => selectedRow.id === row.id) && { backgroundColor: 'lightblue' },
                             ]}>
                                 <View style={styles.cell}>
-                                    <Text>{++rowIndex}</Text>
+                                    <Text>{++rowCount}</Text>
                                 </View>
                                 <View style={styles.cell}>
                                     <Text> {data[rowIndex]?.name}</Text>
@@ -199,7 +200,7 @@ const Contracts = () => {
                                     {selectedRows.map((row, rowIndex) => (
                                         <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
                                             <View style={styles.cell}>
-                                                <Text>{++rowIndex}</Text>
+                                                <Text>{++rowCount}</Text>
                                             </View>
                                             <View style={styles.cell}>
                                                 <TextInput

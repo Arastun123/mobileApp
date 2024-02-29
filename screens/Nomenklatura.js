@@ -35,6 +35,7 @@ const Nomenklatura = () => {
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
     const headers = ["№", "Ad", "Növ", 'Kateqoriya', 'Brend', 'Qiymət'];
+    let rowCount = 0;
     LogBox.ignoreAllLogs()
 
     useEffect(() => { fetchDataAsync() }, []);
@@ -254,7 +255,7 @@ const Nomenklatura = () => {
                         selectedRows.some((selectedRow) => selectedRow.id === row.id) && { backgroundColor: 'lightblue' },
                     ]}>
                         <View style={styles.cell}>
-                            <Text>{++rowIndex}</Text>
+                            <Text>{++rowCount}</Text>
                         </View>
                         <View style={styles.cell}>
                             <Text> {resNomenklatura[rowIndex]?.name}</Text>
@@ -298,7 +299,7 @@ const Nomenklatura = () => {
                             {selectedRows.map((row, rowIndex) => (
                                 <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
                                     <View style={styles.cell}>
-                                        <Text>{++rowIndex}</Text>
+                                        <Text>{++rowCount}</Text>
                                     </View>
                                     <View style={styles.cell}>
                                         <TextInput

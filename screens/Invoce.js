@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { View, TextInput, StyleSheet, ScrollView, Pressable, Text, Alert, Modal, TouchableOpacity, LogBox } from 'react-native';
+import { View, TextInput, StyleSheet, ScrollView, Pressable, Text, Alert, Modal, TouchableOpacity, LogBox, } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { fetchData } from '../services/Server';
 import { addRow, formatDateString, removeLastRow } from '../services/Functions';
 import { sendRequest, deleteData, } from '../services/Server';
+import { SwipeListView } from 'react-native-swipe-list-view';
+
 
 const Invoce = () => {
     const [number, setNumber] = useState();
     const [data, setResData] = useState([]);
-    // const [show, setShow] = useState(false);
     const [customer, setCustomer] = useState();
     const [rowData, setRowData] = useState([]);
     const [date, setDate] = useState(new Date());
@@ -22,7 +23,6 @@ const Invoce = () => {
     const [editTableAmount, setEditTableAmount] = useState(0);
     const [editTableEdv, setEditTableEdv] = useState(0);
     const [editTableAmountAll, setEditTableAmountAll] = useState(0);
-    const [isChecked, setChecked] = useState(false)
     const [rowsSameCustomer, setRowsSameCustomer] = useState([]);
     const [showDatepicker, setShowDatepicker] = useState(false);
 
@@ -30,7 +30,7 @@ const Invoce = () => {
 
     let count = 0;
     let rowCount = 0;
-    const headers = ["№", "Məhsulun adı", "Məbləğ"];
+    const headers = ["№", "Q.N", "Tarix", "Müştəri", "Məbləğ"];
     const editHeaders = ["№", "Miqdar", "Məbləğ", 'Malın adı'];
     const createHeaders = ["№", 'Malın adı', 'Qiymət', "Miqdar", "Məbləğ"];
     const handleDateShow = () => { setShowDatepicker(true) };
@@ -125,23 +125,23 @@ const Invoce = () => {
         fetchDataAsync()
     };
 
-    const deleteRow = async () => {
+    const deleteRow = async (id) => {
         const idsToDelete = selectedRows.map((row) => row.id);
         const tableName = 'invoice';
-
+        console.log(id);
         try {
             for (const idToDelete of idsToDelete) {
-                const result = await deleteData(idToDelete, tableName);
+                const result = await deleteData(id, tableName);
                 if (!result.success) {
                     Alert.alert(result.message);
                     return;
                 }
             }
-
-            setSelectedRows([]);
             Alert.alert('Məlumatlar silindi');
-            setUpdateModalVisible(false)
-            fetchDataAsync()
+            const updatedSelectedRows = rowsSameCustomer.filter((selectedRow) => selectedRow.id !== id);
+            setRowsSameCustomer(updatedSelectedRows);
+    
+            fetchDataAsync();
         } catch (error) {
             console.error(error);
         }
@@ -154,17 +154,19 @@ const Invoce = () => {
             const updatedSelectedRows = selectedRows.filter((selectedRow) => selectedRow.id !== row.id);
             setSelectedRows(updatedSelectedRows);
         } else {
-            const { customer, date, number, ...restRow } = row;
-            const dateObject = new Date(date);
+            let selectedRow = data.filter(item => item.number === row);
 
-            setCustomer(customer || '');
-            setDate(dateObject || new Date());
-            setNumber(number || '');
-            const selectedRowWithoutDate = { ...restRow };
-            const dateToSend = dateObject.toISOString();
-            const rowsWithSameCustomer = data.filter((rowData) => rowData.number === number);
-            setSelectedRows((prevSelectedRows) => [...prevSelectedRows, selectedRowWithoutDate]);
-            setRowsSameCustomer(rowsWithSameCustomer);
+            let customer = selectedRow.map(item => item.customer)[0] || '';
+            setCustomer(customer);
+
+            let number = selectedRow.map(item => item.number)[0] || '';
+            setNumber(number);
+
+            let date = selectedRow.map(item => item.date)[0] || '';
+            setDate(date);
+
+            setRowsSameCustomer(selectedRow);
+            setSelectedRows(selectedRow);
         }
     };
 
@@ -250,7 +252,7 @@ const Invoce = () => {
     data.forEach((item) => {
         const number = item.number;
 
-        if (!groupedRows[number]) groupedRows[number] = { customer: item.customer, sum: 0, rows: [] };
+        if (!groupedRows[number]) groupedRows[number] = { customer: item.customer, sum: 0, number: item.number, date: item.date, id: item.id, rows: [] };
         groupedRows[number].sum += item.price * item.quantity;
         groupedRows[number].rows.push(item);
     });
@@ -384,46 +386,46 @@ const Invoce = () => {
                     <View>
                         {Object.keys(groupedRows).map((number, index) => (
                             <View key={`group_${index}`}>
-                                <Text style={{ margin: 10 }}><Text style={{ fontWeight: 600 }}>Müştəri: </Text> {groupedRows[number].customer}</Text>
-                                {groupedRows[number].rows.map((item, rowIndex) => (
-                                    <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(item)}>
-                                        <View
-                                            style={[
-                                                styles.row,
-                                                selectedRows.some((selectedRow) => selectedRow.id === item.id) && { backgroundColor: 'lightblue' },
-                                            ]}
-                                        >
-                                            <View style={styles.cell}>
-                                                <Text>{++rowIndex}</Text>
-                                            </View>
-                                            <View style={styles.cell}>
-                                                <Text>{item.product_name}</Text>
-                                            </View>
-                                            <View style={styles.cell}>
-                                                <Text>{item.price * item.quantity}</Text>
-                                            </View>
+                                <TouchableOpacity key={`row_${number}`} onPress={() => handleRowPress(number)}>
+                                    <View
+                                        style={[
+                                            styles.row,
+                                            selectedRows.some((selectedRow) => selectedRow.id === groupedRows[number].id) && { backgroundColor: 'lightblue' },
+                                        ]}
+                                    >
+                                        <View style={styles.cell}>
+                                            <Text>{++rowCount}</Text>
                                         </View>
-                                    </TouchableOpacity>
-                                ))}
-                                <Text style={{ textAlign: 'right', paddingHorizontal: 10 }}>
-                                    <Text style={{ fontWeight: 600 }}>Cəmi: </Text> {groupedRows[number].sum}
-                                </Text>
+                                        <View style={styles.cell}>
+                                            <Text>{groupedRows[number].number}</Text>
+                                        </View>
+                                        <View style={styles.cell}>
+                                            <Text>{groupedRows[number].date}</Text>
+                                        </View>
+                                        <View style={styles.cell}>
+                                            <Text>{groupedRows[number].customer}</Text>
+                                        </View>
+                                        <View style={styles.cell}>
+                                            <Text>{groupedRows[number].sum}</Text>
+                                        </View>
+                                    </View>
+                                </TouchableOpacity>
                             </View>
                         ))}
                     </View>
                 </View>
                 <View style={{ margin: 10, display: `${selectedRows.length === 0 ? 'none' : 'block'}`, flexDirection: 'row' }}>
                     <View style={{ margin: 10 }}>
-                        <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'blue', display: `${selectedRows.length === 1 ? 'block' : 'none'}` }} onPress={handleModalOpen}>
+                        <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'blue', display: `${selectedRows.length === 0 ? 'none' : 'block'}` }} onPress={handleModalOpen}>
                             <Text style={styles.text}>Redaktə et</Text>
                         </Pressable>
                     </View>
 
-                    <View style={{ margin: 10, textAlign: 'right' }}>
+                    {/* <View style={{ margin: 10, textAlign: 'right' }}>
                         <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
                             <Text style={styles.text}>Sil</Text>
                         </Pressable>
-                    </View>
+                    </View> */}
                 </View>
             </View>
             <Modal visible={isUpdateModalVisible} animationType="slide">
@@ -478,43 +480,53 @@ const Invoce = () => {
                                         </View>
                                     ))}
                                 </View>
-                                {rowsSameCustomer.map((row, rowIndex) => (
-                                    <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
-                                        <View style={styles.cell}>
-                                            <Text>{++rowCount}</Text>
+
+                                <SwipeListView
+                                    data={rowsSameCustomer}
+                                    keyExtractor={(item) => item.id.toString()}
+                                    renderItem={({ item, index }) => (
+                                        <View style={{ ...styles.row, marginHorizontal: 10, backgroundColor: '#fff' }} key={`row_${index}`}>
+                                            <View style={styles.cell}>
+                                                <Text>{++rowCount}</Text>
+                                            </View>
+                                            <View style={styles.cell}>
+                                                <TextInput
+                                                    placeholder='Malın adı'
+                                                    value={item.product_name}
+                                                    onChangeText={(text) => handleInputChange(index, 'product_name', text)}
+                                                />
+                                            </View>
+                                            <View style={styles.cell}>
+                                                <TextInput
+                                                    placeholder='Qiymət'
+                                                    keyboardType="numeric"
+                                                    value={item.price.toString()}
+                                                    onChangeText={(text) => handleInputChange(index, 'price', text)}
+                                                />
+                                            </View>
+                                            <View style={styles.cell}>
+                                                <TextInput
+                                                    placeholder='Miqdar'
+                                                    keyboardType="numeric"
+                                                    value={item.quantity.toString()}
+                                                    onChangeText={(text) => handleInputChange(index, 'quantity', text)}
+                                                />
+                                            </View>
+                                            <View style={styles.cell}>
+                                                <Text> {isNaN(item.price && item.quantity) ? '000' : item.price * item.quantity} </Text>
+                                            </View>
                                         </View>
-                                        <View style={styles.cell}>
-                                            <TextInput
-                                                placeholder='Malın adı'
-                                                value={String(rowsSameCustomer[rowIndex]?.product_name)}
-                                                onChangeText={(text) => handleInputChange(rowIndex, 'product_name', text)}
-                                            />
+                                    )}
+                                    renderHiddenItem={({ item,index }) => (
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                            <TouchableOpacity style={{ backgroundColor: 'red', justifyContent: 'center', alignItems: 'center', width: 75 }} onPress={() => deleteRow(item.id)}>
+                                                <Text style={{ color: 'white' }}>Sil</Text>
+                                            </TouchableOpacity>
                                         </View>
-                                        <View style={styles.cell}>
-                                            <TextInput
-                                                placeholder='Qiymət'
-                                                keyboardType="numeric"
-                                                value={String(rowsSameCustomer[rowIndex]?.price)}
-                                                onChangeText={(text) => handleInputChange(rowIndex, 'price', text)}
-                                            />
-                                        </View>
-                                        <View style={styles.cell}>
-                                            <TextInput
-                                                placeholder='Miqdar'
-                                                keyboardType="numeric"
-                                                value={String(rowsSameCustomer[rowIndex]?.quantity)}
-                                                onChangeText={(text) => handleInputChange(rowIndex, 'quantity', text)}
-                                            />
-                                        </View>
-                                        <View style={styles.cell}>
-                                            <Text>
-                                                {
-                                                    isNaN(rowsSameCustomer[rowIndex]?.price && rowsSameCustomer[rowIndex]?.quantity) ? '000' : rowsSameCustomer[rowIndex]?.price * rowsSameCustomer[rowIndex]?.quantity
-                                                }
-                                            </Text>
-                                        </View>
-                                    </View>
-                                ))}
+                                    )}
+                                    leftOpenValue={70}
+                                    rightOpenValue={0}
+                                />
                             </View>
                             <View style={{ alignItems: 'flex-end', margin: 10 }}>
                                 <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(editTableAmount) ? '000' : editTableAmount}</Text></Text>
@@ -536,6 +548,7 @@ const Invoce = () => {
         </ScrollView>
     );
 }
+
 
 const styles = StyleSheet.create({
     input: {

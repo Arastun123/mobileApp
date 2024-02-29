@@ -27,7 +27,7 @@ const Orders = () => {
     const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
     const mainHeaders = ["№", "Malın adı", "Miqdarı", "Məbləğ"];
     const editHeaders = ["№", "Qiymət", "Miqdarı", "Malın adı", "Ölçü vahidi", "Məbləğ"];
-
+    let rowCount = 0;
     LogBox.ignoreLogs(['Warning: Failed prop type: Invalid prop `value` of type `date` supplied to `TextInput`, expected `string`'])
 
     useEffect(() => { fetchDataAsync() }, []);
@@ -44,6 +44,7 @@ const Orders = () => {
     let lastId = 1 + id.pop();
 
     if (!fontsLoad) { return null }
+    // const handleDate = () => { formatDateString(dateStr) }
     const handlePress = () => { setModalVisible(true); handleAddRow() }
     const handleDateShow = () => { setShowDatepicker(true) };
     const handleAddRow = () => { addRow(setRowData) };
@@ -257,7 +258,7 @@ const Orders = () => {
                     {rowData.map((row, rowIndex) => (
                         <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
                             <View style={styles.cell}>
-                                <Text>{++rowIndex}</Text>
+                                <Text>{++rowCount}</Text>
                             </View>
                             <View style={styles.cell}>
                                 <TextInput
@@ -323,7 +324,7 @@ const Orders = () => {
                         selectedRows.some((selectedRow) => selectedRow.id === row.id) && { backgroundColor: 'lightblue' },
                     ]}>
                         <View style={styles.cell}>
-                            <Text>{++rowIndex}</Text>
+                            <Text>{++rowCount}</Text>
                         </View>
                         <View style={styles.cell}>
                             <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{resData[rowIndex]?.product_name}</Text>
@@ -398,7 +399,7 @@ const Orders = () => {
                                 {selectedRows.map((row, rowIndex) => (
                                     <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
                                         <View style={styles.cell}>
-                                            <Text>{++rowIndex}</Text>
+                                            <Text>{++rowCount}</Text>
                                         </View>
                                         <View style={styles.cell}>
                                             <TextInput

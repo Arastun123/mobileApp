@@ -15,7 +15,8 @@ const Goods = () => {
     const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
-
+    let count = 0;
+    let rowCount = 0;
     const headers = ["№", "Məhsulun adı"];
     const handlePress = () => { setModalVisible(true); handleAddRow() }
     const handleAddRow = () => { addRow(setRowData) };
@@ -140,7 +141,7 @@ const Goods = () => {
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}>Məhsullar</Text>
             <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
-                <Pressable style={{ ...styles.button, width: 250, display: `${selectedRows.length === 0 ? 'block' : 'none'}` }} onPress={handlePress}>
+                <Pressable style={{ ...styles.button, width: 250, }} onPress={handlePress}>
                     <Text style={styles.text}>Yeni Məhsul əlavə et</Text>
                 </Pressable>
             </View>
@@ -173,7 +174,7 @@ const Goods = () => {
                     {rowData.map((row, rowIndex) => (
                         <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
                             <View style={styles.cell}>
-                                <Text>{++rowIndex}</Text>
+                                <Text>{++rowCount}</Text>
                             </View>
                             <View style={styles.cell}>
                                 <TextInput
@@ -210,7 +211,7 @@ const Goods = () => {
                                     ]}
                                 >
                                     <View style={styles.cell}>
-                                        <Text>{++rowIndex}</Text>
+                                        <Text>{++count}</Text>
                                     </View>
 
                                     <View style={styles.cell}>
@@ -244,7 +245,7 @@ const Goods = () => {
                             {selectedRows.map((row, rowIndex) => (
                                 <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
                                     <View style={styles.cell}>
-                                        <Text>{++rowIndex}</Text>
+                                        <Text>{++rowCount}</Text>
                                     </View>
                                     <View style={styles.cell}>
                                         <TextInput
