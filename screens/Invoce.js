@@ -125,26 +125,43 @@ const Invoce = () => {
         fetchDataAsync()
     };
 
-    const deleteRow = async (id) => {
+    const deleteRow = async (id, check) => {
         const idsToDelete = selectedRows.map((row) => row.id);
         const tableName = 'invoice';
-        console.log(id);
-        try {
-            for (const idToDelete of idsToDelete) {
+        if (check === true) {
+            try {
                 const result = await deleteData(id, tableName);
                 if (!result.success) {
                     Alert.alert(result.message);
                     return;
                 }
+                const updatedSelectedRows = rowsSameCustomer.filter((selectedRow) => selectedRow.id !== id);
+                setRowsSameCustomer(updatedSelectedRows);
+                fetchDataAsync();
+                Alert.alert('Məlumatlar silindi');
+                return;
+            } catch (error) {
+                console.error(error);
             }
-            Alert.alert('Məlumatlar silindi');
-            const updatedSelectedRows = rowsSameCustomer.filter((selectedRow) => selectedRow.id !== id);
-            setRowsSameCustomer(updatedSelectedRows);
-    
-            fetchDataAsync();
-        } catch (error) {
-            console.error(error);
         }
+        else {
+            try {
+                for (const idToDelete of idsToDelete) {
+                    const result = await deleteData(idsToDelete, tableName);
+                    if (!result.success) {
+                        Alert.alert(result.message);
+                        return;
+                    }
+                }
+                setSelectedRows([]);
+                Alert.alert('Məlumatlar silindi');
+                setUpdateModalVisible(false)
+                fetchDataAsync()
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
     };
 
     const handleRowPress = (row) => {
@@ -480,7 +497,6 @@ const Invoce = () => {
                                         </View>
                                     ))}
                                 </View>
-
                                 <SwipeListView
                                     data={rowsSameCustomer}
                                     keyExtractor={(item) => item.id.toString()}
@@ -517,9 +533,9 @@ const Invoce = () => {
                                             </View>
                                         </View>
                                     )}
-                                    renderHiddenItem={({ item,index }) => (
+                                    renderHiddenItem={({ item, index }) => (
                                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                            <TouchableOpacity style={{ backgroundColor: 'red', justifyContent: 'center', alignItems: 'center', width: 75 }} onPress={() => deleteRow(item.id)}>
+                                            <TouchableOpacity style={{ backgroundColor: 'red', justifyContent: 'center', alignItems: 'center', width: 75 }} onPress={() => deleteRow(item.id, true)}>
                                                 <Text style={{ color: 'white' }}>Sil</Text>
                                             </TouchableOpacity>
                                         </View>
@@ -534,10 +550,14 @@ const Invoce = () => {
                                 <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(editTableAmountAll) ? '000' : editTableAmountAll}</Text></Text>
                             </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-
                                 <View style={{ margin: 10 }}>
                                     <Pressable style={{ ...styles.button, width: 150 }} onPress={handleEdit}>
                                         <Text style={styles.text}>Yenilə</Text>
+                                    </Pressable>
+                                </View>
+                                <View style={{ margin: 10, textAlign: 'right' }}>
+                                    <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
+                                        <Text style={styles.text}>Sil</Text>
                                     </Pressable>
                                 </View>
                             </View>
