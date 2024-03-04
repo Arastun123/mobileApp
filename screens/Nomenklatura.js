@@ -34,7 +34,8 @@ const Nomenklatura = () => {
     });
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
-    const headers = ["№", "Ad", "Növ", 'Kateqoriya', 'Brend', 'Qiymət'];
+    const headers = ["№", "Ad", "Növ", 'Qiymət', 'Qaimə nömrəsi'];
+    const editHeaders = ["№", "Ad", "Növ", 'Kateqoriya', 'Brend', 'Qiymət', 'Qaimə nömrəsi'];
     let rowCount = 0;
     LogBox.ignoreAllLogs()
 
@@ -264,13 +265,10 @@ const Nomenklatura = () => {
                             <Text>{resNomenklatura[rowIndex]?.kind}</Text>
                         </View>
                         <View style={styles.cell}>
-                            <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{resNomenklatura[rowIndex]?.category}</Text>
-                        </View>
-                        <View style={styles.cell}>
-                            <Text>{resNomenklatura[rowIndex]?.brand}</Text>
-                        </View>
-                        <View style={styles.cell}>
                             <Text>{resNomenklatura[rowIndex]?.price}</Text>
+                        </View>
+                        <View style={styles.cell}>
+                            <Text>{resNomenklatura[rowIndex]?.invoice_number}</Text>
                         </View>
                     </View>
                 </TouchableOpacity>
@@ -290,7 +288,7 @@ const Nomenklatura = () => {
                         <View style={styles.modalContent}>
                             <Text style={{ display: 'none' }}>{updateData.id}</Text>
                             <View style={{ ...styles.row, marginHorizontal: 10 }}>
-                                {headers.map((header, rowIndex) => (
+                                {editHeaders.map((header, rowIndex) => (
                                     <View style={styles.cell} key={`row_${rowIndex}`}>
                                         <Text>{header}</Text>
                                     </View>
@@ -336,6 +334,9 @@ const Nomenklatura = () => {
                                             value={String(selectedRows[rowIndex]?.price)}
                                             onChangeText={(text) => handleInputChange(rowIndex, 'price', text)}
                                         />
+                                    </View>
+                                    <View style={styles.cell}>
+                                        <Text>{String(selectedRows[rowIndex]?.invoice_number)}</Text>
                                     </View>
                                 </View>
                             ))}
