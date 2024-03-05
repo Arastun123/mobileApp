@@ -268,7 +268,7 @@ const Nomenklatura = () => {
                             <Text>{resNomenklatura[rowIndex]?.price}</Text>
                         </View>
                         <View style={styles.cell}>
-                            <Text>{resNomenklatura[rowIndex]?.invoice_number}</Text>
+                            <Text>{resNomenklatura[rowIndex]?.invoice_id}</Text>
                         </View>
                     </View>
                 </TouchableOpacity>

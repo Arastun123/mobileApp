@@ -25,6 +25,8 @@ const Invoce = () => {
     const [editTableAmountAll, setEditTableAmountAll] = useState(0);
     const [rowsSameCustomer, setRowsSameCustomer] = useState([]);
     const [showDatepicker, setShowDatepicker] = useState(false);
+    const [selectedRowData, setSelectedRowData] = useState(null);
+    const [selectedRowId, setSelectedRowId] = useState(null);
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
 
@@ -126,11 +128,13 @@ const Invoce = () => {
     };
 
     const deleteRow = async (id, check) => {
-        const idsToDelete = selectedRows.map((row) => row.id);
+        const idsToDelete = rowsSameCustomer.map((row) => row.id);
+        let number = rowsSameCustomer.map((item) => item.number)
         const tableName = 'invoice';
         if (check === true) {
             try {
-                const result = await deleteData(id, tableName);
+                console.log(number);
+                const result = await deleteData(number, tableName);
                 // if (!result.success) {
                 //     Alert.alert(result.message);
                 //     return;
@@ -150,7 +154,8 @@ const Invoce = () => {
         else {
             try {
                 for (const idToDelete of idsToDelete) {
-                    const result = await deleteData(idsToDelete, tableName);
+                    console.log(number);
+                    const result = await deleteData(number, tableName);
                     if (!result.success) {
                         Alert.alert(result.message);
                         return;
@@ -168,27 +173,29 @@ const Invoce = () => {
     };
 
     const handleRowPress = (row) => {
-        const isSelected = selectedRows.some((selectedRow) => selectedRow.id === row.id);
+        const isSelected = selectedRowId === row.id;
 
         if (isSelected) {
-            const updatedSelectedRows = selectedRows.filter((selectedRow) => selectedRow.id !== row.id);
-            setSelectedRows(updatedSelectedRows);
+            setSelectedRowId(null);
+            setSelectedRowData(null);
         } else {
-            let selectedRow = data.filter(item => item.number === row);
+            setSelectedRowId(row.id);
 
-            let customer = selectedRow.map(item => item.customer)[0] || '';
+            let selectedRow = data.filter((item) => item.number === row.number);
+            let customer = selectedRow.map((item) => item.customer)[0] || '';
             setCustomer(customer);
 
-            let number = selectedRow.map(item => item.number)[0] || '';
-            setNumber(number);
-
-            let date = selectedRow.map(item => item.date)[0] || '';
+            let date = selectedRow.map((item) => item.date)[0] || '';
             setDate(date);
 
+            let number = selectedRow.map((item) => item.number)[0] || '';
+            setNumber(number);
+
             setRowsSameCustomer(selectedRow);
-            setSelectedRows(selectedRow);
+            setSelectedRowData(selectedRow);
         }
     };
+
 
     const handleInputChange = (index, field, value) => {
         let newRowData = [...rowsSameCustomer];
@@ -255,7 +262,7 @@ const Invoce = () => {
     };
 
     const handleModalOpen = () => {
-        setUpdateModalVisible(true)
+        setUpdateModalVisible(true);
         let sumAmount = rowsSameCustomer.reduce((accumulator, item) => accumulator + ((+item.price || 0) * (+item.quantity || 0)), 0);
         let edv = (sumAmount * 18) / 100;
         let allAmount = sumAmount + edv;
@@ -406,11 +413,11 @@ const Invoce = () => {
                     <View>
                         {Object.keys(groupedRows).map((number, index) => (
                             <View key={`group_${index}`}>
-                                <TouchableOpacity key={`row_${number}`} onPress={() => handleRowPress(number)}>
+                                <TouchableOpacity key={`row_${number}`} onPress={() => handleRowPress(groupedRows[number])}>
                                     <View
                                         style={[
                                             styles.row,
-                                            selectedRows.some((selectedRow) => selectedRow.id === groupedRows[number].id) && { backgroundColor: 'lightblue' },
+                                            selectedRowId === groupedRows[number].id && { backgroundColor: 'lightblue' },
                                         ]}
                                     >
                                         <View style={styles.cell}>
@@ -434,9 +441,9 @@ const Invoce = () => {
                         ))}
                     </View>
                 </View>
-                <View style={{ margin: 10, display: `${selectedRows.length === 0 ? 'none' : 'block'}`, flexDirection: 'row' }}>
+                <View style={{ margin: 10, display: `${selectedRowId ? 'flex' : 'none'}`, flexDirection: 'row' }}>
                     <View style={{ margin: 10 }}>
-                        <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'blue', display: `${selectedRows.length === 0 ? 'none' : 'block'}` }} onPress={handleModalOpen}>
+                        <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'blue' }} onPress={handleModalOpen}>
                             <Text style={styles.text}>Redaktə et</Text>
                         </Pressable>
                     </View>
