@@ -3,7 +3,6 @@ import { View, ScrollView, StyleSheet, Pressable, Text, Modal, Alert, TouchableO
 import { useFonts } from "expo-font";
 import { Ionicons } from '@expo/vector-icons';
 import UserInput from "../components/UserInput";
-import DropDown from "../components/DropDown";
 import { fetchData } from '../services/Server';
 import { sendRequest, sendEditData, deleteData } from '../services/Server';
 import axios from 'axios';
@@ -18,12 +17,8 @@ const Nomenklatura = () => {
     const [invoiceNumber, setInvoiceNumber] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [resNomenklatura, setNomenklatura] = useState([]);
-    const [selectedRow, setSelectedRow] = useState(null);
     const [selectedRows, setSelectedRows] = useState([]);
     const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
-    const [editTableAmount, setEditTableAmount] = useState(0);
-    const [editTableEdv, setEditTableEdv] = useState(0);
-    const [editTableAmountAll, setEditTableAmountAll] = useState(0);
     const [searchResults, setSearchResults] = useState([]);
     const [updateData, setUpdateData] = useState({
         name: '',
@@ -41,23 +36,17 @@ const Nomenklatura = () => {
     // LogBox.ignoreAllLogs()
 
     useEffect(() => { fetchDataAsync() }, []);
-    useEffect(() => {
-        if (name.length > 0) {
-
-            searchProduct(name);
-        }
-    }, [name]);
+    useEffect(() => { if (name.length > 0) { searchProduct(name) } }, [name]);
 
     const fetchDataAsync = async () => {
         try {
             const nomenklatura = await fetchData('nomenklatura');
             if (nomenklatura !== null) {
                 setNomenklatura(nomenklatura)
-                // let invoiceId = resNomenklatura.map(item => item.invoice_id)
-                // console.log(invoiceId);
                 const invoice = await fetchData('invoice');
+
                 let number = invoice.map(item => item.number);
-                setInvoiceNumber(number)
+                setInvoiceNumber(number);
             };
         } catch (error) {
             console.error(error);
@@ -111,14 +100,6 @@ const Nomenklatura = () => {
 
     const handleInputChange = (index, field, value) => {
         let updatedSelectedRows = [...selectedRows];
-        let amount = updatedSelectedRows.map(item => item.price * item.quantity);
-        let edv = (amount * 18) / 100;
-        let allAmoount = +amount + +edv;
-
-        setEditTableAmount(amount);
-        setEditTableEdv(edv);
-        setEditTableAmountAll(allAmoount)
-
         updatedSelectedRows = updatedSelectedRows.map((row, rowIndex) => {
             if (rowIndex === index) {
                 return {
@@ -344,7 +325,7 @@ const Nomenklatura = () => {
                                         />
                                     </View>
                                     <View style={styles.cell}>
-                                        <Text>{String(selectedRows[rowIndex]?.invoice_number)}</Text>
+                                        <Text>{String(invoiceNumber[rowIndex])}</Text>
                                     </View>
                                 </View>
                             ))}

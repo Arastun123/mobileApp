@@ -44,7 +44,6 @@ const Orders = () => {
     let lastId = 1 + id.pop();
 
     if (!fontsLoad) { return null }
-    // const handleDate = () => { formatDateString(dateStr) }
     const handlePress = () => { setModalVisible(true); handleAddRow() }
     const handleDateShow = () => { setShowDatepicker(true) };
     const handleAddRow = () => { addRow(setRowData) };

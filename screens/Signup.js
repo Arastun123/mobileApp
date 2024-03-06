@@ -66,9 +66,6 @@ const Signup = ({navigation}) => {
 
                 <SubmitButton title="Sign Up" handleSubmit={handleSubmit} loading={loading} />
 
-                {/* <Text>
-                    {JSON.stringify({ name, email, password }, null, 4)}
-                </Text> */}
                 <Text small center>
                     Already Joined?  <Text onPress={() => navigation.navigate('Singin')} color="#ff2222"> Sing In </Text>
                 </Text>

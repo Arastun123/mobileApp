@@ -476,7 +476,7 @@ const Invoce = () => {
                                     style={{ ...styles.input, width: 50 }}
                                     placeholder="№"
                                     keyboardType="numeric"
-                                    value={number}
+                                    value={String(number)}
                                     onChangeText={setNumber}
                                 />
                             </View>

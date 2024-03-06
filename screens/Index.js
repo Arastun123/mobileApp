@@ -2,7 +2,7 @@ import React from "react";
 import { Ionicons } from '@expo/vector-icons';
 import SearchBar from "../components/SearchBar";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, StyleSheet, TouchableOpacity, ScrollView, Text  } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, Text } from 'react-native';
 import { useFonts } from 'expo-font';
 
 const Stack = createNativeStackNavigator();
@@ -49,8 +49,8 @@ const Index = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
                     <TouchableOpacity style={styles.buttonContainer}>
-                            <Text onPress={() => navigation.navigate('Goods')} style={styles.buttonText}>Məhsullar</Text>
-                        </TouchableOpacity>
+                        <Text onPress={() => navigation.navigate('Goods')} style={styles.buttonText}>Məhsullar</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity style={styles.buttonContainer}>
                         <Text onPress={() => navigation.navigate('Settings')} style={styles.buttonText}>  <Ionicons name="settings" size={16} color="white" />  </Text>
                     </TouchableOpacity>

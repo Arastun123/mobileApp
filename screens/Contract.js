@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import UserInput from "../components/UserInput";
 import { useFonts } from "expo-font";
-// import { formatDateString } from '../services/Functions';
 import { sendRequest, fetchData } from '../services/Server';
 
 
@@ -107,7 +106,6 @@ const Contracts = () => {
                             mode="date"
                             is24Hour={true}
                             display="default"
-                            // display="spinner"
                             onChange={onChange}
                         />
                     )}

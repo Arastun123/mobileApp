@@ -61,11 +61,6 @@ const Signin = ({ navigation }) => {
 
                 <SubmitButton title="Təsdiq et" handleSubmit={handleSubmit} loading={loading} />
 
-                {/* <Text> {JSON.stringify({ email, password }, null, 4)} </Text> */}
-
-                {/* <Text small center>
-                    Not Yet?   <Text onPress={() => navigation.navigate('Singup')} color="#ff2222">Sing Up </Text>
-                </Text> */}
                 <Text style={{ marginTop: 10, textAlign: 'center', fontFamily: 'Medium', color: 'red' }}>
                     Şifrəni unutmusunuz?
                 </Text>
