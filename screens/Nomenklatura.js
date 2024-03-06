@@ -15,6 +15,7 @@ const Nomenklatura = () => {
     const [category, setCategory] = useState([]);
     const [brand, setBrand] = useState();
     const [price, setPrice] = useState([]);
+    const [invoiceNumber, setInvoiceNumber] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [resNomenklatura, setNomenklatura] = useState([]);
     const [selectedRow, setSelectedRow] = useState(null);
@@ -37,7 +38,7 @@ const Nomenklatura = () => {
     const headers = ["№", "Ad", "Növ", 'Qiymət', 'Qaimə nömrəsi'];
     const editHeaders = ["№", "Ad", "Növ", 'Kateqoriya', 'Brend', 'Qiymət', 'Qaimə nömrəsi'];
     let rowCount = 0;
-    LogBox.ignoreAllLogs()
+    // LogBox.ignoreAllLogs()
 
     useEffect(() => { fetchDataAsync() }, []);
     useEffect(() => {
@@ -50,7 +51,14 @@ const Nomenklatura = () => {
     const fetchDataAsync = async () => {
         try {
             const nomenklatura = await fetchData('nomenklatura');
-            if (nomenklatura !== null) setNomenklatura(nomenklatura);
+            if (nomenklatura !== null) {
+                setNomenklatura(nomenklatura)
+                // let invoiceId = resNomenklatura.map(item => item.invoice_id)
+                // console.log(invoiceId);
+                const invoice = await fetchData('invoice');
+                let number = invoice.map(item => item.number);
+                setInvoiceNumber(number)
+            };
         } catch (error) {
             console.error(error);
         }
@@ -244,7 +252,7 @@ const Nomenklatura = () => {
             <View style={{ ...styles.row }}>
                 {headers.map((header, rowIndex) => (
                     <View style={styles.cell} key={`row_${rowIndex}`}>
-                        <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple" style={{fontWeight:600}}>{header}</Text>
+                        <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple" style={{ fontWeight: 600 }}>{header}</Text>
                     </View>
                 ))}
             </View>
@@ -268,7 +276,7 @@ const Nomenklatura = () => {
                             <Text>{resNomenklatura[rowIndex]?.price}</Text>
                         </View>
                         <View style={styles.cell}>
-                            <Text>{resNomenklatura[rowIndex]?.invoice_id}</Text>
+                            <Text>{invoiceNumber[rowIndex]}</Text>
                         </View>
                     </View>
                 </TouchableOpacity>

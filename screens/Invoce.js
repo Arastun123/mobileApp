@@ -129,20 +129,14 @@ const Invoce = () => {
 
     const deleteRow = async (id, check) => {
         const idsToDelete = rowsSameCustomer.map((row) => row.id);
-        let number = rowsSameCustomer.map((item) => item.number)
         const tableName = 'invoice';
         if (check === true) {
             try {
-                console.log(number);
-                const result = await deleteData(number, tableName);
-                // if (!result.success) {
-                //     Alert.alert(result.message);
-                //     return;
-                // }
+                const result = await deleteData(id, tableName);
                 const updatedSelectedRows = rowsSameCustomer.filter((selectedRow) => selectedRow.id !== id);
                 setRowsSameCustomer(updatedSelectedRows);
                 fetchDataAsync();
-                if(updatedSelectedRows.length === 0) {
+                if (updatedSelectedRows.length === 0) {
                     Alert.alert('Məlumatlar silindi');
                     setUpdateModalVisible(false)
                     setSelectedRows([])
@@ -154,8 +148,7 @@ const Invoce = () => {
         else {
             try {
                 for (const idToDelete of idsToDelete) {
-                    console.log(number);
-                    const result = await deleteData(number, tableName);
+                    const result = await deleteData(idsToDelete, tableName);
                     if (!result.success) {
                         Alert.alert(result.message);
                         return;
@@ -195,7 +188,6 @@ const Invoce = () => {
             setSelectedRowData(selectedRow);
         }
     };
-
 
     const handleInputChange = (index, field, value) => {
         let newRowData = [...rowsSameCustomer];
@@ -283,6 +275,7 @@ const Invoce = () => {
         groupedRows[number].sum += item.price * item.quantity;
         groupedRows[number].rows.push(item);
     });
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 10 }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}>Qaimələr</Text>
