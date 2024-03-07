@@ -33,7 +33,7 @@ const Nomenklatura = () => {
     const headers = ["№", "Ad", "Növ", 'Qiymət', 'Qaimə nömrəsi'];
     const editHeaders = ["№", "Ad", "Növ", 'Kateqoriya', 'Brend', 'Qiymət', 'Qaimə nömrəsi'];
     let rowCount = 0;
-    // LogBox.ignoreAllLogs()
+    LogBox.ignoreAllLogs()
 
     useEffect(() => { fetchDataAsync() }, []);
     useEffect(() => { if (name.length > 0) { searchProduct(name) } }, [name]);
@@ -60,7 +60,7 @@ const Nomenklatura = () => {
 
     const searchProduct = async (query) => {
         try {
-            const response = await axios.get(`http://192.168.88.44:3000/endpoint/autoProducts?query=${query}`);
+            const response = await axios.get(`http://192.168.88.11:3000/endpoint/autoProducts?query=${query}`);
             setSearchResults(response.data);
         } catch (error) {
             console.error('Error searching products:', error);
@@ -165,6 +165,17 @@ const Nomenklatura = () => {
     };
     const handelModalOpen = () => { setUpdateModalVisible(true) }
 
+    const groupedRows = {};
+
+    resNomenklatura.forEach((item) => {
+        const number = item.number;
+
+        if (!groupedRows[number]) groupedRows[number] = { customer: item.customer, sum: 0, number: item.number, date: item.date, id: item.id, rows: [] };
+        groupedRows[number].sum += item.price * item.quantity;
+        groupedRows[number].rows.push(item);
+    });
+
+
     return (
         <ScrollView contentContainerStyle={{ paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
             <Text style={{ marginBottom: 10, textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Nomenklatura </Text>
@@ -239,26 +250,25 @@ const Nomenklatura = () => {
             </View>
 
             {resNomenklatura.map((row, rowIndex) => (
-                <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(row)}>
-                    <View style={[
+                <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(row)}
+                    style={[
                         styles.row,
                         selectedRows.some((selectedRow) => selectedRow.id === row.id) && { backgroundColor: 'lightblue' },
                     ]}>
-                        <View style={styles.cell}>
-                            <Text>{++rowCount}</Text>
-                        </View>
-                        <View style={styles.cell}>
-                            <Text> {resNomenklatura[rowIndex]?.name}</Text>
-                        </View>
-                        <View style={styles.cell}>
-                            <Text>{resNomenklatura[rowIndex]?.kind}</Text>
-                        </View>
-                        <View style={styles.cell}>
-                            <Text>{resNomenklatura[rowIndex]?.price}</Text>
-                        </View>
-                        <View style={styles.cell}>
-                            <Text>{invoiceNumber[rowIndex]}</Text>
-                        </View>
+                    <View style={styles.cell}>
+                        <Text>{++rowCount}</Text>
+                    </View>
+                    <View style={styles.cell}>
+                        <Text> {resNomenklatura[rowIndex]?.name}</Text>
+                    </View>
+                    <View style={styles.cell}>
+                        <Text>{resNomenklatura[rowIndex]?.kind}</Text>
+                    </View>
+                    <View style={styles.cell}>
+                        <Text>{resNomenklatura[rowIndex]?.price}</Text>
+                    </View>
+                    <View style={styles.cell}>
+                        <Text>{invoiceNumber[rowIndex]}</Text>
                     </View>
                 </TouchableOpacity>
             ))}

@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { View, ScrollView, Text, Modal, TextInput, Pressable, StyleSheet, Alert, TouchableOpacity, DevSettings, LogBox } from 'react-native';
+import React, { useEffect, useState, useCallback } from "react";
+import { View, ScrollView, Text, Modal, TextInput, Pressable, StyleSheet, Alert, TouchableOpacity, LogBox } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFonts } from "expo-font";
 import { fetchData } from '../services/Server';
 import { Ionicons } from '@expo/vector-icons';
 import { addRow, removeLastRow } from '../services/Functions';
 import { sendRequest, deleteData, sendEditData } from '../services/Server';
+import axios from "axios";
 
 
 const Orders = () => {
@@ -22,6 +23,8 @@ const Orders = () => {
     const [number, setNumber] = useState();
     const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
     const [showDatepicker, setShowDatepicker] = useState(false);
+    const [searchResults, setSearchResults] = useState([]);
+    const [selectedResult, setSelectedResult] = useState(null);
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
     const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
@@ -31,6 +34,16 @@ const Orders = () => {
     LogBox.ignoreLogs(['Warning: Failed prop type: Invalid prop `value` of type `date` supplied to `TextInput`, expected `string`'])
 
     useEffect(() => { fetchDataAsync() }, []);
+
+    useEffect(() => {
+        formTable.forEach((item, index) => {
+            let name = item.product_name;
+            if (name && name.length > 0) {
+                searchProduct(name, index);
+            }
+        });
+    }, [formTable]);
+
     const fetchDataAsync = async () => {
         try {
             const result = await fetchData('orders', 'true');
@@ -40,11 +53,30 @@ const Orders = () => {
         }
     };
 
+    const searchProduct = useCallback(async (query, index) => {
+        try {
+            const response = await axios.get(`http://192.168.88.11:3000/endpoint/autoFill?query=${query}`);
+            setSearchResults((prevResults) => {
+                const updatedResults = [...prevResults];
+                updatedResults[index] = response.data;
+                return updatedResults;
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }, [setSearchResults]);
+
     let id = resData.map((item) => item.id);
     let lastId = 1 + id.pop();
 
     if (!fontsLoad) { return null }
-    const handlePress = () => { setModalVisible(true); handleAddRow() }
+    const handlePress = () => {
+        setModalVisible(true);
+        handleAddRow();
+        let today = new Date();
+        let formattedToday = today.toISOString().split('T')[0];
+        setDate(formattedToday);
+    }
     const handleDateShow = () => { setShowDatepicker(true) };
     const handleAddRow = () => { addRow(setRowData) };
     const handleRemoveRow = () => { removeLastRow(setRowData) };
@@ -134,7 +166,7 @@ const Orders = () => {
         setModalVisible(false)
         setDate(new Date())
         setRowData([])
-        setFormTable()
+        setFormTable([])
         fetchDataAsync()
     }
 
@@ -181,7 +213,26 @@ const Orders = () => {
         }
 
     };
-    DevSettings.disableYellowBox = true;
+
+    const handleAutoFillSelection = (rowIndex, selectedResult) => {
+        const updatedFormTable = [...formTable];
+        updatedFormTable[rowIndex].product_name = selectedResult.name;
+        setFormTable(updatedFormTable);
+
+        setSearchResults((prevResults) => {
+            const updatedResults = [...prevResults];
+            updatedResults[rowIndex] = [];
+            return updatedResults;
+        });
+
+        setSelectedResult(null);
+        if (selectedResult.name !== formTable[rowIndex]?.product_name) {
+            searchProduct(selectedResult.name);
+        }
+        
+    };
+
+
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>
@@ -191,6 +242,7 @@ const Orders = () => {
                     <Text style={styles.text}>Yeni Sifariş yarat</Text>
                 </Pressable>
             </View>
+
             <Modal visible={isModalVisible} animationType="slide">
                 <ScrollView>
                     <View style={{ margin: 10 }} >
@@ -255,47 +307,66 @@ const Orders = () => {
                         ))}
                     </View>
                     {rowData.map((row, rowIndex) => (
-                        <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
-                            <View style={styles.cell}>
-                                <Text>{++rowCount}</Text>
+                        <View key={`row_${rowIndex}`}>
+                            <View style={{ ...styles.row, marginHorizontal: 10 }}>
+                                <View style={styles.cell}>
+                                    <Text>{++rowCount}</Text>
+                                </View>
+                                <View style={styles.cell}>
+                                    <TextInput
+                                        placeholder='Malın adı'
+                                        value={formTable[rowIndex]?.product_name}
+                                        onChangeText={(text) => handleTableInputChange(rowIndex, 'product_name', text)}
+                                    />
+                                </View>
+                                <View style={styles.cell}>
+                                    <TextInput
+                                        placeholder='Miqdar'
+                                        keyboardType="numeric"
+                                        value={formTable[rowIndex]?.quantity}
+                                        onChangeText={(text) => handleTableInputChange(rowIndex, 'quantity', text)}
+                                    />
+                                </View>
+                                <View style={styles.cell}>
+                                    <TextInput
+                                        placeholder='Qiymət'
+                                        keyboardType="numeric"
+                                        value={formTable[rowIndex]?.price}
+                                        onChangeText={(text) => handleTableInputChange(rowIndex, 'price', text)}
+                                    />
+                                </View>
+                                <View style={styles.cell}>
+                                    <TextInput
+                                        placeholder='Ölçü vahidi'
+                                        value={formTable[rowIndex]?.units}
+                                        onChangeText={(text) => handleTableInputChange(rowIndex, 'units', text)}
+                                    />
+                                </View>
+                                <View style={styles.cell}>
+                                    <Text>
+                                        {isNaN(formTable[rowIndex]?.price * formTable[rowIndex]?.quantity) ? '000' : parseFloat(formTable[rowIndex]?.price * formTable[rowIndex]?.quantity)}
+                                    </Text>
+                                </View>
                             </View>
-                            <View style={styles.cell}>
-                                <TextInput
-                                    placeholder='Malın adı'
-                                    value={formTable[rowIndex]?.product_name}
-                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'product_name', text)}
-                                />
-                            </View>
-                            <View style={styles.cell}>
-                                <TextInput
-                                    placeholder='Miqdar'
-                                    keyboardType="numeric"
-                                    value={formTable[rowIndex]?.quantity}
-                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'quantity', text)}
-                                />
-                            </View>
-                            <View style={styles.cell}>
-                                <TextInput
-                                    placeholder='Qiymət'
-                                    keyboardType="numeric"
-                                    value={formTable[rowIndex]?.price}
-                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'price', text)}
-                                />
-                            </View>
-                            <View style={styles.cell}>
-                                <TextInput
-                                    placeholder='Ölçü vahidi'
-                                    value={formTable[rowIndex]?.units}
-                                    onChangeText={(text) => handleTableInputChange(rowIndex, 'units', text)}
-                                />
-                            </View>
-                            <View style={styles.cell}>
-                                <Text>{
-                                    isNaN(!formTable[rowIndex]?.price * formTable[rowIndex]?.quantity) ? '000' : parseFloat(formTable[rowIndex]?.price * formTable[rowIndex]?.quantity)
-                                }</Text>
-                            </View>
+                            {(formTable[rowIndex]?.product_name === '' && !selectedResult) ? null :
+                                <View style={{ padding: 15 }}>
+                                    {searchResults[rowIndex]?.length > 0 && (
+                                        searchResults[rowIndex].map((result) => (
+                                            <Text
+                                                key={result.id}
+                                                style={{ padding: 3 }}
+                                                onPress={() => handleAutoFillSelection(rowIndex, result)}
+                                            >
+                                                {result.name}
+                                            </Text>
+                                        ))
+                                    )}
+                                </View>
+                            }
                         </View>
                     ))}
+
+
                     <View style={{ alignItems: 'flex-end', margin: 10 }}>
                         <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(totalAmount) ? '000' : totalAmount}</Text></Text>
                         <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(edv) ? '000' : edv}</Text></Text>
@@ -308,6 +379,7 @@ const Orders = () => {
                     </View>
                 </ScrollView>
             </Modal>
+
             <View style={{ ...styles.row }}>
                 {mainHeaders.map((header, rowIndex) => (
                     <View style={styles.cell} key={`row_${rowIndex}`}>

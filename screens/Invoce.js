@@ -37,9 +37,16 @@ const Invoce = () => {
     const createHeaders = ["№", 'Malın adı', 'Qiymət', "Miqdar", "Məbləğ"];
     const handleDateShow = () => { setShowDatepicker(true) };
 
-    const handlePress = () => { setModalVisible(true); handleAddRow() }
+    const handlePress = () => { 
+        setModalVisible(true); 
+        handleAddRow();
+        let today = new Date();
+        let formattedToday = today.toISOString().split('T')[0];
+        setDate(formattedToday);
+        console.log(date);
+    }
 
-    // LogBox.ignoreAllLogs()
+    LogBox.ignoreAllLogs()
 
     useEffect(() => { fetchDataAsync() }, []);
 
@@ -222,7 +229,7 @@ const Invoce = () => {
                 };
             });
 
-            const endpoint = `http://192.168.88.44:3000/api/invoice`;
+            const endpoint = `http://192.168.88.11:3000/api/invoice`;
 
             const result = await fetch(endpoint, {
                 method: 'PUT',
@@ -394,52 +401,42 @@ const Invoce = () => {
                     </View>
                 </ScrollView>
             </Modal>
-            <View>
-                <View style={styles.table}>
-                    <View style={styles.row}>
-                        {headers.map((header, rowIndex) => (
-                            <View style={styles.cell} key={`row_${rowIndex}`}>
-                                <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple" style={{ fontWeight: 600 }}>{header}</Text>
-                            </View>
-                        ))}
-                    </View>
-                    <View>
-                        {Object.keys(groupedRows).map((number, index) => (
-                            <View key={`group_${index}`}>
-                                <TouchableOpacity key={`row_${number}`} onPress={() => handleRowPress(groupedRows[number])}>
-                                    <View
-                                        style={[
-                                            styles.row,
-                                            selectedRowId === groupedRows[number].id && { backgroundColor: 'lightblue' },
-                                        ]}
-                                    >
-                                        <View style={styles.cell}>
-                                            <Text>{++rowCount}</Text>
-                                        </View>
-                                        <View style={styles.cell}>
-                                            <Text>{groupedRows[number].number}</Text>
-                                        </View>
-                                        <View style={styles.cell}>
-                                            <Text>{groupedRows[number].date}</Text>
-                                        </View>
-                                        <View style={styles.cell}>
-                                            <Text>{groupedRows[number].customer}</Text>
-                                        </View>
-                                        <View style={styles.cell}>
-                                            <Text>{groupedRows[number].sum}</Text>
-                                        </View>
-                                    </View>
-                                </TouchableOpacity>
-                            </View>
-                        ))}
-                    </View>
+            <View style={styles.table}>
+                <View style={styles.row}>
+                    {headers.map((header, rowIndex) => (
+                        <View style={styles.cell} key={`row_${rowIndex}`}>
+                            <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple" style={{ fontWeight: 600 }}>{header}</Text>
+                        </View>
+                    ))}
                 </View>
+                {Object.keys(groupedRows).map((number, index) => (
+                    <TouchableOpacity key={`row_${number}`} onPress={() => handleRowPress(groupedRows[number])}
+                        style={[
+                            styles.row,
+                            selectedRowId === groupedRows[number].id && { backgroundColor: 'lightblue' },
+                        ]}
+                    >
+                        <View style={styles.cell}>
+                            <Text>{++rowCount}</Text>
+                        </View>
+                        <View style={styles.cell}>
+                            <Text>{groupedRows[number].number}</Text>
+                        </View>
+                        <View style={styles.cell}>
+                            <Text>{groupedRows[number].date}</Text>
+                        </View>
+                        <View style={styles.cell}>
+                            <Text>{groupedRows[number].customer}</Text>
+                        </View>
+                        <View style={styles.cell}>
+                            <Text>{groupedRows[number].sum}</Text>
+                        </View>
+                    </TouchableOpacity>
+                ))}
                 <View style={{ margin: 10, display: `${selectedRowId ? 'flex' : 'none'}`, flexDirection: 'row' }}>
-                    <View style={{ margin: 10 }}>
-                        <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'blue' }} onPress={handleModalOpen}>
-                            <Text style={styles.text}>Redaktə et</Text>
-                        </Pressable>
-                    </View>
+                    <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'blue' }} onPress={handleModalOpen}>
+                        <Text style={styles.text}>Redaktə et</Text>
+                    </Pressable>
                 </View>
             </View>
             <Modal visible={isUpdateModalVisible} animationType="slide">
@@ -447,116 +444,114 @@ const Invoce = () => {
                     <View style={{ padding: 5 }}>
                         <Text style={{ textAlign: 'right' }} onPress={closeUpdateModal} ><Ionicons name="close" size={24} color="red" /></Text>
                     </View>
-                    <View style={styles.modalContainer}>
-                        <View style={styles.modalContent}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <TextInput
-                                        style={{ ...styles.input, width: 100 }}
-                                        placeholder="Gün-Ay-İl"
-                                        keyboardType="numeric"
-                                        value={date}
-                                        onChangeText={setDate}
-                                    />
-                                    <Pressable onPress={handleDateShow}>
-                                        <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
-                                    </Pressable>
-                                    {showDatepicker && (
-                                        <DateTimePicker
-                                            testID="datePicker"
-                                            value={new Date(date)}
-                                            mode="date"
-                                            is24Hour={true}
-                                            display="default"
-                                            onChange={onChange}
-                                        />
-                                    )}
-                                </View>
+                    <View style={styles.modalContent}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <TextInput
-                                    style={{ ...styles.input, width: 50 }}
-                                    placeholder="№"
+                                    style={{ ...styles.input, width: 100 }}
+                                    placeholder="Gün-Ay-İl"
                                     keyboardType="numeric"
-                                    value={String(number)}
-                                    onChangeText={setNumber}
+                                    value={date}
+                                    onChangeText={setDate}
                                 />
+                                <Pressable onPress={handleDateShow}>
+                                    <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
+                                </Pressable>
+                                {showDatepicker && (
+                                    <DateTimePicker
+                                        testID="datePicker"
+                                        value={new Date(date)}
+                                        mode="date"
+                                        is24Hour={true}
+                                        display="default"
+                                        onChange={onChange}
+                                    />
+                                )}
                             </View>
                             <TextInput
-                                style={{ ...styles.input, }}
-                                placeholder="Müştəri"
-                                value={customer}
-                                onChangeText={setCustomer}
+                                style={{ ...styles.input, width: 50 }}
+                                placeholder="№"
+                                keyboardType="numeric"
+                                value={String(number)}
+                                onChangeText={setNumber}
                             />
-                            <View style={{ marginVertical: 10 }}>
-                                <View style={{ ...styles.row, marginHorizontal: 10 }}>
-                                    {createHeaders.map((header, rowIndex) => (
-                                        <View style={styles.cell} key={`row_${rowIndex}`}>
-                                            <Text>{header}</Text>
-                                        </View>
-                                    ))}
-                                </View>
-                                <SwipeListView
-                                    data={rowsSameCustomer}
-                                    keyExtractor={(item) => item.id.toString()}
-                                    renderItem={({ item, index }) => (
-                                        <View style={{ ...styles.row, marginHorizontal: 10, backgroundColor: '#fff' }} key={`row_${index}`}>
-                                            <View style={styles.cell}>
-                                                <Text>{++rowCount}</Text>
-                                            </View>
-                                            <View style={styles.cell}>
-                                                <TextInput
-                                                    placeholder='Malın adı'
-                                                    value={item.product_name}
-                                                    onChangeText={(text) => handleInputChange(index, 'product_name', text)}
-                                                />
-                                            </View>
-                                            <View style={styles.cell}>
-                                                <TextInput
-                                                    placeholder='Qiymət'
-                                                    keyboardType="numeric"
-                                                    value={item.price.toString()}
-                                                    onChangeText={(text) => handleInputChange(index, 'price', text)}
-                                                />
-                                            </View>
-                                            <View style={styles.cell}>
-                                                <TextInput
-                                                    placeholder='Miqdar'
-                                                    keyboardType="numeric"
-                                                    value={item.quantity.toString()}
-                                                    onChangeText={(text) => handleInputChange(index, 'quantity', text)}
-                                                />
-                                            </View>
-                                            <View style={styles.cell}>
-                                                <Text> {isNaN(item.price && item.quantity) ? '000' : item.price * item.quantity} </Text>
-                                            </View>
-                                        </View>
-                                    )}
-                                    renderHiddenItem={({ item, index }) => (
-                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                            <TouchableOpacity style={{ backgroundColor: 'red', justifyContent: 'center', alignItems: 'center', width: 75 }} onPress={() => deleteRow(item.id, true)}>
-                                                <Text style={{ color: 'white' }}>Sil</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    )}
-                                    leftOpenValue={70}
-                                    rightOpenValue={0}
-                                />
+                        </View>
+                        <TextInput
+                            style={{ ...styles.input, }}
+                            placeholder="Müştəri"
+                            value={customer}
+                            onChangeText={setCustomer}
+                        />
+                        <View style={{ marginVertical: 10 }}>
+                            <View style={{ ...styles.row, marginHorizontal: 10 }}>
+                                {createHeaders.map((header, rowIndex) => (
+                                    <View style={styles.cell} key={`row_${rowIndex}`}>
+                                        <Text>{header}</Text>
+                                    </View>
+                                ))}
                             </View>
-                            <View style={{ alignItems: 'flex-end', margin: 10 }}>
-                                <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(editTableAmount) ? '000' : editTableAmount}</Text></Text>
-                                <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(editTableEdv) ? '000' : editTableEdv}</Text></Text>
-                                <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(editTableAmountAll) ? '000' : editTableAmountAll}</Text></Text>
+                            <SwipeListView
+                                data={rowsSameCustomer}
+                                keyExtractor={(item) => item.id.toString()}
+                                renderItem={({ item, index }) => (
+                                    <View style={{ ...styles.row, marginHorizontal: 10, backgroundColor: '#fff' }} key={`row_${index}`}>
+                                        <View style={styles.cell}>
+                                            <Text>{++rowCount}</Text>
+                                        </View>
+                                        <View style={styles.cell}>
+                                            <TextInput
+                                                placeholder='Malın adı'
+                                                value={item.product_name}
+                                                onChangeText={(text) => handleInputChange(index, 'product_name', text)}
+                                            />
+                                        </View>
+                                        <View style={styles.cell}>
+                                            <TextInput
+                                                placeholder='Qiymət'
+                                                keyboardType="numeric"
+                                                value={item.price.toString()}
+                                                onChangeText={(text) => handleInputChange(index, 'price', text)}
+                                            />
+                                        </View>
+                                        <View style={styles.cell}>
+                                            <TextInput
+                                                placeholder='Miqdar'
+                                                keyboardType="numeric"
+                                                value={item.quantity.toString()}
+                                                onChangeText={(text) => handleInputChange(index, 'quantity', text)}
+                                            />
+                                        </View>
+                                        <View style={styles.cell}>
+                                            <Text> {isNaN(item.price && item.quantity) ? '000' : item.price * item.quantity} </Text>
+                                        </View>
+                                    </View>
+                                )}
+                                renderHiddenItem={({ item, index }) => (
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                        <TouchableOpacity style={{ backgroundColor: 'red', justifyContent: 'center', alignItems: 'center', width: 75 }} onPress={() => deleteRow(item.id, true)}>
+                                            <Text style={{ color: 'white' }}>Sil</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+                                leftOpenValue={70}
+                                rightOpenValue={0}
+                            />
+                        </View>
+                        <View style={{ alignItems: 'flex-end', margin: 10 }}>
+                            <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(editTableAmount) ? '000' : editTableAmount}</Text></Text>
+                            <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(editTableEdv) ? '000' : editTableEdv}</Text></Text>
+                            <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(editTableAmountAll) ? '000' : editTableAmountAll}</Text></Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <View style={{ margin: 10 }}>
+                                <Pressable style={{ ...styles.button, width: 150 }} onPress={handleEdit}>
+                                    <Text style={styles.text}>Yenilə</Text>
+                                </Pressable>
                             </View>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <View style={{ margin: 10 }}>
-                                    <Pressable style={{ ...styles.button, width: 150 }} onPress={handleEdit}>
-                                        <Text style={styles.text}>Yenilə</Text>
-                                    </Pressable>
-                                </View>
-                                <View style={{ margin: 10, textAlign: 'right' }}>
-                                    <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
-                                        <Text style={styles.text}>Sil</Text>
-                                    </Pressable>
-                                </View>
+                            <View style={{ margin: 10, textAlign: 'right' }}>
+                                <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
+                                    <Text style={styles.text}>Sil</Text>
+                                </Pressable>
                             </View>
                         </View>
                     </View>

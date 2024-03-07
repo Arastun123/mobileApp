@@ -28,7 +28,7 @@ const CassaOrders = () => {
     if (!fontsLoad) { return null }
 
     const sendData = async () => {
-        const apiUrl = 'http://192.168.88.44:3000/api/cassa_orders';
+        const apiUrl = 'http://192.168.88.11:3000/api/cassa_orders';
         try {
             const postData = {
                 date: formatDateString(date),
