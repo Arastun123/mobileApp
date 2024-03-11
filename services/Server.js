@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 
-const url = 'http://192.168.88.11:3000/api';
+const url = 'http://192.168.88.40:3000/api';
 
 export const fetchData = async (tableName, formatDate) => {
     try {

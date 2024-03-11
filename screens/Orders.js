@@ -25,6 +25,7 @@ const Orders = () => {
     const [showDatepicker, setShowDatepicker] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [selectedResult, setSelectedResult] = useState(null);
+    const [activeInputIndex, setActiveInputIndex] = useState(null);
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
     const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
@@ -55,7 +56,7 @@ const Orders = () => {
 
     const searchProduct = useCallback(async (query, index) => {
         try {
-            const response = await axios.get(`http://192.168.88.11:3000/endpoint/autoFill?query=${query}`);
+            const response = await axios.get(`http://192.168.88.40:3000/endpoint/autoFill?query=${query}`);
             setSearchResults((prevResults) => {
                 const updatedResults = [...prevResults];
                 updatedResults[index] = response.data;
@@ -214,7 +215,7 @@ const Orders = () => {
 
     };
 
-    const handleAutoFillSelection = (rowIndex, selectedResult) => {
+    const handleAutoFill = (rowIndex, selectedResult) => {
         const updatedFormTable = [...formTable];
         updatedFormTable[rowIndex].product_name = selectedResult.name;
         setFormTable(updatedFormTable);
@@ -225,13 +226,12 @@ const Orders = () => {
             return updatedResults;
         });
 
-        setSelectedResult(null);
+        setActiveInputIndex(null);
+
         if (selectedResult.name !== formTable[rowIndex]?.product_name) {
             searchProduct(selectedResult.name);
         }
-        
     };
-
 
 
     return (
@@ -316,7 +316,10 @@ const Orders = () => {
                                     <TextInput
                                         placeholder='Malın adı'
                                         value={formTable[rowIndex]?.product_name}
-                                        onChangeText={(text) => handleTableInputChange(rowIndex, 'product_name', text)}
+                                        onChangeText={(text) => {
+                                            handleTableInputChange(rowIndex, 'product_name', text);
+                                            setActiveInputIndex(rowIndex);
+                                        }}
                                     />
                                 </View>
                                 <View style={styles.cell}>
@@ -348,21 +351,19 @@ const Orders = () => {
                                     </Text>
                                 </View>
                             </View>
-                            {(formTable[rowIndex]?.product_name === '' && !selectedResult) ? null :
-                                <View style={{ padding: 15 }}>
-                                    {searchResults[rowIndex]?.length > 0 && (
-                                        searchResults[rowIndex].map((result) => (
-                                            <Text
-                                                key={result.id}
-                                                style={{ padding: 3 }}
-                                                onPress={() => handleAutoFillSelection(rowIndex, result)}
-                                            >
-                                                {result.name}
-                                            </Text>
-                                        ))
-                                    )}
-                                </View>
-                            }
+                            <View style={{ paddingHorizontal: 15 }}>
+                                {(searchResults[rowIndex]?.length > 0 && activeInputIndex === rowIndex) && (
+                                    searchResults[rowIndex].map((result) => (
+                                        <Text
+                                            key={result.id}
+                                            style={{ padding: 3 }}
+                                            onPress={() => handleAutoFill(rowIndex, result)}
+                                        >
+                                            {result.name}
+                                        </Text>
+                                    ))
+                                )}
+                            </View>
                         </View>
                     ))}
 

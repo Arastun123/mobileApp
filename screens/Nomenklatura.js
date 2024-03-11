@@ -59,8 +59,10 @@ const Nomenklatura = () => {
     const closeUpdateModal = () => { setUpdateModalVisible(false) }
 
     const searchProduct = async (query) => {
+        let tableName = 'products'
         try {
-            const response = await axios.get(`http://192.168.88.11:3000/endpoint/autoProducts?query=${query}`);
+            const encodedQuery = encodeURIComponent(query);
+            const response = await axios.get(`http://192.168.88.40:3000/api/${tableName}?query=${encodedQuery}`);
             setSearchResults(response.data);
         } catch (error) {
             console.error('Error searching products:', error);

@@ -46,7 +46,7 @@ const Invoce = () => {
         console.log(date);
     }
 
-    LogBox.ignoreAllLogs()
+    // LogBox.ignoreAllLogs()
 
     useEffect(() => { fetchDataAsync() }, []);
 
@@ -229,7 +229,7 @@ const Invoce = () => {
                 };
             });
 
-            const endpoint = `http://192.168.88.11:3000/api/invoice`;
+            const endpoint = `http://192.168.88.40:3000/api/invoice`;
 
             const result = await fetch(endpoint, {
                 method: 'PUT',
