@@ -3,8 +3,7 @@ import { View, ScrollView, StyleSheet, Pressable, Text, Modal, Alert, TouchableO
 import { useFonts } from "expo-font";
 import { Ionicons } from '@expo/vector-icons';
 import UserInput from "../components/UserInput";
-import { fetchData } from '../services/Server';
-import { sendRequest, sendEditData, deleteData } from '../services/Server';
+import { fetchData, sendRequest, sendEditData, deleteData, autoFill } from '../services/Server';
 import axios from 'axios';
 
 
@@ -61,9 +60,9 @@ const Nomenklatura = () => {
     const searchProduct = async (query) => {
         let tableName = 'products'
         try {
-            const encodedQuery = encodeURIComponent(query);
-            const response = await axios.get(`http://192.168.88.40:3000/api/${tableName}?query=${encodedQuery}`);
-            setSearchResults(response.data);
+            const response = await autoFill(tableName, query);
+            console.log(response);
+            setSearchResults(response);
         } catch (error) {
             console.error('Error searching products:', error);
         }

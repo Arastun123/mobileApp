@@ -16,13 +16,12 @@ export const fetchData = async (tableName, formatDate) => {
 export const sendRequest = async (apiUrl, postData) => {
     let endpoint = `${url}${apiUrl}`;
     try {
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(postData),
-        });
+        const response = await axios.post(endpoint, JSON.stringify(postData),{
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
 
         if (response.status === 200) return { success: true, message: 'Məlumatlar göndərildi!' };
         else if (response.status === 400) return { success: true, message: 'Məlumat bazada möcuddur!' };
@@ -35,16 +34,17 @@ export const sendRequest = async (apiUrl, postData) => {
 
 export const sendEditData = async (updatedRows, tableName) => {
     let endpoint = `${url}/edit/${tableName}`;
-     try {
-        const response = await fetch(endpoint, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+    try {
+        const response = await axios.put(endpoint,
+            {
                 updatedRows: updatedRows,
-            }),
-        });
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
         if (response.status === 200) return { success: true, message: 'Məlumat yeniləndi' };
         else return { success: false, message: 'Uğursuz cəht!' };
     } catch (error) {
@@ -55,13 +55,10 @@ export const sendEditData = async (updatedRows, tableName) => {
 export const deleteData = async (id, tableName) => {
     let endpoint = `${url}/delete/${id}/${tableName}`;
     try {
-        const response = await fetch(endpoint, {
-            method: "DELETE",
+        const response = await axios.delete(endpoint, {
             headers: {
                 'Content-Type': 'application/json',
-
             },
-            body: {},
         });
         if (response.status === 200) return { success: true, message: 'Məlumat silindi' };
         else return { success: false, message: 'Uğursuz cəht!' };
@@ -69,4 +66,15 @@ export const deleteData = async (id, tableName) => {
         return { success: false, message: 'Error occurred during the request.' };
 
     }
+}
+
+export const autoFill = async (tableName, query) => {
+    try {
+        const response = await axios.get(`http://192.168.88.40:3000/endpoint/autoFill?query=${query}&tableName=${tableName}`);
+        return response.data;
+    } catch (error) {
+        console.error('Request Error:', error);
+        throw error;
+    }
+
 }

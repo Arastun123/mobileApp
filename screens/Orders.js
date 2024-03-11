@@ -2,11 +2,9 @@ import React, { useEffect, useState, useCallback } from "react";
 import { View, ScrollView, Text, Modal, TextInput, Pressable, StyleSheet, Alert, TouchableOpacity, LogBox } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFonts } from "expo-font";
-import { fetchData } from '../services/Server';
 import { Ionicons } from '@expo/vector-icons';
 import { addRow, removeLastRow } from '../services/Functions';
-import { sendRequest, deleteData, sendEditData } from '../services/Server';
-import axios from "axios";
+import { fetchData, sendRequest, deleteData, sendEditData, autoFill } from '../services/Server';
 
 
 const Orders = () => {
@@ -55,17 +53,23 @@ const Orders = () => {
     };
 
     const searchProduct = useCallback(async (query, index) => {
+        let tableName = 'nomenklatura';
         try {
-            const response = await axios.get(`http://192.168.88.40:3000/endpoint/autoFill?query=${query}`);
-            setSearchResults((prevResults) => {
-                const updatedResults = [...prevResults];
-                updatedResults[index] = response.data;
-                return updatedResults;
-            });
+            const response = await autoFill(tableName, query);
+            if (response) {
+                setSearchResults((prevResults) => {
+                    const updatedResults = [...prevResults];
+                    updatedResults[index] = response;
+                    return updatedResults;
+                });
+            } else {
+                console.error("Response is null or undefined");
+            }
         } catch (error) {
-            console.error(error);
+            console.error("An error occurred during the request:", error);
         }
     }, [setSearchResults]);
+
 
     let id = resData.map((item) => item.id);
     let lastId = 1 + id.pop();
