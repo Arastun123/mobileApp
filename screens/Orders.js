@@ -18,7 +18,7 @@ const Orders = () => {
     const [totalAmount, setTotalAmount] = useState(0);
     const [edv, setEdv] = useState(0);
     const [wholeAmout, setWholeAmount] = useState(0);
-    const [number, setNumber] = useState();
+    // const [number, setNumber] = useState();
     const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
     const [showDatepicker, setShowDatepicker] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
@@ -75,6 +75,10 @@ const Orders = () => {
     let lastId = 1 + id.pop();
 
     if (!fontsLoad) { return null }
+    const handleDateShow = () => { setShowDatepicker(true) };
+    const handleAddRow = () => { addRow(setRowData) };
+    const handleRemoveRow = () => { removeLastRow(setRowData) };
+    
     const handlePress = () => {
         setModalVisible(true);
         handleAddRow();
@@ -82,11 +86,22 @@ const Orders = () => {
         let formattedToday = today.toISOString().split('T')[0];
         setDate(formattedToday);
     }
-    const handleDateShow = () => { setShowDatepicker(true) };
-    const handleAddRow = () => { addRow(setRowData) };
-    const handleRemoveRow = () => { removeLastRow(setRowData) };
-    const closeUpdateModal = () => { setUpdateModalVisible(false) }
-    const handelModalOpen = () => { setUpdateModalVisible(true); }
+   
+    const closeUpdateModal = () => { 
+        setUpdateModalVisible(false);
+        setCustomer();
+        setDate(new Date());
+    }
+
+    const handelModalOpen = () => { 
+        setUpdateModalVisible(true); 
+        if(selectedRows.length === 1){
+            let customer =  selectedRows.map(item => item.customer)
+            setCustomer(customer[0]);
+            let date = selectedRows.map(item => item.date)
+            setDate(date[0])
+        }
+    }
 
     const handleTableInputChange = (index, field, value) => {
         let updatedFormTable = [...formTable];
@@ -259,7 +274,7 @@ const Orders = () => {
                                     style={{ ...styles.input, width: 100 }}
                                     placeholder="Gün-Ay-İl"
                                     keyboardType="numeric"
-                                    value={date}
+                                    value={date.toString()}
                                     onChangeText={setDate}
                                 />
                                 <Pressable onPress={handleDateShow}>
@@ -276,13 +291,6 @@ const Orders = () => {
                                     />
                                 )}
                             </View>
-                            {/* <TextInput
-                                style={{ ...styles.input, width: 50 }}
-                                placeholder="№"
-                                keyboardType="numeric"
-                                value={isNaN(lastId) ? '1' : String(lastId)}
-                                onChangeText={setNumber}
-                            /> */}
                         </View>
                         <TextInput
                             style={{ ...styles.input, }}
@@ -433,7 +441,7 @@ const Orders = () => {
                                         style={{ ...styles.input, width: 100 }}
                                         placeholder="Gün-Ay-İl"
                                         keyboardType="numeric"
-                                        value={new Date(date)}
+                                        value={new Date(date).toDateString()}
                                         onChangeText={setDate}
                                     />
                                     <Pressable onPress={handleDateShow}>
@@ -450,13 +458,6 @@ const Orders = () => {
                                         />
                                     )}
                                 </View>
-                                <TextInput
-                                    style={{ ...styles.input, width: 50 }}
-                                    placeholder="№"
-                                    keyboardType="numeric"
-                                    value={number}
-                                    onChangeText={setNumber}
-                                />
                             </View>
                             <TextInput
                                 style={{ ...styles.input, }}

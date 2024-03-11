@@ -4,7 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { fetchData } from '../services/Server';
-import { addRow, formatDateString, removeLastRow } from '../services/Functions';
+import { addRow, removeLastRow } from '../services/Functions';
 import { sendRequest, deleteData, } from '../services/Server';
 import { SwipeListView } from 'react-native-swipe-list-view';
 
@@ -29,8 +29,7 @@ const Invoce = () => {
     const [selectedRowId, setSelectedRowId] = useState(null);
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
-
-    let count = 0;
+    LogBox.ignoreAllLogs();
     let rowCount = 0;
     const headers = ["№", "Q.N", "Tarix", "Müştəri", "Məbləğ"];
     const editHeaders = ["№", "Miqdar", "Məbləğ", 'Malın adı'];
@@ -43,10 +42,7 @@ const Invoce = () => {
         let today = new Date();
         let formattedToday = today.toISOString().split('T')[0];
         setDate(formattedToday);
-        console.log(date);
     }
-
-    // LogBox.ignoreAllLogs()
 
     useEffect(() => { fetchDataAsync() }, []);
 
@@ -81,7 +77,6 @@ const Invoce = () => {
             newData[index] = {
                 ...newData[index],
                 [field]: value,
-                // total: total,
             };
             return newData;
         });
@@ -89,7 +84,6 @@ const Invoce = () => {
 
     const handleAddRow = () => { addRow(setRowData) };
     const handleRemoveRow = () => { removeLastRow(setRowData) };
-    const handleDate = () => { formatDateString(dateStr) }
     const closeUpdateModal = () => {
         setUpdateModalVisible(false)
         setCustomer()
@@ -303,7 +297,7 @@ const Invoce = () => {
                                     style={{ ...styles.input, width: 100 }}
                                     placeholder="Gün-Ay-İl"
                                     keyboardType="numeric"
-                                    value={date}
+                                    value={date.toString()}
                                     onChangeText={setDate}
                                 />
                                 <Pressable onPress={handleDateShow}>
@@ -451,7 +445,7 @@ const Invoce = () => {
                                     style={{ ...styles.input, width: 100 }}
                                     placeholder="Gün-Ay-İl"
                                     keyboardType="numeric"
-                                    value={date}
+                                    value={new Date(date).toDateString()}
                                     onChangeText={setDate}
                                 />
                                 <Pressable onPress={handleDateShow}>

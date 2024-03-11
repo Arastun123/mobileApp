@@ -4,15 +4,14 @@ import { useFonts } from "expo-font";
 import { Ionicons } from '@expo/vector-icons';
 import UserInput from "../components/UserInput";
 import { fetchData, sendRequest, sendEditData, deleteData, autoFill } from '../services/Server';
-import axios from 'axios';
 
 
 const Nomenklatura = () => {
     const [name, setName] = useState('');
     const [kind, setKind] = useState();
-    const [category, setCategory] = useState([]);
+    const [category, setCategory] = useState();
     const [brand, setBrand] = useState();
-    const [price, setPrice] = useState([]);
+    const [price, setPrice] = useState();
     const [invoiceNumber, setInvoiceNumber] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [resNomenklatura, setNomenklatura] = useState([]);
@@ -61,7 +60,6 @@ const Nomenklatura = () => {
         let tableName = 'products'
         try {
             const response = await autoFill(tableName, query);
-            console.log(response);
             setSearchResults(response);
         } catch (error) {
             console.error('Error searching products:', error);
