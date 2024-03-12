@@ -25,7 +25,7 @@ const Legal = ({ selectedLocation }) => {
        
         if (
             !name ||
-            !phone_number ||
+            !phone ||
             !tin ||
             !address 
         ) {

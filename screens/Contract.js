@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, StyleSheet, Text, View, Pressable, Alert, LogBox, TouchableOpacity } from "react-native";
+import { ScrollView, StyleSheet, Text, View, Pressable, Alert, LogBox} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import UserInput from "../components/UserInput";
@@ -20,6 +20,7 @@ const Contracts = () => {
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
     let rowCount = 0;
     useEffect(() => { fetchDataAsync(); }, []);
+
     const fetchDataAsync = async () => {
         try {
             const result = await fetchData('contract');
@@ -28,12 +29,16 @@ const Contracts = () => {
             console.error(error);
         }
     };
+    
     LogBox.ignoreLogs(['Warning: Failed prop type: Invalid prop `value` of type `date` supplied to `TextInput`, expected `string`'])
 
-    const handleDateShow = () => { setShowDatepicker(true) };
     const headers = ["№", "Adı", "Şirkətin adı", "Tarix", "Növ"];
-
     if (!fontsLoad) { return null }
+    let id = data.map((item) => item.id);
+    let lastId = 1 + id.pop();
+
+    const handleDateShow = () => { setShowDatepicker(true) };
+    
     const onChange = (event, selectedDate) => {
         setShowDatepicker(Platform.OS === 'ios');
         if (selectedDate) {
@@ -48,7 +53,7 @@ const Contracts = () => {
             !name ||
             !type ||
             !companyName ||
-            !date 
+            !date
         ) {
             Alert.alert('Məlumatları daxil edin!');
             return;
@@ -72,14 +77,10 @@ const Contracts = () => {
             Alert.alert(result.message);
         }
     };
-
-    let id = data.map((item) => item.id);
-    let lastId = 1 + id.pop();
-
-    // let currenDate  = new Date();
-    // let toDay = `${currenDate.getDate()}.${currenDate.getMonth()}.${currenDate.getFullYear()}`;
-    // setDate(toDay);
     
+   
+
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, marginHorizontal: 10 }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Müqavilə</Text>
@@ -161,7 +162,6 @@ const Contracts = () => {
                         </View>
                     ))}
                 </View>
-
                 {
                     data.map((row, rowIndex) => (
                         <View key={`row_${rowIndex}`} onPress={() => handleRowPress(row)}>

@@ -25,7 +25,7 @@ const Physical = () => {
         
         if (
             !name ||
-            !phone_number ||
+            !phone ||
             !tin ||
             !address 
         ) {

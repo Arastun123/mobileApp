@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { View, ScrollView, Text, Modal, TextInput, Pressable, StyleSheet, Alert, TouchableOpacity, LogBox } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFonts } from "expo-font";
@@ -24,6 +24,8 @@ const Orders = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [selectedResult, setSelectedResult] = useState(null);
     const [activeInputIndex, setActiveInputIndex] = useState(null);
+    const [isPressed, setIsPressed] = useState(false);
+    const secondInput = useRef()
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
     const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
@@ -32,7 +34,9 @@ const Orders = () => {
     let rowCount = 0;
     LogBox.ignoreLogs(['Warning: Failed prop type: Invalid prop `value` of type `date` supplied to `TextInput`, expected `string`'])
 
-    useEffect(() => { fetchDataAsync() }, []);
+    useEffect(() => {
+        fetchDataAsync();
+    }, []);
 
     useEffect(() => {
         formTable.forEach((item, index) => {
@@ -78,7 +82,7 @@ const Orders = () => {
     const handleDateShow = () => { setShowDatepicker(true) };
     const handleAddRow = () => { addRow(setRowData) };
     const handleRemoveRow = () => { removeLastRow(setRowData) };
-    
+
     const handlePress = () => {
         setModalVisible(true);
         handleAddRow();
@@ -86,17 +90,17 @@ const Orders = () => {
         let formattedToday = today.toISOString().split('T')[0];
         setDate(formattedToday);
     }
-   
-    const closeUpdateModal = () => { 
+
+    const closeUpdateModal = () => {
         setUpdateModalVisible(false);
         setCustomer();
         setDate(new Date());
     }
 
-    const handelModalOpen = () => { 
-        setUpdateModalVisible(true); 
-        if(selectedRows.length === 1){
-            let customer =  selectedRows.map(item => item.customer)
+    const handelModalOpen = () => {
+        setUpdateModalVisible(true);
+        if (selectedRows.length === 1) {
+            let customer = selectedRows.map(item => item.customer)
             setCustomer(customer[0]);
             let date = selectedRows.map(item => item.date)
             setDate(date[0])
@@ -261,8 +265,13 @@ const Orders = () => {
         if (selectedResult.name !== formTable[rowIndex]?.product_name) {
             searchProduct(selectedResult.name);
         }
+        setIsPressed(!isPressed);
+        secondInput.current.focus()
     };
 
+    const focusSecondInput = () => {
+        secondInput.current.focus();
+    };
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>
@@ -343,10 +352,13 @@ const Orders = () => {
                                             handleTableInputChange(rowIndex, 'product_name', text);
                                             setActiveInputIndex(rowIndex);
                                         }}
+                                        onSubmitEditing={focusSecondInput}
+
                                     />
                                 </View>
                                 <View style={styles.cell}>
                                     <TextInput
+                                        ref={secondInput}
                                         placeholder='Miqdar'
                                         keyboardType="numeric"
                                         value={formTable[rowIndex]?.quantity}
@@ -374,16 +386,18 @@ const Orders = () => {
                                     </Text>
                                 </View>
                             </View>
-                            <View style={{ paddingHorizontal: 15 }}>
+                            <View style={styles.box}>
                                 {(searchResults[rowIndex]?.length > 0 && activeInputIndex === rowIndex) && (
                                     searchResults[rowIndex].map((result) => (
-                                        <Text
+                                        <TouchableOpacity
+                                            style={{ ...styles.text, padding: 5, borderBottomWidth: 1, borderStyle: "dotted" }}
                                             key={result.id}
-                                            style={{ padding: 3 }}
                                             onPress={() => handleAutoFill(rowIndex, result)}
                                         >
-                                            {result.name}
-                                        </Text>
+                                            <Text>
+                                                {result.name}
+                                            </Text>
+                                        </TouchableOpacity>
                                     ))
                                 )}
                             </View>
@@ -402,7 +416,7 @@ const Orders = () => {
                         </Pressable>
                     </View>
                 </ScrollView>
-            </Modal>
+            </Modal >
 
             <View style={{ ...styles.row }}>
                 {mainHeaders.map((header, rowIndex) => (
@@ -412,27 +426,29 @@ const Orders = () => {
                 ))}
             </View>
 
-            {resData.map((row, rowIndex) => (
-                <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(row)}>
-                    <View style={[
-                        styles.row,
-                        selectedRows.some((selectedRow) => selectedRow.id === row.id) && { backgroundColor: 'lightblue' },
-                    ]}>
-                        <View style={styles.cell}>
-                            <Text>{++rowCount}</Text>
+            {
+                resData.map((row, rowIndex) => (
+                    <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(row)}>
+                        <View style={[
+                            styles.row,
+                            selectedRows.some((selectedRow) => selectedRow.id === row.id) && { backgroundColor: 'lightblue' },
+                        ]}>
+                            <View style={styles.cell}>
+                                <Text>{++rowCount}</Text>
+                            </View>
+                            <View style={styles.cell}>
+                                <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{resData[rowIndex]?.product_name}</Text>
+                            </View>
+                            <View style={styles.cell}>
+                                <Text>{resData[rowIndex]?.quantity}</Text>
+                            </View>
+                            <View style={styles.cell}>
+                                <Text>{resData[rowIndex]?.price * resData[rowIndex]?.quantity}</Text>
+                            </View>
                         </View>
-                        <View style={styles.cell}>
-                            <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{resData[rowIndex]?.product_name}</Text>
-                        </View>
-                        <View style={styles.cell}>
-                            <Text>{resData[rowIndex]?.quantity}</Text>
-                        </View>
-                        <View style={styles.cell}>
-                            <Text>{resData[rowIndex]?.price * resData[rowIndex]?.quantity}</Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-            ))}
+                    </TouchableOpacity>
+                ))
+            }
             <View style={{ margin: 10 }}>
                 <Pressable disabled={selectedRows.length === 0} style={{ ...styles.button, width: 150, display: `${selectedRows.length === 0 ? 'none' : 'block'}`, backgroundColor: 'blue' }} onPress={handelModalOpen}>
                     <Text style={styles.text}>Redaktə et</Text>
@@ -591,5 +607,9 @@ const styles = StyleSheet.create({
         color: 'white',
         fontFamily: 'Medium'
     },
+    box: {
+        marginHorizontal: 10,
+        paddingHorizontal: 10,
+    }
 });
 export default Orders;
