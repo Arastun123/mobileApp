@@ -78,7 +78,19 @@ const Nomenklatura = () => {
     }
 
     const sendData = async () => {
-        let apiUrl = '/nomenklatura'
+        let apiUrl = '/nomenklatura';
+        
+        if (
+            !name ||
+            !category ||
+            !brand ||
+            !price ||
+            !kind 
+        ) {
+            Alert.alert('Məlumatları daxil edin!');
+            return;
+        }
+
         const postData = {
             name: name,
             category: category,

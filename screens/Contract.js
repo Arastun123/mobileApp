@@ -43,7 +43,17 @@ const Contracts = () => {
     };
 
     const sendData = async () => {
-        let apiUrl = '/contract'
+        let apiUrl = '/contract';
+        if (
+            !name ||
+            !type ||
+            !companyName ||
+            !date 
+        ) {
+            Alert.alert('Məlumatları daxil edin!');
+            return;
+        }
+
         const postData = {
             name: name,
             number: isNaN(lastId) ? '1' : lastId,
@@ -66,6 +76,10 @@ const Contracts = () => {
     let id = data.map((item) => item.id);
     let lastId = 1 + id.pop();
 
+    // let currenDate  = new Date();
+    // let toDay = `${currenDate.getDate()}.${currenDate.getMonth()}.${currenDate.getFullYear()}`;
+    // setDate(toDay);
+    
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, marginHorizontal: 10 }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Müqavilə</Text>

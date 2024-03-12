@@ -21,7 +21,18 @@ const Legal = ({ selectedLocation }) => {
     const onDataReceived = (data) => { setAddress(data) }
 
     const sendData = async () => {
-        let apiUrl = '/kontragent'
+        let apiUrl = '/kontragent';
+       
+        if (
+            !name ||
+            !phone_number ||
+            !tin ||
+            !address 
+        ) {
+            Alert.alert('Məlumatları daxil edin!');
+            return;
+        }
+
         const postData = {
             name: name,
             phone_number: phone,

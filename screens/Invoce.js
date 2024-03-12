@@ -95,6 +95,15 @@ const Invoce = () => {
     const sendData = async () => {
         let apiUrl = '/invoice';
 
+        if (
+            !customer ||
+            formTable.length === 0 ||
+            formTable.some(entry => !entry.product_name || !entry.price || !entry.quantity )
+        ) {
+            Alert.alert('Məlumatları daxil edin!');
+            return;
+        }
+
         const postData = {
             date: date,
             number: isNaN(lastId) ? '1' : lastId,

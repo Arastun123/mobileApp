@@ -64,6 +64,15 @@ const Goods = () => {
 
     const sendData = async () => {
         let apiUrl = '/products'
+
+        if (
+            formTable.length === 0 ||
+            formTable.some(entry => !entry.name )
+        ) {
+            Alert.alert('Məlumatları daxil edin!');
+            return;
+        }
+
         const postData = {
             formTable: formTable,
         };

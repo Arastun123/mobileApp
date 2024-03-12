@@ -136,7 +136,18 @@ const Orders = () => {
     };
 
     const sendData = async () => {
-        let apiUrl = '/orders'
+        let apiUrl = '/orders';
+
+        if (
+            !date ||
+            !customer ||
+            formTable.length === 0 ||
+            formTable.some(entry => !entry.quantity || !entry.price || !entry.product_name || !entry.units)
+        ) {
+            Alert.alert('Məlumatları daxil edin!');
+            return;
+        }
+
         const postData = {
             date: date,
             customer: customer,
