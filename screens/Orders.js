@@ -43,9 +43,15 @@ const Orders = () => {
             let name = item.product_name;
             if (name && name.length > 0) {
                 searchProduct(name, index);
+            } else {
+                setSearchResults((prevResults) => {
+                    const updatedResults = [...prevResults];
+                    updatedResults[index] = null;
+                    return updatedResults;
+                });
             }
         });
-    }, [formTable]);
+    }, [formTable, searchProduct, setSearchResults]);
 
     const fetchDataAsync = async () => {
         try {
@@ -67,10 +73,10 @@ const Orders = () => {
                     return updatedResults;
                 });
             } else {
-                console.error("Response is null or undefined");
+                console.error("Undefined");
             }
         } catch (error) {
-            console.error("An error occurred during the request:", error);
+            console.error(error);
         }
     }, [setSearchResults]);
 
@@ -203,6 +209,7 @@ const Orders = () => {
         setRowData([])
         setFormTable([])
         fetchDataAsync()
+        setSearchResults([])
     }
 
     const handleInputChange = (index, field, value) => {
@@ -266,7 +273,8 @@ const Orders = () => {
             searchProduct(selectedResult.name);
         }
         setIsPressed(!isPressed);
-        secondInput.current.focus()
+        secondInput.current.focus();
+        setSearchResults([])
     };
 
     const focusSecondInput = () => {
@@ -353,7 +361,6 @@ const Orders = () => {
                                             setActiveInputIndex(rowIndex);
                                         }}
                                         onSubmitEditing={focusSecondInput}
-
                                     />
                                 </View>
                                 <View style={styles.cell}>
@@ -386,11 +393,31 @@ const Orders = () => {
                                     </Text>
                                 </View>
                             </View>
-                            <View style={styles.box}>
+                            <View style={{
+                                ...styles.box,
+                                backgroundColor: '#f0f0f0', 
+                                borderStyle: 'dotted',
+                                paddingHorizontal: 15,
+                                // shadowColor: '#aaa',
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 2,
+                                },
+                                shadowOpacity: 0.5,
+                                shadowRadius: 3,
+                                elevation: 2,
+                            }}>
                                 {(searchResults[rowIndex]?.length > 0 && activeInputIndex === rowIndex) && (
-                                    searchResults[rowIndex].map((result) => (
+                                    searchResults[rowIndex].map((result, index) => (
                                         <TouchableOpacity
-                                            style={{ ...styles.text, padding: 5, borderBottomWidth: 1, borderStyle: "dotted" }}
+                                            style={{
+                                                ...styles.text,
+                                                padding: 5,
+                                                marginBottom: index === searchResults[rowIndex].length - 1 ? 0 : 5,
+                                                borderStyle: 'dotted',
+                                                borderBottomWidth: 1,
+                                                backgroundColor: index % 2 === 0 ? '#f0f0f0' : 'white', 
+                                            }}
                                             key={result.id}
                                             onPress={() => handleAutoFill(rowIndex, result)}
                                         >

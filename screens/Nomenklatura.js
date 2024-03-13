@@ -105,6 +105,7 @@ const Nomenklatura = () => {
             Alert.alert(result.message);
             setModalVisible(false)
             fetchDataAsync()
+            closeModal()
         }
         else Alert.alert(result.message);
     };
