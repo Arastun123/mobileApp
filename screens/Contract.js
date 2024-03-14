@@ -78,9 +78,6 @@ const Contracts = () => {
         }
     };
     
-   
-
-
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, marginHorizontal: 10 }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Müqavilə</Text>
@@ -305,7 +302,6 @@ const styles = StyleSheet.create({
     },
     row: {
         flexDirection: 'row',
-        borderBottomWidth: 1,
         borderBottomWidth: 1,
         borderColor: '#ddd',
     },

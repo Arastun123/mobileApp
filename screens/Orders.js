@@ -18,11 +18,9 @@ const Orders = () => {
     const [totalAmount, setTotalAmount] = useState(0);
     const [edv, setEdv] = useState(0);
     const [wholeAmout, setWholeAmount] = useState(0);
-    // const [number, setNumber] = useState();
     const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
     const [showDatepicker, setShowDatepicker] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
-    const [selectedResult, setSelectedResult] = useState(null);
     const [activeInputIndex, setActiveInputIndex] = useState(null);
     const [isPressed, setIsPressed] = useState(false);
     const secondInput = useRef()
@@ -87,7 +85,14 @@ const Orders = () => {
     if (!fontsLoad) { return null }
     const handleDateShow = () => { setShowDatepicker(true) };
     const handleAddRow = () => { addRow(setRowData) };
-    const handleRemoveRow = () => { removeLastRow(setRowData) };
+    const handleRemoveRow = () => {
+        removeLastRow(setRowData);
+        setRowData([])
+        setFormTable([])
+        fetchDataAsync()
+        setSearchResults([])
+
+    };
 
     const handlePress = () => {
         setModalVisible(true);
@@ -277,9 +282,7 @@ const Orders = () => {
         setSearchResults([])
     };
 
-    const focusSecondInput = () => {
-        secondInput.current.focus();
-    };
+    const focusSecondInput = () => { secondInput.current.focus() };
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>
@@ -289,6 +292,7 @@ const Orders = () => {
                     <Text style={styles.text}>Yeni Sifariş yarat</Text>
                 </Pressable>
             </View>
+            
 
             <Modal visible={isModalVisible} animationType="slide">
                 <ScrollView>
@@ -304,6 +308,7 @@ const Orders = () => {
                                     keyboardType="numeric"
                                     value={date.toString()}
                                     onChangeText={setDate}
+                                    editable={false}
                                 />
                                 <Pressable onPress={handleDateShow}>
                                     <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
@@ -360,7 +365,7 @@ const Orders = () => {
                                             handleTableInputChange(rowIndex, 'product_name', text);
                                             setActiveInputIndex(rowIndex);
                                         }}
-                                        onSubmitEditing={focusSecondInput}
+                                        onSubmitEditingr={focusSecondInput}
                                     />
                                 </View>
                                 <View style={styles.cell}>
@@ -395,10 +400,9 @@ const Orders = () => {
                             </View>
                             <View style={{
                                 ...styles.box,
-                                backgroundColor: '#f0f0f0', 
+                                backgroundColor: '#f0f0f0',
                                 borderStyle: 'dotted',
-                                paddingHorizontal: 15,
-                                // shadowColor: '#aaa',
+                                shadowColor: '#aaa',
                                 shadowOffset: {
                                     width: 0,
                                     height: 2,
@@ -412,16 +416,14 @@ const Orders = () => {
                                         <TouchableOpacity
                                             style={{
                                                 ...styles.text,
-                                                padding: 5,
-                                                marginBottom: index === searchResults[rowIndex].length - 1 ? 0 : 5,
                                                 borderStyle: 'dotted',
-                                                borderBottomWidth: 1,
-                                                backgroundColor: index % 2 === 0 ? '#f0f0f0' : 'white', 
+                                                // borderBottomWidth: 1,
+                                                backgroundColor: index % 2 === 0 ? '#f0f0f0' : 'white',
                                             }}
                                             key={result.id}
                                             onPress={() => handleAutoFill(rowIndex, result)}
                                         >
-                                            <Text>
+                                            <Text style={{ padding: 5, }}>
                                                 {result.name}
                                             </Text>
                                         </TouchableOpacity>
@@ -453,29 +455,27 @@ const Orders = () => {
                 ))}
             </View>
 
-            {
-                resData.map((row, rowIndex) => (
-                    <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(row)}>
-                        <View style={[
-                            styles.row,
-                            selectedRows.some((selectedRow) => selectedRow.id === row.id) && { backgroundColor: 'lightblue' },
-                        ]}>
-                            <View style={styles.cell}>
-                                <Text>{++rowCount}</Text>
-                            </View>
-                            <View style={styles.cell}>
-                                <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{resData[rowIndex]?.product_name}</Text>
-                            </View>
-                            <View style={styles.cell}>
-                                <Text>{resData[rowIndex]?.quantity}</Text>
-                            </View>
-                            <View style={styles.cell}>
-                                <Text>{resData[rowIndex]?.price * resData[rowIndex]?.quantity}</Text>
-                            </View>
+            {resData.map((row, rowIndex) => (
+                <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(row)}>
+                    <View style={[
+                        styles.row,
+                        selectedRows.some((selectedRow) => selectedRow.id === row.id) && { backgroundColor: 'lightblue' },
+                    ]}>
+                        <View style={styles.cell}>
+                            <Text>{++rowCount}</Text>
                         </View>
-                    </TouchableOpacity>
-                ))
-            }
+                        <View style={styles.cell}>
+                            <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{resData[rowIndex]?.product_name}</Text>
+                        </View>
+                        <View style={styles.cell}>
+                            <Text>{resData[rowIndex]?.quantity}</Text>
+                        </View>
+                        <View style={styles.cell}>
+                            <Text>{resData[rowIndex]?.price * resData[rowIndex]?.quantity}</Text>
+                        </View>
+                    </View>
+                </TouchableOpacity>
+            ))}
             <View style={{ margin: 10 }}>
                 <Pressable disabled={selectedRows.length === 0} style={{ ...styles.button, width: 150, display: `${selectedRows.length === 0 ? 'none' : 'block'}`, backgroundColor: 'blue' }} onPress={handelModalOpen}>
                     <Text style={styles.text}>Redaktə et</Text>
@@ -495,8 +495,9 @@ const Orders = () => {
                                         style={{ ...styles.input, width: 100 }}
                                         placeholder="Gün-Ay-İl"
                                         keyboardType="numeric"
-                                        value={new Date(date).toDateString()}
+                                        value={date.toString()}
                                         onChangeText={setDate}
+                                        editable={false}
                                     />
                                     <Pressable onPress={handleDateShow}>
                                         <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
@@ -608,7 +609,6 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         borderBottomWidth: 1,
-        borderBottomWidth: 1,
         borderColor: '#ddd',
     },
     cell: {
@@ -628,15 +628,10 @@ const styles = StyleSheet.create({
     },
     text: {
         fontSize: 16,
-        lineHeight: 21,
         fontWeight: 'bold',
-        letterSpacing: 0.25,
         color: 'white',
         fontFamily: 'Medium'
     },
-    box: {
-        marginHorizontal: 10,
-        paddingHorizontal: 10,
-    }
+    box: { marginHorizontal: 10 }
 });
 export default Orders;

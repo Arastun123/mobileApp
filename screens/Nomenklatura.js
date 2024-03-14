@@ -404,7 +404,6 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         borderBottomWidth: 1,
-        borderBottomWidth: 1,
         borderColor: '#ddd',
     },
     cell: {
