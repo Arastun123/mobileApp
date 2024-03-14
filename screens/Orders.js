@@ -24,12 +24,14 @@ const Orders = () => {
     const [activeInputIndex, setActiveInputIndex] = useState(null);
     const [isPressed, setIsPressed] = useState(false);
     const secondInput = useRef()
+    const inputRefs = useRef([])
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
     const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
     const mainHeaders = ["№", "Malın adı", "Miqdarı", "Məbləğ"];
     const editHeaders = ["№", "Qiymət", "Miqdarı", "Malın adı", "Ölçü vahidi", "Məbləğ"];
     let rowCount = 0;
+    let inputCount = 0;
     LogBox.ignoreLogs(['Warning: Failed prop type: Invalid prop `value` of type `date` supplied to `TextInput`, expected `string`'])
 
     useEffect(() => {
@@ -84,7 +86,10 @@ const Orders = () => {
 
     if (!fontsLoad) { return null }
     const handleDateShow = () => { setShowDatepicker(true) };
-    const handleAddRow = () => { addRow(setRowData) };
+    const handleAddRow = () => { 
+        addRow(setRowData) 
+        inputCount = inputCount + 4
+    };
     const handleRemoveRow = () => {
         removeLastRow(setRowData);
         setRowData([])
@@ -278,11 +283,15 @@ const Orders = () => {
             searchProduct(selectedResult.name);
         }
         setIsPressed(!isPressed);
-        secondInput.current.focus();
-        setSearchResults([])
+        setSearchResults([]);
+        inputRefs.current[2].focus()    
     };
 
-    const focusSecondInput = () => { secondInput.current.focus() };
+    const focusInputRefs = (index) => {
+        if (inputRefs.current[index + 1]) inputRefs.current[index + 1].focus();
+        console.log('index', index + 1);
+        console.log('inputCount', inputCount);
+    }
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>
@@ -292,7 +301,7 @@ const Orders = () => {
                     <Text style={styles.text}>Yeni Sifariş yarat</Text>
                 </Pressable>
             </View>
-            
+
 
             <Modal visible={isModalVisible} animationType="slide">
                 <ScrollView>
@@ -330,6 +339,8 @@ const Orders = () => {
                             placeholder="Müştəri"
                             value={customer}
                             onChangeText={(text) => setCustomer(text)}
+                            ref={(ref) => (inputRefs.current[0] = ref)}
+                            onSubmitEditing={() => focusInputRefs(0)}
                         />
                     </View>
                     <View style={{ marginVertical: 20, marginHorizontal: 10, flexDirection: 'row' }}>
@@ -365,16 +376,18 @@ const Orders = () => {
                                             handleTableInputChange(rowIndex, 'product_name', text);
                                             setActiveInputIndex(rowIndex);
                                         }}
-                                        onSubmitEditingr={focusSecondInput}
+                                        ref={(ref) => (inputRefs.current[inputCount + 1] = ref)}
+                                        onSubmitEditing={() => focusInputRefs(inputCount + 1)}
                                     />
                                 </View>
                                 <View style={styles.cell}>
                                     <TextInput
-                                        ref={secondInput}
                                         placeholder='Miqdar'
                                         keyboardType="numeric"
                                         value={formTable[rowIndex]?.quantity}
                                         onChangeText={(text) => handleTableInputChange(rowIndex, 'quantity', text)}
+                                        ref={(ref) => (inputRefs.current[inputCount + 2] = ref)}
+                                        onSubmitEditing={() => focusInputRefs(inputCount + 2)}
                                     />
                                 </View>
                                 <View style={styles.cell}>
@@ -383,6 +396,8 @@ const Orders = () => {
                                         keyboardType="numeric"
                                         value={formTable[rowIndex]?.price}
                                         onChangeText={(text) => handleTableInputChange(rowIndex, 'price', text)}
+                                        ref={(ref) => (inputRefs.current[inputCount + 3] = ref)}
+                                        onSubmitEditing={() => focusInputRefs(inputCount + 3)}
                                     />
                                 </View>
                                 <View style={styles.cell}>
@@ -390,6 +405,8 @@ const Orders = () => {
                                         placeholder='Ölçü vahidi'
                                         value={formTable[rowIndex]?.units}
                                         onChangeText={(text) => handleTableInputChange(rowIndex, 'units', text)}
+                                        ref={(ref) => (inputRefs.current[inputCount + 4] = ref)}
+                                        onSubmitEditing={() => focusInputRefs(inputCount + 1)}
                                     />
                                 </View>
                                 <View style={styles.cell}>
