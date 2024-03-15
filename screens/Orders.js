@@ -44,20 +44,6 @@ const Orders = () => {
         fetchDataAsync();
     }, []);
 
-    useEffect(() => {
-        formTable.forEach((item, index) => {
-            let name = item.product_name;
-            if (name && name.length > 0) {
-                searchProduct(name, index);
-            } else {
-                setSearchResults((prevResults) => {
-                    const updatedResults = [...prevResults];
-                    updatedResults[index] = null;
-                    return updatedResults;
-                });
-            }
-        });
-    }, [formTable, searchProduct, setSearchResults]);
 
     const fetchDataAsync = async () => {
         try {
@@ -68,21 +54,64 @@ const Orders = () => {
         }
     };
 
-    const searchProduct = useCallback(async (query, index) => {
-        let tableName = 'nomenklatura';
+    // const searchData = useCallback(async (tableName, columnName, query, index) => {
+    //     try {
+    //         const response = await autoFill(tableName, columnName, query);
+    //         let result = response.map( item => item[columnName])
+    //         setSearchResults(result)
+    //         console.log(result);
+    //         if (response) {
+    //             setSearchResults((prevResults) => {
+    //                 const updatedResults = [...prevResults];
+    //                 updatedResults[index] = response;
+    //                 return updatedResults;
+    //             });
+    //         } else {
+    //             console.error("No results found");
+    //             setSearchResults((prevResults) => {
+    //                 const updatedResults = [...prevResults];
+    //                 updatedResults[index] = null;
+    //                 return updatedResults;
+    //             });
+    //         }
+    //     } catch (error) {
+    //         console.error("Error searching:", error);
+    //         setSearchResults((prevResults) => {
+    //             const updatedResults = [...prevResults];
+    //             updatedResults[index] = null;
+    //             return updatedResults;
+    //         });
+    //     }
+    // }, [setSearchResults]);
+
+    const searchData = useCallback(async (tableName, columnName, query, index) => {
         try {
-            const response = await autoFill(tableName, query);
+            const response = await autoFill(tableName, columnName, query);
             if (response) {
+                let result = response.map(item => item[columnName]);
+                result = Array.from(new Set(result)); // Remove duplicates using a Set
+                setSearchResults(result)
+                console.log(result);
                 setSearchResults((prevResults) => {
                     const updatedResults = [...prevResults];
-                    updatedResults[index] = response;
+                    updatedResults[index] = result;
                     return updatedResults;
                 });
             } else {
-                console.error("Undefined");
+                console.error("No results found");
+                setSearchResults((prevResults) => {
+                    const updatedResults = [...prevResults];
+                    updatedResults[index] = null;
+                    return updatedResults;
+                });
             }
         } catch (error) {
-            console.error(error);
+            console.error("Error searching:", error);
+            setSearchResults((prevResults) => {
+                const updatedResults = [...prevResults];
+                updatedResults[index] = null;
+                return updatedResults;
+            });
         }
     }, [setSearchResults]);
 
@@ -93,9 +122,7 @@ const Orders = () => {
     if (!fontsLoad) { return null }
     const handleDateShow = () => { setShowDatepicker(true) };
 
-    const handleAddRow = () => {
-        addRow(setRowData)
-    };
+    const handleAddRow = () => { addRow(setRowData) };
 
     const handleRemoveRow = () => {
         removeLastRow(setRowData);
@@ -328,17 +355,16 @@ const Orders = () => {
         setActiveInputIndex(null);
 
         if (selectedResult.name !== formTable[rowIndex]?.product_name) {
-            searchProduct(selectedResult.name);
+            searchData('nomenklatura', 'product_name', selectedResult.name, rowIndex);
         }
+
         setIsPressed(!isPressed);
         setSearchResults([]);
 
-        // const nextInputIndex = rowIndex * 4 + 1;
         if (inputRefs.current[inputNumber]) {
             inputRefs.current[inputNumber].focus();
         }
     };
-
 
     const focusInputRefs = (index) => {
         const rowIndex = Math.floor(index / 4);
@@ -426,8 +452,43 @@ const Orders = () => {
                             style={{ ...styles.input, }}
                             placeholder="Müştəri"
                             value={customer}
-                            onChangeText={(text) => setCustomer(text)}
+                            onChangeText={(text) => {
+                                setCustomer(text)
+                                searchData('invoice', 'customer', text, null);
+                            }}
                         />
+                        <View style={{
+                            ...styles.box,
+                            backgroundColor: '#f0f0f0',
+                            borderStyle: 'dotted',
+                            shadowColor: '#aaa',
+                            shadowOffset: {
+                                width: 0,
+                                height: 2,
+                            },
+                            shadowOpacity: 0.5,
+                            shadowRadius: 3,
+                            elevation: 2,
+                        }}>
+                            {(customer?.length > 0) && (
+                                searchResults.map((result, index) => (
+                                    <TouchableOpacity
+                                        style={{
+                                            ...styles.text,
+                                            borderStyle: 'dotted',
+                                            // borderBottomWidth: 1,
+                                            backgroundColor: index % 2 === 0 ? '#f0f0f0' : 'white',
+                                        }}
+                                        key={result.id}
+                                        onPress={() => setCustomer(result)}
+                                    >
+                                        <Text style={{ padding: 5, }}>
+                                            {result}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))
+                            )}
+                        </View>
                     </View>
                     <View style={{ marginVertical: 20, marginHorizontal: 10, flexDirection: 'row' }}>
                         <View>
@@ -461,6 +522,7 @@ const Orders = () => {
                                         onChangeText={(text) => {
                                             handleTableInputChange(rowIndex, 'product_name', text);
                                             setActiveInputIndex(rowIndex, rowCount + 2);
+                                            searchData('nomenklatura', 'name', text, null);
                                         }}
                                         ref={(ref) => (inputRefs.current[rowCount + 1] = ref)}
                                         onSubmitEditing={() => focusInputRefs(rowCount + 1)}
@@ -644,50 +706,87 @@ const Orders = () => {
                                 data={rowsSameCustomer}
                                 keyExtractor={(item) => item.id.toString()}
                                 renderItem={({ item, index }) => (
-                                    <View style={{ ...styles.row, marginHorizontal: 10, backgroundColor: '#fff' }} key={`row_${index}`}>
-                                        <View style={styles.cell}>
-                                            <Text>{++rowCount}</Text>
+                                    <View>
+                                        <View style={{ ...styles.row, marginHorizontal: 10, backgroundColor: '#fff' }} key={`row_${index}`}>
+                                            <View style={styles.cell}>
+                                                <Text>{++rowCount}</Text>
+                                            </View>
+                                            <View style={styles.cell}>
+                                                <TextInput
+                                                    placeholder='Qiymət'
+                                                    keyboardType="numeric"
+                                                    value={String(item.price)}
+                                                    onChangeText={(text) => handleInputChange(index, 'price', text)}
+                                                    ref={(ref) => (inputRefs.current[rowCount + 1] = ref)}
+                                                    onSubmitEditing={() => focusInputRefs(rowCount + 1)}
+                                                />
+                                            </View>
+                                            <View style={styles.cell}>
+                                                <TextInput
+                                                    placeholder='Miqdar'
+                                                    keyboardType="numeric"
+                                                    value={String(item.quantity)}
+                                                    onChangeText={(text) => handleInputChange(index, 'quantity', text)}
+                                                    ref={(ref) => (inputRefs.current[rowCount + 2] = ref)}
+                                                    onSubmitEditing={() => focusInputRefs(rowCount + 2)}
+                                                />
+                                            </View>
+                                            <View style={styles.cell}>
+                                                <TextInput
+                                                    placeholder='Malın adı'
+                                                    value={item.product_name}
+                                                    onChangeText={(text) => {
+                                                        handleInputChange(index, 'product_name', text);
+                                                        setActiveInputIndex(index, rowCount + 2);
+                                                    }}
+                                                    ref={(ref) => (inputRefs.current[rowCount + 3] = ref)}
+                                                    onSubmitEditing={() => focusInputRefs(rowCount + 3)}
+                                                />
+                                            </View>
+                                            <View style={styles.cell}>
+                                                <TextInput
+                                                    placeholder='Ölçü vahidi'
+                                                    value={item.units}
+                                                    onChangeText={(text) => handleInputChange(index, 'units', text)}
+                                                    ref={(ref) => (inputRefs.current[rowCount + 4] = ref)}
+                                                    onSubmitEditing={() => focusInputRefs(rowCount)}
+                                                />
+                                            </View>
+                                            <View style={styles.cell}>
+                                                <Text> {isNaN(item.price && item.quantity) ? '000' : item.price * item.quantity} </Text>
+                                            </View>
                                         </View>
-                                        <View style={styles.cell}>
-                                            <TextInput
-                                                placeholder='Qiymət'
-                                                keyboardType="numeric"
-                                                value={String(item.price)}
-                                                onChangeText={(text) => handleInputChange(index, 'price', text)}
-                                                ref={(ref) => (inputRefs.current[rowCount + 1] = ref)}
-                                                onSubmitEditing={() => focusInputRefs(rowCount + 1)}
-                                            />
-                                        </View>
-                                        <View style={styles.cell}>
-                                            <TextInput
-                                                placeholder='Miqdar'
-                                                keyboardType="numeric"
-                                                value={String(item.quantity)}
-                                                onChangeText={(text) => handleInputChange(index, 'quantity', text)}
-                                                ref={(ref) => (inputRefs.current[rowCount + 2] = ref)}
-                                                onSubmitEditing={() => focusInputRefs(rowCount + 2)}
-                                            />
-                                        </View>
-                                        <View style={styles.cell}>
-                                            <TextInput
-                                                placeholder='Malın adı'
-                                                value={item.product_name}
-                                                onChangeText={(text) => handleInputChange(index, 'product_name', text)}
-                                                ref={(ref) => (inputRefs.current[rowCount + 3] = ref)}
-                                                onSubmitEditing={() => focusInputRefs(rowCount + 3)}
-                                            />
-                                        </View>
-                                        <View style={styles.cell}>
-                                            <TextInput
-                                                placeholder='Ölçü vahidi'
-                                                value={item.units}
-                                                onChangeText={(text) => handleInputChange(index, 'units', text)}
-                                                ref={(ref) => (inputRefs.current[rowCount + 4] = ref)}
-                                                onSubmitEditing={() => focusInputRefs(rowCount)}
-                                            />
-                                        </View>
-                                        <View style={styles.cell}>
-                                            <Text> {isNaN(item.price && item.quantity) ? '000' : item.price * item.quantity} </Text>
+                                        <View style={{
+                                            ...styles.box,
+                                            backgroundColor: '#f0f0f0',
+                                            borderStyle: 'dotted',
+                                            shadowColor: '#aaa',
+                                            shadowOffset: {
+                                                width: 0,
+                                                height: 2,
+                                            },
+                                            shadowOpacity: 0.5,
+                                            shadowRadius: 3,
+                                            elevation: 2,
+                                        }}>
+                                            {(searchResults[index]?.length > 0 && activeInputIndex === index) && (
+                                                searchResults[index].map((result, index) => (
+                                                    <TouchableOpacity
+                                                        style={{
+                                                            ...styles.text,
+                                                            borderStyle: 'dotted',
+                                                            // borderBottomWidth: 1,
+                                                            backgroundColor: index % 2 === 0 ? '#f0f0f0' : 'white',
+                                                        }}
+                                                        key={result.id}
+                                                        onPress={() => handleAutoFill(index, result)}
+                                                    >
+                                                        <Text style={{ padding: 5, }}>
+                                                            {result.name}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                ))
+                                            )}
                                         </View>
                                     </View>
                                 )}

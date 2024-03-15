@@ -16,11 +16,11 @@ export const fetchData = async (tableName, formatDate) => {
 export const sendRequest = async (apiUrl, postData) => {
     let endpoint = `${url}${apiUrl}`;
     try {
-        const response = await axios.post(endpoint, JSON.stringify(postData),{
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }
+        const response = await axios.post(endpoint, JSON.stringify(postData), {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }
         );
 
         if (response.status === 200) return { success: true, message: 'Məlumatlar göndərildi!' };
@@ -68,9 +68,9 @@ export const deleteData = async (id, tableName) => {
     }
 }
 
-export const autoFill = async (tableName, query) => {
+export const autoFill = async (tableName, columnName, query) => {
     try {
-        const response = await axios.get(`http://192.168.88.40:3000/endpoint/autoFill?query=${query}&tableName=${tableName}`);
+        const response = await axios.get(`http://192.168.88.40:3000/endpoint/autoFill?query=${query}&tableName=${tableName}&columnName=${columnName}`);
         return response.data;
     } catch (error) {
         console.error('Request Error:', error);
