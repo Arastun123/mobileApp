@@ -5,6 +5,7 @@ import { useFonts } from "expo-font";
 import { Ionicons } from '@expo/vector-icons';
 import { addRow, removeLastRow } from '../services/Functions';
 import { fetchData, sendRequest, deleteData, sendEditData, autoFill } from '../services/Server';
+import { SwipeListView } from 'react-native-swipe-list-view';
 
 
 const Orders = () => {
@@ -13,6 +14,7 @@ const Orders = () => {
     const [selectedRows, setSelectedRows] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [date, setDate] = useState(new Date());
+    const [number, setNumber] = useState();
     const [customer, setCustomer] = useState();
     const [formTable, setFormTable] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
@@ -22,13 +24,17 @@ const Orders = () => {
     const [showDatepicker, setShowDatepicker] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [activeInputIndex, setActiveInputIndex] = useState(null);
+    const [selectedRowId, setSelectedRowId] = useState(null);
     const [isPressed, setIsPressed] = useState(false);
-    const secondInput = useRef()
-    const inputRefs = useRef([])
+    const secondInput = useRef();
+    const inputRefs = useRef([]);
+    const [rowsSameCustomer, setRowsSameCustomer] = useState([]);
+    const [selectedRowData, setSelectedRowData] = useState(null);
+
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
     const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
-    const mainHeaders = ["№", "Malın adı", "Miqdarı", "Məbləğ"];
+    const mainHeaders = ["№", "Nömrəsi", "Müştəri", "Tarix", "Məbləğ"];
     const editHeaders = ["№", "Qiymət", "Miqdarı", "Malın adı", "Ölçü vahidi", "Məbləğ"];
     let rowCount = 0;
     let inputCount = 0;
@@ -110,7 +116,7 @@ const Orders = () => {
         setDate(new Date());
     }
 
-    const handelModalOpen = () => {
+    const handleModalOpen = () => {
         setUpdateModalVisible(true);
         if (selectedRows.length === 1) {
             let customer = selectedRows.map(item => item.customer)
@@ -167,6 +173,7 @@ const Orders = () => {
 
         const postData = {
             date: date,
+            number: isNaN(lastId) ? '1' : lastId,
             customer: customer,
             formTable: formTable,
         };
@@ -188,26 +195,43 @@ const Orders = () => {
         }
     };
 
-    const deleteRow = async () => {
-        const idsToDelete = selectedRows.map((row) => row.id);
+    const deleteRow = async (id, check) => {
+        const idsToDelete = rowsSameCustomer.map((row) => row.id);
         const tableName = 'orders';
-
-        try {
-            for (const idToDelete of idsToDelete) {
-                const result = await deleteData(idToDelete, tableName);
-                if (!result.success) {
-                    Alert.alert(result.message);
-                    return;
+        if (check === true) {
+            try {
+                const result = await deleteData(id, tableName);
+                const updatedSelectedRows = rowsSameCustomer.filter((selectedRow) => selectedRow.id !== id);
+                setRowsSameCustomer(updatedSelectedRows);
+                fetchDataAsync();
+                if (updatedSelectedRows.length === 0) {
+                    Alert.alert('Məlumatlar silindi');
+                    setUpdateModalVisible(false)
+                    setSelectedRows([]);
+                    setSelectedRowId(null);
                 }
+            } catch (error) {
+                console.error(error);
             }
-
-            setSelectedRows([]);
-            Alert.alert('Məlumatlar silindi');
-            setUpdateModalVisible(false)
-            fetchDataAsync()
-        } catch (error) {
-            console.error(error);
         }
+        else {
+            try {
+                for (const idToDelete of idsToDelete) {
+                    const result = await deleteData(idsToDelete, tableName);
+                    if (!result.success) {
+                        Alert.alert(result.message);
+                        return;
+                    }
+                }
+                setSelectedRows([]);
+                Alert.alert('Məlumatlar silindi');
+                setUpdateModalVisible(false)
+                fetchDataAsync()
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
     };
 
     const closeModal = () => {
@@ -220,29 +244,43 @@ const Orders = () => {
     }
 
     const handleInputChange = (index, field, value) => {
-        let updatedSelectedRows = [...selectedRows];
+        let newRowData = [...rowsSameCustomer];
 
-        updatedSelectedRows = updatedSelectedRows.map((row, rowIndex) => {
-            if (rowIndex === index) {
-                return {
-                    ...row,
-                    [field]: value,
-                };
-            }
-            return row;
-        });
-        setSelectedRows(updatedSelectedRows);
+        newRowData[index] = {
+            ...newRowData[index],
+            [field]: value,
+        };
+
+        setRowsSameCustomer(newRowData);
     };
 
     const handleEdit = async () => {
         let tableName = 'orders';
+        const dateObject = new Date(date);
+
+        const updatedRows = rowsSameCustomer.map(item => {
+            return {
+                id: item.id,
+                quantity: item.quantity || 0,
+                price: item.price || 0,
+                product_name: item.product_name || '',
+                units: item.units || '',
+            };
+        });
+        let newData = {
+            date: dateObject.toISOString().split('T')[0],
+            customer,
+            number,
+            newUpdatedRows: updatedRows,
+        }
         try {
-            const result = await sendEditData(selectedRows, tableName);
+            const result = await sendEditData(newData, tableName);
             if (result.success) {
                 Alert.alert(result.message);
                 setUpdateModalVisible(false);
-                setSelectedRows([]);
+                setRowsSameCustomer([]);
                 fetchDataAsync();
+                setSelectedRowId(null);
             } else {
                 setSelectedRows([]);
                 Alert.alert(result.message);
@@ -253,17 +291,30 @@ const Orders = () => {
     };
 
     const handleRowPress = (row) => {
-        const isSelected = selectedRows.some((selectedRow) => selectedRow.id === row.id);
-        if (isSelected) {
-            const updatedSelectedRows = selectedRows.filter((selectedRow) => selectedRow.id !== row.id);
-            setSelectedRows(updatedSelectedRows);
-        } else {
-            setSelectedRows([...selectedRows, row]);
-        }
+        const isSelected = selectedRowId === row.id;
 
+        if (isSelected) {
+            setSelectedRowId(null);
+            setSelectedRowData(null);
+        } else {
+            setSelectedRowId(row.id);
+
+            let selectedRow = resData.filter((item) => item.number === row.number);
+            let customer = selectedRow.map((item) => item.customer)[0] || '';
+            setCustomer(customer);
+
+            let date = selectedRow.map((item) => item.date)[0] || '';
+            setDate(date);
+
+            let number = selectedRow.map((item) => item.number)[0] || '';
+            setNumber(number);
+
+            setRowsSameCustomer(selectedRow);
+            setSelectedRowData(selectedRow);
+        }
     };
 
-    const handleAutoFill = (rowIndex, selectedResult) => {
+    const handleAutoFill = (rowIndex, selectedResult, inputNumber) => {
         const updatedFormTable = [...formTable];
         updatedFormTable[rowIndex].product_name = selectedResult.name;
         setFormTable(updatedFormTable);
@@ -281,23 +332,47 @@ const Orders = () => {
         }
         setIsPressed(!isPressed);
         setSearchResults([]);
-        inputRefs.current[2].focus()
+
+        // const nextInputIndex = rowIndex * 4 + 1;
+        if (inputRefs.current[inputNumber]) {
+            inputRefs.current[inputNumber].focus();
+        }
     };
 
 
     const focusInputRefs = (index) => {
-        const rowIndex = Math.floor(index / 4); 
-    
-        if (index % 4 === 3) { 
-            const nextRowFirstInputIndex = (rowIndex + 1) * 4;
-            if (inputRefs.current[nextRowFirstInputIndex]) {
-                inputRefs.current[nextRowFirstInputIndex].focus(); 
-            }
-        } else if (inputRefs.current[index + 1]) { 
-            inputRefs.current[index + 1].focus();
+        const rowIndex = Math.floor(index / 4);
+        const columnIndex = index % 4;
+
+        let nextIndex = -1;
+
+        if (columnIndex === 3) {
+            nextIndex = (rowIndex + 1) * 4;
+        } else {
+            nextIndex = index + 1;
+        }
+
+        if (inputRefs.current[nextIndex]) {
+            inputRefs.current[nextIndex].focus();
         }
     };
-    
+
+    const groupedRows = {};
+
+    resData.forEach((item) => {
+        const number = item.number;
+
+        if (!groupedRows[number]) groupedRows[number] = {
+            customer: item.customer,
+            sum: 0,
+            number: item.number,
+            date: item.date,
+            id: item.id,
+            rows: []
+        };
+        groupedRows[number].sum += item.price * item.quantity;
+        groupedRows[number].rows.push(item);
+    });
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>
@@ -339,6 +414,13 @@ const Orders = () => {
                                     />
                                 )}
                             </View>
+                            <TextInput
+                                style={{ ...styles.input, width: 50 }}
+                                placeholder="№"
+                                keyboardType="numeric"
+                                value={isNaN(lastId) ? '1' : String(lastId)}
+                                onChangeText={setNumber}
+                            />
                         </View>
                         <TextInput
                             style={{ ...styles.input, }}
@@ -378,7 +460,7 @@ const Orders = () => {
                                         value={formTable[rowIndex]?.product_name}
                                         onChangeText={(text) => {
                                             handleTableInputChange(rowIndex, 'product_name', text);
-                                            setActiveInputIndex(rowIndex);
+                                            setActiveInputIndex(rowIndex, rowCount + 2);
                                         }}
                                         ref={(ref) => (inputRefs.current[rowCount + 1] = ref)}
                                         onSubmitEditing={() => focusInputRefs(rowCount + 1)}
@@ -476,29 +558,33 @@ const Orders = () => {
                 ))}
             </View>
 
-            {resData.map((row, rowIndex) => (
-                <TouchableOpacity key={`row_${rowIndex}`} onPress={() => handleRowPress(row)}>
-                    <View style={[
+            {Object.keys(groupedRows).map((number, index) => (
+                <TouchableOpacity key={`row_${number}`} onPress={() => handleRowPress(groupedRows[number])}
+                    style={[
                         styles.row,
-                        selectedRows.some((selectedRow) => selectedRow.id === row.id) && { backgroundColor: 'lightblue' },
-                    ]}>
-                        <View style={styles.cell}>
-                            <Text>{++rowCount}</Text>
-                        </View>
-                        <View style={styles.cell}>
-                            <Text numberOfLines={1} ellipsizeMode="tail" textBreakStrategy="simple">{resData[rowIndex]?.product_name}</Text>
-                        </View>
-                        <View style={styles.cell}>
-                            <Text>{resData[rowIndex]?.quantity}</Text>
-                        </View>
-                        <View style={styles.cell}>
-                            <Text>{resData[rowIndex]?.price * resData[rowIndex]?.quantity}</Text>
-                        </View>
+                        selectedRowId === groupedRows[number].id && { backgroundColor: 'lightblue' },
+                    ]}
+                >
+                    <View style={styles.cell}>
+                        <Text>{++rowCount}</Text>
+                    </View>
+                    <View style={styles.cell}>
+                        <Text>{groupedRows[number].number}</Text>
+                    </View>
+                    <View style={styles.cell}>
+                        <Text>{groupedRows[number].customer}</Text>
+                    </View>
+                    <View style={styles.cell}>
+                        <Text>{groupedRows[number].date}</Text>
+                    </View>
+                    <View style={styles.cell}>
+                        <Text>{groupedRows[number].sum}</Text>
                     </View>
                 </TouchableOpacity>
             ))}
-            <View style={{ margin: 10 }}>
-                <Pressable disabled={selectedRows.length === 0} style={{ ...styles.button, width: 150, display: `${selectedRows.length === 0 ? 'none' : 'block'}`, backgroundColor: 'blue' }} onPress={handelModalOpen}>
+
+            <View style={{ margin: 10, display: `${selectedRowId ? 'flex' : 'none'}`, flexDirection: 'row' }}>
+                <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'blue' }} onPress={handleModalOpen}>
                     <Text style={styles.text}>Redaktə et</Text>
                 </Pressable>
             </View>
@@ -508,49 +594,57 @@ const Orders = () => {
                     <View style={{ padding: 5 }}>
                         <Text style={{ textAlign: 'right' }} onPress={closeUpdateModal} ><Ionicons name="close" size={24} color="red" /></Text>
                     </View>
-                    <View style={styles.modalContainer}>
-                        <View style={styles.modalContent}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <TextInput
-                                        style={{ ...styles.input, width: 100 }}
-                                        placeholder="Gün-Ay-İl"
-                                        keyboardType="numeric"
-                                        value={date.toString()}
-                                        onChangeText={setDate}
-                                        editable={false}
+                    <View style={styles.modalContent}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <TextInput
+                                    style={{ ...styles.input, width: 100 }}
+                                    placeholder="Gün-Ay-İl"
+                                    keyboardType="numeric"
+                                    value={new Date(date).toDateString()}
+                                    onChangeText={setDate}
+                                />
+                                <Pressable onPress={handleDateShow}>
+                                    <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
+                                </Pressable>
+                                {showDatepicker && (
+                                    <DateTimePicker
+                                        testID="datePicker"
+                                        value={new Date(date)}
+                                        mode="date"
+                                        is24Hour={true}
+                                        display="default"
+                                        onChange={onChange}
                                     />
-                                    <Pressable onPress={handleDateShow}>
-                                        <Text> <Ionicons name="calendar" size={20} color="#333" /> </Text>
-                                    </Pressable>
-                                    {showDatepicker && (
-                                        <DateTimePicker
-                                            testID="datePicker"
-                                            value={new Date(date)}
-                                            mode="date"
-                                            is24Hour={true}
-                                            display="default"
-                                            onChange={onChange}
-                                        />
-                                    )}
-                                </View>
+                                )}
                             </View>
                             <TextInput
-                                style={{ ...styles.input, }}
-                                placeholder="Müştəri"
-                                value={customer}
-                                onChangeText={setCustomer}
+                                style={{ ...styles.input, width: 50 }}
+                                placeholder="№"
+                                keyboardType="numeric"
+                                value={String(number)}
+                                onChangeText={setNumber}
                             />
-                            <View style={{ marginVertical: 10 }}>
-                                <View style={{ ...styles.row, marginHorizontal: 10 }}>
-                                    {editHeaders.map((header, rowIndex) => (
-                                        <View style={styles.cell} key={`row_${rowIndex}`}>
-                                            <Text>{header}</Text>
-                                        </View>
-                                    ))}
-                                </View>
-                                {selectedRows.map((row, rowIndex) => (
-                                    <View style={{ ...styles.row, marginHorizontal: 10 }} key={`row_${rowIndex}`}>
+                        </View>
+                        <TextInput
+                            style={{ ...styles.input, }}
+                            placeholder="Müştəri"
+                            value={customer}
+                            onChangeText={setCustomer}
+                        />
+                        <View style={{ marginVertical: 10 }}>
+                            <View style={{ ...styles.row, marginHorizontal: 10 }}>
+                                {editHeaders.map((header, rowIndex) => (
+                                    <View style={styles.cell} key={`row_${rowIndex}`}>
+                                        <Text>{header}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                            <SwipeListView
+                                data={rowsSameCustomer}
+                                keyExtractor={(item) => item.id.toString()}
+                                renderItem={({ item, index }) => (
+                                    <View style={{ ...styles.row, marginHorizontal: 10, backgroundColor: '#fff' }} key={`row_${index}`}>
                                         <View style={styles.cell}>
                                             <Text>{++rowCount}</Text>
                                         </View>
@@ -558,53 +652,71 @@ const Orders = () => {
                                             <TextInput
                                                 placeholder='Qiymət'
                                                 keyboardType="numeric"
-                                                value={String(selectedRows[rowIndex]?.price)}
-                                                onChangeText={(text) => handleInputChange(rowIndex, 'price', text)}
+                                                value={String(item.price)}
+                                                onChangeText={(text) => handleInputChange(index, 'price', text)}
+                                                ref={(ref) => (inputRefs.current[rowCount + 1] = ref)}
+                                                onSubmitEditing={() => focusInputRefs(rowCount + 1)}
                                             />
                                         </View>
                                         <View style={styles.cell}>
                                             <TextInput
                                                 placeholder='Miqdar'
                                                 keyboardType="numeric"
-                                                value={String(selectedRows[rowIndex]?.quantity)}
-                                                onChangeText={(text) => handleInputChange(rowIndex, 'quantity', text)}
+                                                value={String(item.quantity)}
+                                                onChangeText={(text) => handleInputChange(index, 'quantity', text)}
+                                                ref={(ref) => (inputRefs.current[rowCount + 2] = ref)}
+                                                onSubmitEditing={() => focusInputRefs(rowCount + 2)}
                                             />
                                         </View>
                                         <View style={styles.cell}>
                                             <TextInput
                                                 placeholder='Malın adı'
-                                                value={String(selectedRows[rowIndex]?.product_name)}
-                                                onChangeText={(text) => handleInputChange(rowIndex, 'product_name', text)}
+                                                value={item.product_name}
+                                                onChangeText={(text) => handleInputChange(index, 'product_name', text)}
+                                                ref={(ref) => (inputRefs.current[rowCount + 3] = ref)}
+                                                onSubmitEditing={() => focusInputRefs(rowCount + 3)}
                                             />
                                         </View>
                                         <View style={styles.cell}>
                                             <TextInput
                                                 placeholder='Ölçü vahidi'
-                                                value={String(selectedRows[rowIndex]?.units)}
-                                                onChangeText={(text) => handleInputChange(rowIndex, 'units', text)}
+                                                value={item.units}
+                                                onChangeText={(text) => handleInputChange(index, 'units', text)}
+                                                ref={(ref) => (inputRefs.current[rowCount + 4] = ref)}
+                                                onSubmitEditing={() => focusInputRefs(rowCount)}
                                             />
                                         </View>
                                         <View style={styles.cell}>
-                                            <Text>
-                                                {
-                                                    isNaN(selectedRows[rowIndex]?.price && selectedRows[rowIndex]?.quantity) ? '000' : selectedRows[rowIndex]?.price * selectedRows[rowIndex]?.quantity
-                                                }
-                                            </Text>
+                                            <Text> {isNaN(item.price && item.quantity) ? '000' : item.price * item.quantity} </Text>
                                         </View>
                                     </View>
-                                ))}
+                                )}
+                                renderHiddenItem={({ item, index }) => (
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                        <TouchableOpacity style={{ backgroundColor: 'red', justifyContent: 'center', alignItems: 'center', width: 75 }} onPress={() => deleteRow(item.id, true)}>
+                                            <Text style={{ color: 'white' }}>Sil</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+                                leftOpenValue={70}
+                                rightOpenValue={0}
+                            />
+                        </View>
+                        {/* <View style={{ alignItems: 'flex-end', margin: 10 }}>
+                            <Text style={{ ...styles.text, color: '#333' }}>Məbləğ: <Text>{isNaN(editTableAmount) ? '000' : editTableAmount}</Text></Text>
+                            <Text style={{ ...styles.text, color: '#333' }}>Ədv:    <Text>{isNaN(editTableEdv) ? '000' : editTableEdv}</Text></Text>
+                            <Text style={{ ...styles.text, color: '#333' }}>Toplam: <Text>{isNaN(editTableAmountAll) ? '000' : editTableAmountAll}</Text></Text>
+                        </View> */}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <View style={{ margin: 10 }}>
+                                <Pressable style={{ ...styles.button, width: 150 }} onPress={handleEdit}>
+                                    <Text style={styles.text}>Yenilə</Text>
+                                </Pressable>
                             </View>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <View style={{ margin: 10 }}>
-                                    <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
-                                        <Text style={styles.text}>Sil</Text>
-                                    </Pressable>
-                                </View>
-                                <View style={{ margin: 10 }}>
-                                    <Pressable style={{ ...styles.button, width: 150 }} onPress={handleEdit}>
-                                        <Text style={styles.text}>Yenilə</Text>
-                                    </Pressable>
-                                </View>
+                            <View style={{ margin: 10, textAlign: 'right' }}>
+                                <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'red' }} onPress={deleteRow}>
+                                    <Text style={styles.text}>Sil</Text>
+                                </Pressable>
                             </View>
                         </View>
                     </View>
