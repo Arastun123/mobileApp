@@ -86,17 +86,14 @@ const Orders = () => {
 
     if (!fontsLoad) { return null }
     const handleDateShow = () => { setShowDatepicker(true) };
-    const handleAddRow = () => { 
-        addRow(setRowData) 
-        inputCount = inputCount + 4
+
+    const handleAddRow = () => {
+        addRow(setRowData)
     };
+
     const handleRemoveRow = () => {
         removeLastRow(setRowData);
-        setRowData([])
-        setFormTable([])
-        fetchDataAsync()
         setSearchResults([])
-
     };
 
     const handlePress = () => {
@@ -284,14 +281,23 @@ const Orders = () => {
         }
         setIsPressed(!isPressed);
         setSearchResults([]);
-        inputRefs.current[2].focus()    
+        inputRefs.current[2].focus()
     };
 
+
     const focusInputRefs = (index) => {
-        if (inputRefs.current[index + 1]) inputRefs.current[index + 1].focus();
-        console.log('index', index + 1);
-        console.log('inputCount', inputCount);
-    }
+        const rowIndex = Math.floor(index / 4); 
+    
+        if (index % 4 === 3) { 
+            const nextRowFirstInputIndex = (rowIndex + 1) * 4;
+            if (inputRefs.current[nextRowFirstInputIndex]) {
+                inputRefs.current[nextRowFirstInputIndex].focus(); 
+            }
+        } else if (inputRefs.current[index + 1]) { 
+            inputRefs.current[index + 1].focus();
+        }
+    };
+    
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', marginTop: 20 }}>
@@ -339,8 +345,6 @@ const Orders = () => {
                             placeholder="Müştəri"
                             value={customer}
                             onChangeText={(text) => setCustomer(text)}
-                            ref={(ref) => (inputRefs.current[0] = ref)}
-                            onSubmitEditing={() => focusInputRefs(0)}
                         />
                     </View>
                     <View style={{ marginVertical: 20, marginHorizontal: 10, flexDirection: 'row' }}>
@@ -376,8 +380,8 @@ const Orders = () => {
                                             handleTableInputChange(rowIndex, 'product_name', text);
                                             setActiveInputIndex(rowIndex);
                                         }}
-                                        ref={(ref) => (inputRefs.current[inputCount + 1] = ref)}
-                                        onSubmitEditing={() => focusInputRefs(inputCount + 1)}
+                                        ref={(ref) => (inputRefs.current[rowCount + 1] = ref)}
+                                        onSubmitEditing={() => focusInputRefs(rowCount + 1)}
                                     />
                                 </View>
                                 <View style={styles.cell}>
@@ -386,8 +390,8 @@ const Orders = () => {
                                         keyboardType="numeric"
                                         value={formTable[rowIndex]?.quantity}
                                         onChangeText={(text) => handleTableInputChange(rowIndex, 'quantity', text)}
-                                        ref={(ref) => (inputRefs.current[inputCount + 2] = ref)}
-                                        onSubmitEditing={() => focusInputRefs(inputCount + 2)}
+                                        ref={(ref) => (inputRefs.current[rowCount + 2] = ref)}
+                                        onSubmitEditing={() => focusInputRefs(rowCount + 2)}
                                     />
                                 </View>
                                 <View style={styles.cell}>
@@ -396,8 +400,8 @@ const Orders = () => {
                                         keyboardType="numeric"
                                         value={formTable[rowIndex]?.price}
                                         onChangeText={(text) => handleTableInputChange(rowIndex, 'price', text)}
-                                        ref={(ref) => (inputRefs.current[inputCount + 3] = ref)}
-                                        onSubmitEditing={() => focusInputRefs(inputCount + 3)}
+                                        ref={(ref) => (inputRefs.current[rowCount + 3] = ref)}
+                                        onSubmitEditing={() => focusInputRefs(rowCount + 3)}
                                     />
                                 </View>
                                 <View style={styles.cell}>
@@ -405,8 +409,8 @@ const Orders = () => {
                                         placeholder='Ölçü vahidi'
                                         value={formTable[rowIndex]?.units}
                                         onChangeText={(text) => handleTableInputChange(rowIndex, 'units', text)}
-                                        ref={(ref) => (inputRefs.current[inputCount + 4] = ref)}
-                                        onSubmitEditing={() => focusInputRefs(inputCount + 1)}
+                                        ref={(ref) => (inputRefs.current[rowCount + 4] = ref)}
+                                        onSubmitEditing={() => focusInputRefs(rowCount)}
                                     />
                                 </View>
                                 <View style={styles.cell}>
