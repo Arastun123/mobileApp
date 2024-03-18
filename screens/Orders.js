@@ -9,40 +9,36 @@ import { SwipeListView } from 'react-native-swipe-list-view';
 
 
 const Orders = () => {
+    const inputRefs = useRef([]);
+    const [edv, setEdv] = useState(0);
+    const [number, setNumber] = useState();
     const [resData, setData] = useState([]);
     const [rowData, setRowData] = useState([]);
-    const [selectedRows, setSelectedRows] = useState([]);
-    const [isModalVisible, setModalVisible] = useState(false);
-    const [date, setDate] = useState(new Date());
-    const [number, setNumber] = useState();
     const [customer, setCustomer] = useState();
+    const [date, setDate] = useState(new Date());
     const [formTable, setFormTable] = useState([]);
-    const [totalAmount, setTotalAmount] = useState(0);
-    const [edv, setEdv] = useState(0);
     const [wholeAmout, setWholeAmount] = useState(0);
-    const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
-    const [showDatepicker, setShowDatepicker] = useState(false);
-    const [searchResults, setSearchResults] = useState([]);
-    const [activeInputIndex, setActiveInputIndex] = useState(null);
-    const [selectedRowId, setSelectedRowId] = useState(null);
+    const [totalAmount, setTotalAmount] = useState(0);
     const [isPressed, setIsPressed] = useState(false);
-    const inputRefs = useRef([]);
-    const [rowsSameCustomer, setRowsSameCustomer] = useState([]);
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [searchResults, setSearchResults] = useState([]);
+    const [selectedRowId, setSelectedRowId] = useState(null);
+    const [isModalVisible, setModalVisible] = useState(false);
+    const [showDatepicker, setShowDatepicker] = useState(false);
     const [selectedRowData, setSelectedRowData] = useState(null);
-
+    const [rowsSameCustomer, setRowsSameCustomer] = useState([]);
+    const [activeInputIndex, setActiveInputIndex] = useState(null);
+    const [isUpdateModalVisible, setUpdateModalVisible] = useState(false);
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
     const headers = ["№", "Malın adı", "Miqdarı", "Qiymət", "Ölçü vahidi", "Məbləğ"];
     const mainHeaders = ["№", "Nömrəsi", "Müştəri", "Tarix", "Məbləğ"];
     const editHeaders = ["№", "Qiymət", "Miqdarı", "Malın adı", "Ölçü vahidi", "Məbləğ"];
     let rowCount = 0;
-    let inputCount = 0;
+    const groupedRows = {};
     LogBox.ignoreLogs(['Warning: Failed prop type: Invalid prop `value` of type `date` supplied to `TextInput`, expected `string`'])
 
-    useEffect(() => {
-        fetchDataAsync();
-    }, []);
-
+    useEffect(() => { fetchDataAsync() }, []);
 
     const fetchDataAsync = async () => {
         try {
@@ -53,26 +49,32 @@ const Orders = () => {
         }
     };
 
-    const searchData = useCallback(async (tableName, columnName, query, index) => {
+    const handleSearchDataResult = (rowIndex, results) => {
+        setSearchResults(prevResults => {
+            const updatedResults = [...prevResults];
+            updatedResults[rowIndex] = results;
+            return updatedResults;
+        });
+    };   
+
+    const searchData = useCallback(async (tableName, columnName, query, index, rowIndex) => {
         if (query.length > 0) {
             try {
                 const response = await autoFill(tableName, columnName, query);
                 if (response) {
-                    const uniqueResults = Array.from(new Set(response.map(item => item[columnName])));
-                    setSearchResults(uniqueResults);
+                    handleSearchDataResult(rowIndex, Array.from(new Set(response.map(item => item[columnName]))));
                 } else {
                     console.error("No results found");
-                    setSearchResults([]);
+                    handleSearchDataResult(rowIndex, []);
                 }
             } catch (error) {
                 console.error("Error searching:", error);
-                setSearchResults([]);
+                handleSearchDataResult(rowIndex, []);
             }
         } else {
-            setSearchResults([]);
+            handleSearchDataResult(rowIndex, []);
         }
-    }, [setSearchResults])
-
+    }, [handleSearchDataResult]);
 
     let id = resData.map((item) => item.id);
     let lastId = 1 + id.pop();
@@ -321,7 +323,6 @@ const Orders = () => {
         }
     };
 
-
     const focusInputRefs = (index) => {
         const rowIndex = Math.floor(index / 4);
         const columnIndex = index % 4;
@@ -338,8 +339,6 @@ const Orders = () => {
             inputRefs.current[nextIndex].focus();
         }
     };
-
-    const groupedRows = {};
 
     resData.forEach((item) => {
         const number = item.number;
@@ -364,7 +363,6 @@ const Orders = () => {
                     <Text style={styles.text}>Yeni Sifariş yarat</Text>
                 </Pressable>
             </View>
-
 
             <Modal visible={isModalVisible} animationType="slide">
                 <ScrollView>
@@ -405,14 +403,19 @@ const Orders = () => {
                             />
                         </View>
                         <TextInput
-                            style={{ ...styles.input, }}
+                            style={{ ...styles.input }}
                             placeholder="Müştəri"
                             value={customer}
                             onChangeText={(text) => {
-                                setCustomer(text)
-                                searchData('invoice', 'customer', text, null);
+                                setCustomer(text);
+                                if (text.length > 0) {
+                                    searchData('invoice', 'customer', text, null);
+                                } else {
+                                    setSearchResults([]);
+                                }
                             }}
                         />
+
                         <View style={{
                             ...styles.box,
                             backgroundColor: '#f0f0f0',
@@ -429,17 +432,16 @@ const Orders = () => {
                             {(customer?.length > 0) && (
                                 searchResults.map((result, index) => (
                                     <TouchableOpacity
-                                        style={{
-                                            ...styles.text,
-                                            borderStyle: 'dotted',
-                                            // borderBottomWidth: 1,
-                                            backgroundColor: index % 2 === 0 ? '#f0f0f0' : 'white',
-                                        }}
-                                        onPress={() => {
-                                            setCustomer(result)
-                                            setSearchResults([])
-                                        }}
-                                        key={`row_${index}`}                  
+                                    style={{
+                                        ...styles.text,
+                                        borderStyle: 'dotted',
+                                        backgroundColor: index % 2 === 0 ? '#f0f0f0' : 'white',
+                                    }}
+                                    onPress={() => {
+                                        setCustomer(result)
+                                        setSearchResults([])
+                                    }}
+                                    key={`row_${index}`}
                                     >
                                         <Text
                                             style={{ padding: 5, }}
@@ -483,7 +485,7 @@ const Orders = () => {
                                         onChangeText={(text) => {
                                             handleTableInputChange(rowIndex, 'product_name', text);
                                             setActiveInputIndex(rowIndex, rowCount + 2);
-                                            searchData('nomenklatura', 'name', text, null);
+                                            searchData('nomenklatura', 'name', text, null, rowIndex);
                                         }}
                                         ref={(ref) => (inputRefs.current[rowCount + 1] = ref)}
                                         onSubmitEditing={() => focusInputRefs(rowCount + 1)}
@@ -537,8 +539,8 @@ const Orders = () => {
                                 shadowRadius: 3,
                                 elevation: 2,
                             }}>
-                                {(formTable?.length > 0) && (
-                                    searchResults.map((result, index) => (
+                                {(searchResults[rowIndex]?.length > 0) && (
+                                    searchResults[rowIndex].map((result, index) => (
                                         <TouchableOpacity
                                             style={{
                                                 ...styles.text,
