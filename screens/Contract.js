@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { ScrollView, StyleSheet, Text, View, Pressable, Alert, LogBox} from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { ScrollView, StyleSheet, Text, View, Pressable, Alert, LogBox, TextInput} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import UserInput from "../components/UserInput";
 import { useFonts } from "expo-font";
 import { sendRequest, fetchData } from '../services/Server';
 
@@ -16,7 +15,7 @@ const Contracts = () => {
     const [comment, setComment] = useState()
     const [data, setData] = useState([]);
     const [showDatepicker, setShowDatepicker] = useState(false);
-
+    const inputRefs = useRef([]);
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') });
     let rowCount = 0;
     useEffect(() => { fetchDataAsync(); }, []);
@@ -77,36 +76,42 @@ const Contracts = () => {
             Alert.alert(result.message);
         }
     };
+
+    const focusInputRefs = (index) => {
+        const nextIndex = index + 1;
+        if (inputRefs.current[nextIndex]) {
+            inputRefs.current[nextIndex].focus();
+        }
+    };
     
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 20, marginHorizontal: 10 }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}> Müqavilə</Text>
-            <UserInput
-                name="Şirkətin adı"
+            <TextInput
+                style={styles.input}
+                placeholder='Şirkətin adı'
                 value={companyName}
-                setValue={setCompanyName}
-                autoCompleteType="text"
                 onChangeText={(text) => setCompanyName(text)}
+                ref={(ref) => (inputRefs.current[1] = ref)}
+                onSubmitEditing={() => focusInputRefs(1)}
             />
             <View style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
                 <View>
-                    <UserInput
-                        name="№"
+                    <TextInput
+                        style={styles.input}
+                        placeholder="№"
                         value={String(lastId)}
-                        setValue={setNumber}
-                        autoCompleteType="text"
                         keyboardType="numeric"
                         onChangeText={(text) => setNumber(text)}
                     />
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <UserInput
-                        name="Tarix"
+                    <TextInput
+                        placeholder="Tarix"
                         value={date}
-                        setValue={setDate}
-                        autoCompleteType="date"
                         keyboardType="numeric"
                         onChangeText={(text) => setDate(text)}
+                        style={styles.input}
                     />
                     <Pressable onPress={handleDateShow}>
                         <Text> <Ionicons name="calendar" size={20} color="#333" /></Text>
@@ -123,27 +128,29 @@ const Contracts = () => {
                     )}
                 </View>
             </View>
-            <UserInput
-                name="Növ"
+            <TextInput
+                placeholder="Növ"
                 value={type}
-                setValue={setType}
-                autoCompleteType="text"
                 onChangeText={(text) => setType(text)}
+                style={styles.input}
+                ref={(ref) => (inputRefs.current[2] = ref)}
+                onSubmitEditing={() => focusInputRefs(2)}
             />
-            <UserInput
-                name="Ad"
+            <TextInput
+                placeholder="Ad"
                 value={name}
-                setValue={setName}
-                autoCompleteType="text"
                 onChangeText={(text) => setName(text)}
+                style={styles.input}
+                ref={(ref) => (inputRefs.current[3] = ref)}
+                onSubmitEditing={() => focusInputRefs(3)}
             />
-            <UserInput
-                name="Şərh"
+            <TextInput
+                placeholder="Şərh"
                 value={comment}
-                setValue={setComment}
-                autoCompleteType="text"
                 multiline
                 onChangeText={(text) => setComment(text)}
+                style={styles.input}
+                ref={(ref) => (inputRefs.current[4] = ref)}
             />
             <View style={{ alignItems: 'flex-end', margin: 10 }}>
                 <Pressable style={{ ...styles.button, width: 150 }} onPress={sendData}>

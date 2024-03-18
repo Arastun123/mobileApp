@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, ScrollView, StyleSheet, Pressable, Text, Modal, Alert, TouchableOpacity, TextInput, LogBox } from "react-native";
 import { useFonts } from "expo-font";
 import { Ionicons } from '@expo/vector-icons';
-import UserInput from "../components/UserInput";
 import { fetchData, sendRequest, sendEditData, deleteData, autoFill } from '../services/Server';
 
 
@@ -26,6 +25,7 @@ const Nomenklatura = () => {
         price: '',
         customer: '',
     });
+    const inputRefs = useRef([]);
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
     const headers = ["№", "Ad", "Növ", 'Qiymət', 'Qaimə nömrəsi'];
@@ -187,6 +187,23 @@ const Nomenklatura = () => {
         groupedRows[number].rows.push(item);
     });
 
+    const focusInputRefs = (index) => {
+        const rowIndex = Math.floor(index / 4);
+        const columnIndex = index % 4;
+
+        let nextIndex = -1;
+
+        if (columnIndex === 3) {
+            nextIndex = (rowIndex + 1) * 4;
+        } else {
+            nextIndex = index + 1;
+        }
+
+        if (inputRefs.current[nextIndex]) {
+            inputRefs.current[nextIndex].focus();
+        }
+    };
+    
 
     return (
         <ScrollView contentContainerStyle={{ paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
@@ -202,11 +219,13 @@ const Nomenklatura = () => {
                     <View style={{ padding: 5 }}>
                         <Text style={{ textAlign: 'right' }} onPress={closeModal} ><Ionicons name="close" size={24} color="red" /></Text>
                     </View>
-                    <UserInput
-                        name="Ad"
+                    <TextInput
+                        placeholder="Ad"
                         value={name}
-                        setValue={setName}
-                        autoCompleteType="text"
+                        onChangeText={(text) => setName(text)}
+                        style = {styles.input}
+                        ref={(ref) => (inputRefs.current[1] = ref)}
+                        onSubmitEditing={() => inputRefs.current[2].focus()}
                     />
                     <View style={{ padding: 15 }}>
                         {searchResults.map((result) => (
@@ -215,29 +234,36 @@ const Nomenklatura = () => {
                             </Text>
                         ))}
                     </View>
-                    <UserInput
-                        name="Növ"
+                    <TextInput
+                        placeholder="Növ"
                         value={kind}
-                        setValue={setKind}
-                        autoCompleteType="text"
+                        onChangeText={(text) => setKind(text)}
+                        style = {styles.input}
+                        ref={(ref) => (inputRefs.current[2] = ref)}
+                        onSubmitEditing={() => inputRefs.current[3].focus()}
                     />
-                    <UserInput
-                        name="Kateqoriya"
+                    <TextInput
+                        placeholder="Kateqoriya"
                         value={category}
-                        setValue={setCategory}
-                        autoCompleteType="text"
+                        onChangeText={(text) =>  setCategory(text)}
+                        style = {styles.input}
+                        ref={(ref) => (inputRefs.current[3] = ref)}
+                        onSubmitEditing={() => inputRefs.current[4].focus()}
                     />
-                    <UserInput
-                        name="Brend"
+                    <TextInput
+                        placeholder="Brend"
                         value={brand}
-                        setValue={setBrand}
-                        autoCompleteType="text"
+                        onChangeText={(text) => setBrand(text)}
+                        style = {styles.input}
+                        ref={(ref) => (inputRefs.current[4] = ref)}
+                        onSubmitEditing={() => inputRefs.current[5].focus()}
                     />
-                    <UserInput
-                        name="Qiymət"
+                    <TextInput
+                        placeholder="Qiymət"
                         value={price}
-                        setValue={setPrice}
-                        autoCompleteType="numeric"
+                        onChangeText={(text) => setPrice(text)}
+                        style = {styles.input}
+                        ref={(ref) => (inputRefs.current[5] = ref)}
                         keyboardType="numeric"
                     />
                     {/*<View style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -315,6 +341,8 @@ const Nomenklatura = () => {
                                             placeholder='Malın adı'
                                             value={selectedRows[rowIndex]?.name}
                                             onChangeText={(text) => handleInputChange(rowIndex, 'name', text)}
+                                            ref={(ref) => (inputRefs.current[rowCount + 1] = ref)}
+                                            onSubmitEditing={() => focusInputRefs(rowCount + 1)}
                                         />
                                     </View>
                                     <View style={styles.cell}>
@@ -322,6 +350,8 @@ const Nomenklatura = () => {
                                             placeholder='Növ'
                                             value={selectedRows[rowIndex]?.kind}
                                             onChangeText={(text) => handleInputChange(rowIndex, 'kind', text)}
+                                            ref={(ref) => (inputRefs.current[rowCount + 2] = ref)}
+                                            onSubmitEditing={() => focusInputRefs(rowCount + 2)}
                                         />
                                     </View>
                                     <View style={styles.cell}>
@@ -329,6 +359,8 @@ const Nomenklatura = () => {
                                             placeholder='Kateqoriya'
                                             value={String(selectedRows[rowIndex]?.category)}
                                             onChangeText={(text) => handleInputChange(rowIndex, 'category', text)}
+                                            ref={(ref) => (inputRefs.current[rowCount + 3] = ref)}
+                                            onSubmitEditing={() => focusInputRefs(rowCount + 3)}
                                         />
                                     </View>
                                     <View style={styles.cell}>
@@ -336,6 +368,8 @@ const Nomenklatura = () => {
                                             placeholder='Brend'
                                             value={String(selectedRows[rowIndex]?.brand)}
                                             onChangeText={(text) => handleInputChange(rowIndex, 'brand', text)}
+                                            ref={(ref) => (inputRefs.current[rowCount + 4] = ref)}
+                                            onSubmitEditing={() => focusInputRefs(rowCount + 4)}
                                         />
                                     </View>
                                     <View style={styles.cell}>
@@ -344,6 +378,8 @@ const Nomenklatura = () => {
                                             keyboardType="numeric"
                                             value={String(selectedRows[rowIndex]?.price)}
                                             onChangeText={(text) => handleInputChange(rowIndex, 'price', text)}
+                                            ref={(ref) => (inputRefs.current[rowCount + 5] = ref)}
+                                            onSubmitEditing={() => focusInputRefs(rowCount)}
                                         />
                                     </View>
                                     <View style={styles.cell}>

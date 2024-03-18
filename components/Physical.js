@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { ScrollView, View, StyleSheet, Pressable, Modal, Text, Alert } from "react-native";
-import UserInput from "./UserInput";
+import React, { useState, useRef } from "react";
+import { ScrollView, View, StyleSheet, Pressable, Modal, Text, Alert, TextInput } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import MapComponent from "./MapComponent";
 import { useFonts } from "expo-font";
@@ -14,6 +13,7 @@ const Physical = () => {
     const [address, setAddress] = useState("");
     const [tin, setTin] = useState("");
     const [isModalVisible, setModalVisible] = useState(false);
+    const inputRefs = useRef([]);
 
     if (!fontsLoad) { return null }
     const handlePress = () => { setModalVisible(true) }
@@ -49,40 +49,51 @@ const Physical = () => {
         }
     }
 
+    const focusInputRefs = (index) => {
+        const nextIndex = index + 1;
+        if (inputRefs.current[nextIndex]) {
+            inputRefs.current[nextIndex].focus();
+        }
+    };
+
     return (
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
-            <Text style={{ marginBottom: 10, textAlign: 'center', fontSize: 32 }}>Fiziki şəxs</Text>
+         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
+            <Text style={{ marginBottom: 10, textAlign: 'center', fontSize: 32 }}>Hüquqi şəxs</Text>
             <View style={{ marginVertical: 10 }}>
-                <UserInput
-                    name="S.A.A"
-                    value={name}
-                    setValue={setName}
-                    autoCompleteType="text"
+                <TextInput
+                    placeholder="S.A.A"
+                    value = {name}
                     onChangeText={(text) => setName(text)}
+                    style = {styles.input}
+                    ref={(ref) => (inputRefs.current[1] = ref)}
+                    onSubmitEditing={() => focusInputRefs(1)}
                 />
-                <UserInput
-                    name="Əlaqə nömrəsi"
+                <TextInput
+                    placeholder="Əlaqə nömrəsi"
                     value={phone}
-                    setValue={setPhone}
-                    autoCompleteType="numeric"
                     keyboardType="numeric"
                     onChangeText={(text) => setPhone(text)}
+                    style = {styles.input}
+                    ref={(ref) => (inputRefs.current[2] = ref)}
+                    onSubmitEditing={() => focusInputRefs(2)}
                 />
-                <UserInput
-                    name="Vöen"
+                <TextInput
+                    placeholder="Vöen"
                     value={tin}
-                    setValue={setTin}
-                    autoCompleteType="text"
                     onChangeText={(text) => setTin(text)}
+                    style = {styles.input}
+                    ref={(ref) => (inputRefs.current[3] = ref)}
+                    onSubmitEditing={() => focusInputRefs(3)}
                 />
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <View style={{ width: 250 }}>
-                        <UserInput
-                            name="Ünvan"
+                        <TextInput
+                            placeholder="Ünvan"
                             value={address}
-                            setValue={setAddress}
-                            autoCompleteType="text"
                             onChangeText={(text => (setAddress(text)))}
+                            style = {styles.input}
+                            ref={(ref) => (inputRefs.current[4] = ref)}
+                            onSubmitEditing={() => focusInputRefs(4)}
                         />
                     </View>
                     <View style={{ marginTop: 20 }}>
@@ -91,18 +102,15 @@ const Physical = () => {
                         </Pressable>
                     </View>
                 </View>
-                <View>
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={isModalVisible}
-                        onRequestClose={closeModal}
-                    >
-                        <MapComponent closeModal={closeModal} onDataReceived={onDataReceived} />
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={isModalVisible}
+                    onRequestClose={closeModal}
+                >
+                    <MapComponent closeModal={closeModal} onDataReceived={onDataReceived} />
 
-                    </Modal>
-                </View>
-                {/* <Text>{JSON.stringify({ name, phone, address, voen }, null, 4)}</Text> */}
+                </Modal>
                 <View style={{ alignItems: 'flex-end', margin: 10 }}>
                     <Pressable style={{ ...styles.button, width: 150 }} onPress={sendData}>
                         <Text style={styles.text}>Təsdiq et</Text>
@@ -129,6 +137,12 @@ const styles = StyleSheet.create({
         letterSpacing: 0.25,
         color: 'white',
         fontFamily: 'Medium'
+    },
+    input: {
+        margin: 10,
+        borderBottomWidth: 0.5,
+        height: 48,
+        borderBottomColor: '#8e93a1',
     },
 });
 

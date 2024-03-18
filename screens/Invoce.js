@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, TextInput, StyleSheet, ScrollView, Pressable, Text, Alert, Modal, TouchableOpacity, LogBox, } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,6 +27,7 @@ const Invoce = () => {
     const [showDatepicker, setShowDatepicker] = useState(false);
     const [selectedRowData, setSelectedRowData] = useState(null);
     const [selectedRowId, setSelectedRowId] = useState(null);
+    const inputRefs = useRef([]);
 
     let [fontsLoad] = useFonts({ 'Medium': require('../assets/fonts/static/Montserrat-Medium.ttf') })
     LogBox.ignoreAllLogs();
@@ -286,6 +287,23 @@ const Invoce = () => {
         groupedRows[number].rows.push(item);
     });
 
+    const focusInputRefs = (index) => {
+        const rowIndex = Math.floor(index / 3);
+        const columnIndex = index % 3;
+
+        let nextIndex = -1;
+
+        if (columnIndex === 3) {
+            nextIndex = (rowIndex + 1) * 3;
+        } else {
+            nextIndex = index + 1;
+        }
+
+        if (inputRefs.current[nextIndex]) {
+            inputRefs.current[nextIndex].focus();
+        }
+    };
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'start', paddingVertical: 15, marginVertical: 10 }}>
             <Text style={{ textAlign: 'center', fontFamily: 'Medium', fontSize: 32 }}>Qaimələr</Text>
@@ -367,6 +385,8 @@ const Invoce = () => {
                                     placeholder='Malın adı'
                                     value={formTable[rowIndex]?.product_name}
                                     onChangeText={(text) => handleTableInputChange(rowIndex, 'product_name', text)}
+                                    ref={(ref) => (inputRefs.current[rowCount + 1] = ref)}
+                                    onSubmitEditing={() => focusInputRefs(rowCount + 1)}
                                 />
                             </View>
                             <View style={styles.cell}>
@@ -375,6 +395,8 @@ const Invoce = () => {
                                     keyboardType="numeric"
                                     value={formTable[rowIndex]?.price}
                                     onChangeText={(text) => handleTableInputChange(rowIndex, 'price', text)}
+                                    ref={(ref) => (inputRefs.current[rowCount + 2] = ref)}
+                                    onSubmitEditing={() => focusInputRefs(rowCount + 2)}
                                 />
                             </View>
                             <View style={styles.cell}>
@@ -383,7 +405,9 @@ const Invoce = () => {
                                     keyboardType="numeric"
                                     value={formTable[rowIndex]?.quantity}
                                     onChangeText={(text) => handleTableInputChange(rowIndex, 'quantity', text)}
-                                />
+                                    ref={(ref) => (inputRefs.current[rowCount + 3] = ref)}
+                                    onSubmitEditing={() => focusInputRefs(rowCount)}
+                               />
                             </View>
                             <View style={styles.cell}>
                                 <Text>{
@@ -506,7 +530,9 @@ const Invoce = () => {
                                                 placeholder='Malın adı'
                                                 value={item.product_name}
                                                 onChangeText={(text) => handleInputChange(index, 'product_name', text)}
-                                            />
+                                                ref={(ref) => (inputRefs.current[rowCount + 1] = ref)}
+                                                onSubmitEditing={() => focusInputRefs(rowCount + 1)}
+                                           />
                                         </View>
                                         <View style={styles.cell}>
                                             <TextInput
@@ -514,7 +540,9 @@ const Invoce = () => {
                                                 keyboardType="numeric"
                                                 value={item.price.toString()}
                                                 onChangeText={(text) => handleInputChange(index, 'price', text)}
-                                            />
+                                                ref={(ref) => (inputRefs.current[rowCount + 2] = ref)}
+                                                onSubmitEditing={() => focusInputRefs(rowCount + 2)}
+                                           />
                                         </View>
                                         <View style={styles.cell}>
                                             <TextInput
@@ -522,7 +550,9 @@ const Invoce = () => {
                                                 keyboardType="numeric"
                                                 value={item.quantity.toString()}
                                                 onChangeText={(text) => handleInputChange(index, 'quantity', text)}
-                                            />
+                                                ref={(ref) => (inputRefs.current[rowCount + 3] = ref)}
+                                                onSubmitEditing={() => focusInputRefs(rowCount + 3)}
+                                           />
                                         </View>
                                         <View style={styles.cell}>
                                             <Text> {isNaN(item.price && item.quantity) ? '000' : item.price * item.quantity} </Text>

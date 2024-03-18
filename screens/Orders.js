@@ -26,7 +26,6 @@ const Orders = () => {
     const [activeInputIndex, setActiveInputIndex] = useState(null);
     const [selectedRowId, setSelectedRowId] = useState(null);
     const [isPressed, setIsPressed] = useState(false);
-    const secondInput = useRef();
     const inputRefs = useRef([]);
     const [rowsSameCustomer, setRowsSameCustomer] = useState([]);
     const [selectedRowData, setSelectedRowData] = useState(null);
@@ -54,66 +53,25 @@ const Orders = () => {
         }
     };
 
-    // const searchData = useCallback(async (tableName, columnName, query, index) => {
-    //     try {
-    //         const response = await autoFill(tableName, columnName, query);
-    //         let result = response.map( item => item[columnName])
-    //         setSearchResults(result)
-    //         console.log(result);
-    //         if (response) {
-    //             setSearchResults((prevResults) => {
-    //                 const updatedResults = [...prevResults];
-    //                 updatedResults[index] = response;
-    //                 return updatedResults;
-    //             });
-    //         } else {
-    //             console.error("No results found");
-    //             setSearchResults((prevResults) => {
-    //                 const updatedResults = [...prevResults];
-    //                 updatedResults[index] = null;
-    //                 return updatedResults;
-    //             });
-    //         }
-    //     } catch (error) {
-    //         console.error("Error searching:", error);
-    //         setSearchResults((prevResults) => {
-    //             const updatedResults = [...prevResults];
-    //             updatedResults[index] = null;
-    //             return updatedResults;
-    //         });
-    //     }
-    // }, [setSearchResults]);
-
     const searchData = useCallback(async (tableName, columnName, query, index) => {
-        try {
-            const response = await autoFill(tableName, columnName, query);
-            if (response) {
-                let result = response.map(item => item[columnName]);
-                result = Array.from(new Set(result)); // Remove duplicates using a Set
-                setSearchResults(result)
-                console.log(result);
-                setSearchResults((prevResults) => {
-                    const updatedResults = [...prevResults];
-                    updatedResults[index] = result;
-                    return updatedResults;
-                });
-            } else {
-                console.error("No results found");
-                setSearchResults((prevResults) => {
-                    const updatedResults = [...prevResults];
-                    updatedResults[index] = null;
-                    return updatedResults;
-                });
+        if (query.length > 0) {
+            try {
+                const response = await autoFill(tableName, columnName, query);
+                if (response) {
+                    const uniqueResults = Array.from(new Set(response.map(item => item[columnName])));
+                    setSearchResults(uniqueResults);
+                } else {
+                    console.error("No results found");
+                    setSearchResults([]);
+                }
+            } catch (error) {
+                console.error("Error searching:", error);
+                setSearchResults([]);
             }
-        } catch (error) {
-            console.error("Error searching:", error);
-            setSearchResults((prevResults) => {
-                const updatedResults = [...prevResults];
-                updatedResults[index] = null;
-                return updatedResults;
-            });
+        } else {
+            setSearchResults([]);
         }
-    }, [setSearchResults]);
+    }, [setSearchResults])
 
 
     let id = resData.map((item) => item.id);
@@ -268,6 +226,7 @@ const Orders = () => {
         setFormTable([])
         fetchDataAsync()
         setSearchResults([])
+        setCustomer()
     }
 
     const handleInputChange = (index, field, value) => {
@@ -343,7 +302,7 @@ const Orders = () => {
 
     const handleAutoFill = (rowIndex, selectedResult, inputNumber) => {
         const updatedFormTable = [...formTable];
-        updatedFormTable[rowIndex].product_name = selectedResult.name;
+        updatedFormTable[rowIndex].product_name = selectedResult;
         setFormTable(updatedFormTable);
 
         setSearchResults((prevResults) => {
@@ -354,17 +313,14 @@ const Orders = () => {
 
         setActiveInputIndex(null);
 
-        if (selectedResult.name !== formTable[rowIndex]?.product_name) {
-            searchData('nomenklatura', 'product_name', selectedResult.name, rowIndex);
-        }
-
         setIsPressed(!isPressed);
         setSearchResults([]);
 
-        if (inputRefs.current[inputNumber]) {
+        if (inputNumber && inputRefs.current[inputNumber]) {
             inputRefs.current[inputNumber].focus();
         }
     };
+
 
     const focusInputRefs = (index) => {
         const rowIndex = Math.floor(index / 4);
@@ -479,10 +435,15 @@ const Orders = () => {
                                             // borderBottomWidth: 1,
                                             backgroundColor: index % 2 === 0 ? '#f0f0f0' : 'white',
                                         }}
-                                        key={result.id}
-                                        onPress={() => setCustomer(result)}
+                                        onPress={() => {
+                                            setCustomer(result)
+                                            setSearchResults([])
+                                        }}
+                                        key={`row_${index}`}                  
                                     >
-                                        <Text style={{ padding: 5, }}>
+                                        <Text
+                                            style={{ padding: 5, }}
+                                        >
                                             {result}
                                         </Text>
                                     </TouchableOpacity>
@@ -576,21 +537,18 @@ const Orders = () => {
                                 shadowRadius: 3,
                                 elevation: 2,
                             }}>
-                                {(searchResults[rowIndex]?.length > 0 && activeInputIndex === rowIndex) && (
-                                    searchResults[rowIndex].map((result, index) => (
+                                {(formTable?.length > 0) && (
+                                    searchResults.map((result, index) => (
                                         <TouchableOpacity
                                             style={{
                                                 ...styles.text,
                                                 borderStyle: 'dotted',
-                                                // borderBottomWidth: 1,
                                                 backgroundColor: index % 2 === 0 ? '#f0f0f0' : 'white',
                                             }}
-                                            key={result.id}
-                                            onPress={() => handleAutoFill(rowIndex, result)}
+                                            onPress={() => handleAutoFill(rowIndex, result, rowCount + 2)}
+                                            key={`row_${index}`}
                                         >
-                                            <Text style={{ padding: 5, }}>
-                                                {result.name}
-                                            </Text>
+                                            <Text style={{ padding: 5 }}>{result}</Text>
                                         </TouchableOpacity>
                                     ))
                                 )}
@@ -610,7 +568,7 @@ const Orders = () => {
                         </Pressable>
                     </View>
                 </ScrollView>
-            </Modal >
+            </Modal>
 
             <View style={{ ...styles.row }}>
                 {mainHeaders.map((header, rowIndex) => (
