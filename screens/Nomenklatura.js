@@ -215,7 +215,7 @@ const Nomenklatura = () => {
             </View>
 
             <Modal visible={isModalVisible} animationType="slide">
-                <ScrollView contentContainerStyle={{ marginVertical: 10 }} >
+                <ScrollView contentContainerStyle={{  paddingHorizontal: 10 }} >
                     <View style={{ padding: 5 }}>
                         <Text style={{ textAlign: 'right' }} onPress={closeModal} ><Ionicons name="close" size={24} color="red" /></Text>
                     </View>

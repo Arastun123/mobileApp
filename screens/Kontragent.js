@@ -158,7 +158,7 @@ const Kontragent = ({ selectedLocation }) => {
                     ))
                 }
                 <View style={{ margin: 10 }}>
-                    <Pressable disabled={selectedRows.length === 0} style={{ ...styles.button, width: 150, display: `${selectedRows.length === 0 ? 'none' : 'block'}`, backgroundColor: 'blue' }} onPress={handelModalOpen}>
+                    <Pressable disabled={selectedRows.length === 0} style={{ ...styles.button, width: 150, display: `${selectedRows.length === 0 ? 'none' : 'block'}`, backgroundColor: '#3498db' }} onPress={handelModalOpen}>
                         <Text style={styles.text}>Redaktə et</Text>
                     </Pressable>
                 </View>
@@ -229,7 +229,7 @@ const Kontragent = ({ selectedLocation }) => {
                                         </Pressable>
                                     </View>
                                     <View style={{ margin: 10 }}>
-                                        <Pressable style={{ ...styles.button, width: 150 }} onPress={handleEdit}>
+                                        <Pressable style={{ ...styles.button, width: 150, backgroundColor: 'green' }} onPress={handleEdit}>
                                             <Text style={styles.text}>Yenilə</Text>
                                         </Pressable>
                                     </View>

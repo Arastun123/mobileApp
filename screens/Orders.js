@@ -22,6 +22,7 @@ const Orders = () => {
     const [isPressed, setIsPressed] = useState(false);
     const [selectedRows, setSelectedRows] = useState([]);
     const [searchResults, setSearchResults] = useState([]);
+    const [searchCustomer, setSearchCustomer] = useState([]);
     const [selectedRowId, setSelectedRowId] = useState(null);
     const [isModalVisible, setModalVisible] = useState(false);
     const [showDatepicker, setShowDatepicker] = useState(false);
@@ -36,7 +37,7 @@ const Orders = () => {
     const editHeaders = ["№", "Qiymət", "Miqdarı", "Malın adı", "Ölçü vahidi", "Məbləğ"];
     let rowCount = 0;
     const groupedRows = {};
-    LogBox.ignoreLogs(['Warning: Failed prop type: Invalid prop `value` of type `date` supplied to `TextInput`, expected `string`'])
+    LogBox.ignoreAllLogs()
 
     useEffect(() => { fetchDataAsync() }, []);
 
@@ -62,7 +63,8 @@ const Orders = () => {
             try {
                 const response = await autoFill(tableName, columnName, query);
                 if (response) {
-                    handleSearchDataResult(rowIndex, Array.from(new Set(response.map(item => item[columnName]))));
+                    if(columnName === 'customer') setSearchCustomer(Array.from(new Set(response.map(item => item[columnName]))))
+                    else handleSearchDataResult(rowIndex, Array.from(new Set(response.map(item => item[columnName]))));
                 } else {
                     console.error("No results found");
                     handleSearchDataResult(rowIndex, []);
@@ -430,7 +432,7 @@ const Orders = () => {
                             elevation: 2,
                         }}>
                             {(customer?.length > 0) && (
-                                searchResults.map((result, index) => (
+                                searchCustomer.map((result, index) => (
                                     <TouchableOpacity
                                     style={{
                                         ...styles.text,
@@ -439,7 +441,7 @@ const Orders = () => {
                                     }}
                                     onPress={() => {
                                         setCustomer(result)
-                                        setSearchResults([])
+                                        setSearchCustomer([])
                                     }}
                                     key={`row_${index}`}
                                     >

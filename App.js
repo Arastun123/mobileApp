@@ -1,8 +1,6 @@
 import React from 'react';
 import Index from './screens/Index';
 import Debst from './screens/Debts';
-import Singup from './screens/Signup';
-import Singin from './screens/Signin';
 import Orders from './screens/Orders';
 import Routes from './screens/Routes';
 import Invoce from './screens/Invoce';
@@ -36,8 +34,6 @@ export default function App() {
         <Stack.Screen name="Settings" component={Settings} />
         <Stack.Screen name="Server" component={Server} />
         <Stack.Screen name="Goods" component={Goods} />
-        <Stack.Screen name="Singup" component={Singup} />
-        <Stack.Screen name="Singin" component={Singin} />
       </Stack.Navigator> 
     </NavigationContainer>
   );
