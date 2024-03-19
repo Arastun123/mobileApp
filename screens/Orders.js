@@ -56,14 +56,14 @@ const Orders = () => {
             updatedResults[rowIndex] = results;
             return updatedResults;
         });
-    };   
+    };
 
     const searchData = useCallback(async (tableName, columnName, query, index, rowIndex) => {
         if (query.length > 0) {
             try {
                 const response = await autoFill(tableName, columnName, query);
                 if (response) {
-                    if(columnName === 'customer') setSearchCustomer(Array.from(new Set(response.map(item => item[columnName]))))
+                    if (columnName === 'customer') setSearchCustomer(Array.from(new Set(response.map(item => item[columnName]))))
                     else handleSearchDataResult(rowIndex, Array.from(new Set(response.map(item => item[columnName]))));
                 } else {
                     console.error("No results found");
@@ -198,6 +198,7 @@ const Orders = () => {
                     setUpdateModalVisible(false)
                     setSelectedRows([]);
                     setSelectedRowId(null);
+                    setSelectedRowData(null);
                 }
             } catch (error) {
                 console.error(error);
@@ -230,7 +231,9 @@ const Orders = () => {
         setFormTable([])
         fetchDataAsync()
         setSearchResults([])
-        setCustomer()
+        setCustomer();
+        setSearchCustomer([]);
+        setSearchResults([]);
     }
 
     const handleInputChange = (index, field, value) => {
@@ -434,19 +437,19 @@ const Orders = () => {
                             {(customer?.length > 0) && (
                                 searchCustomer.map((result, index) => (
                                     <TouchableOpacity
-                                    style={{
-                                        ...styles.text,
-                                        borderStyle: 'dotted',
-                                        backgroundColor: index % 2 === 0 ? '#f0f0f0' : 'white',
-                                    }}
-                                    onPress={() => {
-                                        setCustomer(result)
-                                        setSearchCustomer([])
-                                    }}
-                                    key={`row_${index}`}
+                                        style={{
+                                            ...styles.text,
+                                            borderStyle: 'dotted',
+                                            backgroundColor: index % 2 === 0 ? '#f0f0f0' : 'white',
+                                        }}
+                                        onPress={() => {
+                                            setCustomer(result)
+                                            setSearchCustomer([])
+                                        }}
+                                        key={`row_${index}`}
                                     >
                                         <Text
-                                            style={{ padding: 5, }}
+                                            style={{ padding: 5 }}
                                         >
                                             {result}
                                         </Text>
@@ -487,7 +490,7 @@ const Orders = () => {
                                         onChangeText={(text) => {
                                             handleTableInputChange(rowIndex, 'product_name', text);
                                             setActiveInputIndex(rowIndex, rowCount + 2);
-                                            searchData('nomenklatura', 'name', text, null, rowIndex);
+                                            searchData('products', 'name', text, null, rowIndex);
                                         }}
                                         ref={(ref) => (inputRefs.current[rowCount + 1] = ref)}
                                         onSubmitEditing={() => focusInputRefs(rowCount + 1)}
@@ -529,7 +532,8 @@ const Orders = () => {
                                 </View>
                             </View>
                             <View style={{
-                                ...styles.box,
+                                maxWidth: 100,
+                                marginHorizontal: 70,
                                 backgroundColor: '#f0f0f0',
                                 borderStyle: 'dotted',
                                 shadowColor: '#aaa',
@@ -548,11 +552,17 @@ const Orders = () => {
                                                 ...styles.text,
                                                 borderStyle: 'dotted',
                                                 backgroundColor: index % 2 === 0 ? '#f0f0f0' : 'white',
+
                                             }}
                                             onPress={() => handleAutoFill(rowIndex, result, rowCount + 2)}
                                             key={`row_${index}`}
                                         >
-                                            <Text style={{ padding: 5 }}>{result}</Text>
+                                            <Text style={{
+                                                padding: 5,
+                                                textAlign: 'start',
+                                                // width: 180,
+                                                // marginHorizontal: 60,
+                                            }}>{result}</Text>
                                         </TouchableOpacity>
                                     ))
                                 )}
@@ -826,6 +836,6 @@ const styles = StyleSheet.create({
         color: 'white',
         fontFamily: 'Medium'
     },
-    box: { marginHorizontal: 10 }
+    box: { marginHorizontal: 10, }
 });
 export default Orders;
