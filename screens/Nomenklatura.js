@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { View, ScrollView, StyleSheet, Pressable, Text, Modal, Alert, TouchableOpacity, TextInput, LogBox } from "react-native";
 import { useFonts } from "expo-font";
 import { Ionicons } from '@expo/vector-icons';
@@ -31,10 +31,24 @@ const Nomenklatura = () => {
     const headers = ["№", "Ad", "Növ", 'Qiymət', 'Qaimə nömrəsi'];
     const editHeaders = ["№", "Ad", "Növ", 'Kateqoriya', 'Brend', 'Qiymət', 'Qaimə nömrəsi'];
     let rowCount = 0;
-    LogBox.ignoreAllLogs()
+    // LogBox.ignoreAllLogs()
 
     useEffect(() => { fetchDataAsync() }, []);
-    useEffect(() => { if (name.length > 0) { searchProduct(name) } }, [name]);
+
+    const searchData = useCallback(async (tableName, columnName, query, index, rowIndex) => {
+        if (query.length > 0) {
+            try {
+                const response = await autoFill(tableName, columnName, query);
+                if (response) {
+                    setSearchResults(Array.from(new Set(response.map(item => item[columnName]))))
+                } else {
+                    console.error("No results found");
+                }
+            } catch (error) {
+                console.error("Error searching:", error);
+            }
+        }
+    }, []);
 
     const fetchDataAsync = async () => {
         try {
@@ -56,16 +70,6 @@ const Nomenklatura = () => {
     const handlePress = () => { setModalVisible(true); }
     const closeUpdateModal = () => { setUpdateModalVisible(false) }
 
-    const searchProduct = async (query) => {
-        let tableName = 'products'
-        try {
-            const response = await autoFill(tableName, query);
-            setSearchResults(response);
-        } catch (error) {
-            console.error('Error searching products:', error);
-        }
-    };
-
     const closeModal = () => {
         setModalVisible(false)
         setName('')
@@ -79,13 +83,13 @@ const Nomenklatura = () => {
 
     const sendData = async () => {
         let apiUrl = '/nomenklatura';
-        
+
         if (
             !name ||
             !category ||
             !brand ||
             !price ||
-            !kind 
+            !kind
         ) {
             Alert.alert('Məlumatları daxil edin!');
             return;
@@ -203,7 +207,7 @@ const Nomenklatura = () => {
             inputRefs.current[nextIndex].focus();
         }
     };
-    
+
 
     return (
         <ScrollView contentContainerStyle={{ paddingVertical: 35, marginVertical: 20, marginHorizontal: 10 }}>
@@ -215,22 +219,29 @@ const Nomenklatura = () => {
             </View>
 
             <Modal visible={isModalVisible} animationType="slide">
-                <ScrollView contentContainerStyle={{  paddingHorizontal: 10 }} >
+                <ScrollView contentContainerStyle={{ paddingHorizontal: 10 }} >
                     <View style={{ padding: 5 }}>
                         <Text style={{ textAlign: 'right' }} onPress={closeModal} ><Ionicons name="close" size={24} color="red" /></Text>
                     </View>
                     <TextInput
                         placeholder="Ad"
                         value={name}
-                        onChangeText={(text) => setName(text)}
-                        style = {styles.input}
+                        onChangeText={(text) => {
+                            setName(text)
+                            searchData('products', 'name', text, null);
+                        }}
+                        style={styles.input}
                         ref={(ref) => (inputRefs.current[1] = ref)}
                         onSubmitEditing={() => inputRefs.current[2].focus()}
                     />
                     <View style={{ padding: 15 }}>
-                        {searchResults.map((result) => (
-                            <Text key={result.id} style={{ padding: 3 }} onPress={() => setName(result.name)}>
-                                {result.name}
+                        {searchResults.map((result, index) => (
+                            <Text key={index} style={{ padding: 3 }}
+                                onPress={() => {
+                                    setName(result)
+                                    setSearchResults([])
+                                }}>
+                                {result}
                             </Text>
                         ))}
                     </View>
@@ -238,15 +249,15 @@ const Nomenklatura = () => {
                         placeholder="Növ"
                         value={kind}
                         onChangeText={(text) => setKind(text)}
-                        style = {styles.input}
+                        style={styles.input}
                         ref={(ref) => (inputRefs.current[2] = ref)}
                         onSubmitEditing={() => inputRefs.current[3].focus()}
                     />
                     <TextInput
                         placeholder="Kateqoriya"
                         value={category}
-                        onChangeText={(text) =>  setCategory(text)}
-                        style = {styles.input}
+                        onChangeText={(text) => setCategory(text)}
+                        style={styles.input}
                         ref={(ref) => (inputRefs.current[3] = ref)}
                         onSubmitEditing={() => inputRefs.current[4].focus()}
                     />
@@ -254,7 +265,7 @@ const Nomenklatura = () => {
                         placeholder="Brend"
                         value={brand}
                         onChangeText={(text) => setBrand(text)}
-                        style = {styles.input}
+                        style={styles.input}
                         ref={(ref) => (inputRefs.current[4] = ref)}
                         onSubmitEditing={() => inputRefs.current[5].focus()}
                     />
@@ -262,7 +273,7 @@ const Nomenklatura = () => {
                         placeholder="Qiymət"
                         value={price}
                         onChangeText={(text) => setPrice(text)}
-                        style = {styles.input}
+                        style={styles.input}
                         ref={(ref) => (inputRefs.current[5] = ref)}
                         keyboardType="numeric"
                     />

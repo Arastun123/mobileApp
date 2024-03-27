@@ -23,8 +23,8 @@ const Server = ({ navigation }) => {
             
     }
     return (
-        <ScrollView contentContainerStyle={{ marginVertical: 30 }}>
-            <Text style={{ ...styles.text, color: '#333', fontSize: 32, marginVertical: 10}}> Server</Text>
+        <ScrollView contentContainerStyle={{  marginHorizontal: 10 }}>
+            <Text style={{ ...styles.text, color: '#333', fontSize: 32, marginTop: 20}}> Server</Text>
             <View>
                 <TextInput
                     placeholder='Server yolu'
@@ -51,7 +51,6 @@ const styles = StyleSheet.create({
     },
     text: {
         fontSize: 16,
-        lineHeight: 21,
         fontWeight: 'bold',
         color: '#fff',
         fontFamily: 'Medium',
