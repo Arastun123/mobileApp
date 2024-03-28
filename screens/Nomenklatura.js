@@ -103,7 +103,9 @@ const Nomenklatura = () => {
             kind: kind,
         };
 
+        let productName = { formTable: [{ name: name }] };
         const result = await sendRequest(apiUrl, postData);
+        const response = await sendRequest('/products', productName)
 
         if (result.success) {
             Alert.alert(result.message);
@@ -130,7 +132,9 @@ const Nomenklatura = () => {
 
     const handleEdit = async () => {
         let tableName = 'nomenklatura';
+        let productName = { formTable : selectedRows.map(item => ({ name: item.name })) }
         try {
+            const response = await sendRequest('/products', productName)
             const result = await sendEditData(selectedRows, tableName);
             if (result.success) {
                 Alert.alert(result.message);

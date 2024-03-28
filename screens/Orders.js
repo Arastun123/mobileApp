@@ -166,7 +166,10 @@ const Orders = () => {
             customer: customer,
             formTable: formTable,
         };
+        let productName = { formTable : formTable.map(item => ({ name: item.product_name })) }
         const result = await sendRequest(apiUrl, postData);
+        const response = await sendRequest('/products', productName)
+
 
         if (result.success) {
             Alert.alert(result.message)
@@ -266,8 +269,10 @@ const Orders = () => {
             number,
             newUpdatedRows: updatedRows,
         }
+        let productName = { formTable : updatedRows.map(item => ({ name: item.product_name })) }
         try {
             const result = await sendEditData(newData, tableName);
+            const response = await sendRequest('/products', productName)
             if (result.success) {
                 Alert.alert(result.message);
                 setUpdateModalVisible(false);
